@@ -29,15 +29,15 @@ interface ConversationWithDetails {
 interface SwapOffersPanelProps {
   onAcceptOffer?: (conversationId: string, otherUserId: string) => void;
   onSwapOffer?: (car: Car) => void;
-  onLiveInquiry?: (car: Car) => void;
   onOwnerClick?: (userId: string) => void;
   onSendMessage?: (userId: string, carId?: string) => void;
   isPremiumUser?: boolean;
 }
 
-export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onOwnerClick, onSendMessage, isPremiumUser = false }: SwapOffersPanelProps) {
+export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onOwnerClick, onSendMessage, isPremiumUser = false }: SwapOffersPanelProps) {
   const [offers, setOffers] = useState<SwapOfferWithDetails[]>([]);
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
+  const [directMessages, setDirectMessages] = useState<ConversationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [selectedUserProfile, setSelectedUserProfile] = useState<{ userId: string; userEmail: string } | null>(null);
@@ -46,6 +46,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
   useEffect(() => {
     loadOffers();
     loadConversations();
+    loadDirectMessages();
 
     if (!user) return;
 
@@ -60,6 +61,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
         },
         () => {
           loadConversations();
+          loadDirectMessages();
         }
       )
       .on(
@@ -72,6 +74,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
         },
         () => {
           loadConversations();
+          loadDirectMessages();
         }
       )
       .subscribe();
@@ -252,6 +255,115 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
     setConversations(conversationsList);
   };
 
+  const loadDirectMessages = async () => {
+    if (!user) return;
+
+    const { data: allSwapOffers } = await supabase
+      .from('swap_offers')
+      .select('conversation_id')
+      .not('conversation_id', 'is', null);
+
+    const swapConversationIds = allSwapOffers?.map(o => o.conversation_id).filter(Boolean) || [];
+
+    const { data: participantData } = await supabase
+      .from('conversation_participants')
+      .select(`
+        conversation_id,
+        unread_count,
+        conversations (
+          id,
+          car_id,
+          updated_at,
+          last_message_at
+        )
+      `)
+      .eq('user_id', user.id);
+
+    if (!participantData || participantData.length === 0) {
+      setDirectMessages([]);
+      return;
+    }
+
+    const directConvs = participantData.filter(p =>
+      p.conversation_id && !swapConversationIds.includes(p.conversation_id)
+    );
+
+    if (directConvs.length === 0) {
+      setDirectMessages([]);
+      return;
+    }
+
+    const conversationIds = directConvs.map(p => p.conversation_id);
+
+    const { data: otherParticipants } = await supabase
+      .from('conversation_participants')
+      .select('conversation_id, user_id, user_profiles(id, nickname)')
+      .in('conversation_id', conversationIds)
+      .neq('user_id', user.id);
+
+    const { data: lastMessages } = await supabase
+      .from('messages')
+      .select('conversation_id, content, created_at')
+      .in('conversation_id', conversationIds)
+      .order('created_at', { ascending: false });
+
+    const conversationsMap = new Map();
+    directConvs.forEach(p => {
+      if (p.conversations) {
+        conversationsMap.set(p.conversation_id, {
+          id: (p.conversations as any).id,
+          car_id: (p.conversations as any).car_id,
+          updated_at: (p.conversations as any).updated_at,
+          last_message_at: (p.conversations as any).last_message_at,
+          unread_count: p.unread_count,
+          other_user_id: '',
+          other_user_nickname: null,
+        });
+      }
+    });
+
+    otherParticipants?.forEach(op => {
+      const conv = conversationsMap.get(op.conversation_id);
+      if (conv) {
+        conv.other_user_id = op.user_id;
+        conv.other_user_nickname = op.user_profiles ? (op.user_profiles as any).nickname : null;
+      }
+    });
+
+    const messagesByConversation = new Map();
+    lastMessages?.forEach(msg => {
+      if (!messagesByConversation.has(msg.conversation_id)) {
+        messagesByConversation.set(msg.conversation_id, msg.content);
+      }
+    });
+
+    const conversationsList = Array.from(conversationsMap.values())
+      .filter(conv => conv.other_user_id)
+      .map(conv => ({
+        ...conv,
+        last_message_content: messagesByConversation.get(conv.id) || '',
+      }));
+
+    const carIds = conversationsList.map(c => c.car_id).filter(Boolean);
+    if (carIds.length > 0) {
+      const { data: cars } = await supabase
+        .from('cars')
+        .select('*')
+        .in('id', carIds);
+
+      conversationsList.forEach(conv => {
+        conv.car = cars?.find(c => c.id === conv.car_id);
+      });
+    }
+
+    conversationsList.sort((a, b) =>
+      new Date(b.last_message_at || b.updated_at).getTime() -
+      new Date(a.last_message_at || a.updated_at).getTime()
+    );
+
+    setDirectMessages(conversationsList);
+  };
+
   const updateOfferStatus = async (offerId: string, status: 'accepted' | 'rejected') => {
     const { error } = await supabase
       .from('swap_offers')
@@ -335,6 +447,62 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
 
   return (
     <div className="space-y-4">
+      {directMessages.length > 0 && (
+        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+              <MessageCircle className="w-4 h-4 text-white" />
+            </div>
+            Direktne poruke
+          </h2>
+
+          <div className="space-y-2">
+            {directMessages.map((conv) => (
+              <div
+                key={conv.id}
+                onClick={() => onAcceptOffer && onAcceptOffer(conv.id, conv.other_user_id)}
+                className={`backdrop-blur-md rounded-xl p-3 transition-all cursor-pointer hover:scale-[1.01] ${
+                  conv.unread_count > 0
+                    ? 'border-2 border-green-500/50 bg-green-500/10 hover:bg-green-500/20'
+                    : 'border border-white/10 bg-white/5 hover:border-green-500/30'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  {conv.car && (
+                    <img
+                      src={conv.car.image_url}
+                      alt={conv.car.brand}
+                      className="w-16 h-12 object-cover rounded-lg"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className={`text-white text-sm ${conv.unread_count > 0 ? 'font-black' : 'font-bold'}`}>
+                        @{conv.other_user_nickname || 'Korisnik'}
+                      </p>
+                      {conv.unread_count > 0 && (
+                        <span className="bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 animate-pulse">
+                          {conv.unread_count}
+                        </span>
+                      )}
+                    </div>
+                    {conv.car && (
+                      <p className="text-xs text-cyan-400 mb-0.5">
+                        {conv.car.brand} {conv.car.model} ({conv.car.year})
+                      </p>
+                    )}
+                    {conv.last_message_content && (
+                      <p className={`text-xs truncate ${conv.unread_count > 0 ? 'text-white font-semibold' : 'text-gray-400'}`}>{conv.last_message_content}</p>
+                    )}
+                  </div>
+                  <MessageCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {conversations.length > 0 && (
         <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -699,7 +867,6 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
           car={selectedCar}
           onClose={() => setSelectedCar(null)}
           onSwapOffer={onSwapOffer}
-          onLiveInquiry={onLiveInquiry}
           onOwnerClick={onOwnerClick}
           onSendMessage={onSendMessage}
           isPremiumUser={isPremiumUser}

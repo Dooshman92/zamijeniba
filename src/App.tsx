@@ -12,7 +12,6 @@ import { AuthModal } from './components/AuthModal';
 import { PremiumBadge } from './components/PremiumBadge';
 import { ProfileEditModal } from './components/ProfileEditModal';
 import { PremiumModal } from './components/PremiumModal';
-import { LiveInquiryModal } from './components/LiveInquiryModal';
 import { MyAdsModal } from './components/MyAdsModal';
 import AdminDashboard from './components/AdminDashboard';
 import { MessagingCenterModal } from './components/MessagingCenterModal';
@@ -48,7 +47,6 @@ function App() {
   const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
   const [offersUnreadCount, setOffersUnreadCount] = useState(0);
   const [selectedCarForSwap, setSelectedCarForSwap] = useState<Car | null>(null);
-  const [selectedCarForLiveInquiry, setSelectedCarForLiveInquiry] = useState<Car | null>(null);
   const [activeTab, setActiveTab] = useState<'cars' | 'offers'>('cars');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -633,7 +631,6 @@ function App() {
                               key={car.id}
                               car={car}
                               onSwapOffer={setSelectedCarForSwap}
-                              onLiveInquiry={setSelectedCarForLiveInquiry}
                               isPremiumUser={userProfile?.is_premium || false}
                               currentUserId={user?.id}
                               onOwnerClick={handleOwnerClick}
@@ -672,7 +669,6 @@ function App() {
                               key={car.id}
                               car={car}
                               onSwapOffer={setSelectedCarForSwap}
-                              onLiveInquiry={setSelectedCarForLiveInquiry}
                               isPremiumUser={userProfile?.is_premium || false}
                               currentUserId={user?.id}
                               onOwnerClick={handleOwnerClick}
@@ -706,7 +702,6 @@ function App() {
                               key={car.id}
                               car={car}
                               onSwapOffer={setSelectedCarForSwap}
-                              onLiveInquiry={setSelectedCarForLiveInquiry}
                               isPremiumUser={userProfile?.is_premium || false}
                               currentUserId={user?.id}
                               onOwnerClick={handleOwnerClick}
@@ -749,7 +744,6 @@ function App() {
                               key={car.id}
                               car={car}
                               onSwapOffer={setSelectedCarForSwap}
-                              onLiveInquiry={setSelectedCarForLiveInquiry}
                               isPremiumUser={userProfile?.is_premium || false}
                               currentUserId={user?.id}
                               onOwnerClick={handleOwnerClick}
@@ -790,7 +784,6 @@ function App() {
                               key={car.id}
                               car={car}
                               onSwapOffer={setSelectedCarForSwap}
-                              onLiveInquiry={setSelectedCarForLiveInquiry}
                               isPremiumUser={userProfile?.is_premium || false}
                               currentUserId={user?.id}
                               onOwnerClick={handleOwnerClick}
@@ -823,7 +816,6 @@ function App() {
                               key={car.id}
                               car={car}
                               onSwapOffer={setSelectedCarForSwap}
-                              onLiveInquiry={setSelectedCarForLiveInquiry}
                               isPremiumUser={userProfile?.is_premium || false}
                               currentUserId={user?.id}
                               onOwnerClick={handleOwnerClick}
@@ -846,9 +838,6 @@ function App() {
               }}
               onSwapOffer={(car) => {
                 setSelectedCarForSwap(car);
-              }}
-              onLiveInquiry={(car) => {
-                setSelectedCarForLiveInquiry(car);
               }}
               onOwnerClick={handleOwnerClick}
               onSendMessage={handleSendMessage}
@@ -904,16 +893,6 @@ function App() {
           />
         )}
 
-        {selectedCarForLiveInquiry && (
-          <LiveInquiryModal
-            car={selectedCarForLiveInquiry}
-            onClose={() => setSelectedCarForLiveInquiry(null)}
-            onSuccess={() => {
-              setSelectedCarForLiveInquiry(null);
-            }}
-          />
-        )}
-
         {showMyAds && user && (
           <MyAdsModal
             onClose={() => {
@@ -958,10 +937,6 @@ function App() {
             onSwapOffer={(car) => {
               setShowInbox(false);
               setSelectedCarForSwap(car);
-            }}
-            onLiveInquiry={(car) => {
-              setShowInbox(false);
-              setSelectedCarForLiveInquiry(car);
             }}
             onOwnerClick={(userId) => {
               setShowInbox(false);
@@ -1019,10 +994,6 @@ function App() {
             onSwapOffer={(car) => {
               setShowCarDetail(false);
               setSelectedCarForSwap(car);
-            }}
-            onLiveInquiry={(car) => {
-              setShowCarDetail(false);
-              setSelectedCarForLiveInquiry(car);
             }}
             onOwnerClick={(userId) => {
               setShowCarDetail(false);

@@ -10,14 +10,13 @@ interface CarDetailModalProps {
   carId?: string;
   onClose: () => void;
   onSwapOffer?: (car: Car) => void;
-  onLiveInquiry?: (car: Car) => void;
   onOwnerClick?: (userId: string) => void;
   onSendMessage?: (userId: string) => void;
   onEdit?: (car: Car) => void;
   isPremiumUser?: boolean;
 }
 
-export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, onLiveInquiry, onOwnerClick, onSendMessage, onEdit, isPremiumUser = false }: CarDetailModalProps) {
+export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, onOwnerClick, onSendMessage, onEdit, isPremiumUser = false }: CarDetailModalProps) {
   const [car, setCar] = useState<Car | null>(initialCar || null);
   const [carImages, setCarImages] = useState<CarImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -507,18 +506,6 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                         <MessageCircle className="w-6 h-6 group-hover/btn:scale-110 transition-transform duration-300" />
                         <span className="text-lg">Pošalji poruku</span>
                         <Crown className="w-5 h-5 text-yellow-300" />
-                      </div>
-                    </button>
-                  )}
-                  {isPremiumUser && onLiveInquiry && (
-                    <button
-                      onClick={() => onLiveInquiry(car)}
-                      className="group/btn relative w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 overflow-hidden shadow-lg shadow-yellow-500/30"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-yellow-600 to-amber-700 opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
-                      <div className="relative flex items-center justify-center gap-2">
-                        <Zap className="w-6 h-6 group-hover/btn:scale-110 transition-transform duration-300" />
-                        <span className="text-lg">Live Upit</span>
                       </div>
                     </button>
                   )}

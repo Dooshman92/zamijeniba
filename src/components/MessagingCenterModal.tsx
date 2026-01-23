@@ -7,7 +7,6 @@ interface MessagingCenterModalProps {
   onClose: () => void;
   onViewSwapOffer?: (offerId: string) => void;
   onSwapOffer?: (car: Car) => void;
-  onLiveInquiry?: (car: Car) => void;
   onOwnerClick?: (userId: string) => void;
   onSendMessage?: (userId: string, carId?: string) => void;
   isPremiumUser?: boolean;
@@ -17,7 +16,6 @@ export function MessagingCenterModal({
   onClose,
   onViewSwapOffer,
   onSwapOffer,
-  onLiveInquiry,
   onOwnerClick,
   onSendMessage,
   isPremiumUser = false
@@ -94,7 +92,6 @@ export function MessagingCenterModal({
               setShowDirectChat(true);
             }}
             onSwapOffer={onSwapOffer}
-            onLiveInquiry={onLiveInquiry}
             onOwnerClick={onOwnerClick}
             onSendMessage={onSendMessage}
             isPremiumUser={isPremiumUser}

@@ -6,7 +6,6 @@ import { FeaturedBadge } from './FeaturedBadge';
 interface CarCardProps {
   car: Car;
   onSwapOffer: (car: Car) => void;
-  onLiveInquiry?: (car: Car) => void;
   showSwapButton?: boolean;
   isPremiumUser?: boolean;
   currentUserId?: string;
@@ -15,7 +14,7 @@ interface CarCardProps {
   layout?: 'grid' | 'list';
 }
 
-export function CarCard({ car, onSwapOffer, onLiveInquiry, showSwapButton = true, isPremiumUser = false, currentUserId, onOwnerClick, onCardClick, layout = 'grid' }: CarCardProps) {
+export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser = false, currentUserId, onOwnerClick, onCardClick, layout = 'grid' }: CarCardProps) {
   const isOwnCar = currentUserId && car.user_id === currentUserId;
   const ownerDisplayName = car.owner_nickname
     ? `@${car.owner_nickname}`
@@ -135,22 +134,6 @@ export function CarCard({ car, onSwapOffer, onLiveInquiry, showSwapButton = true
 
             {!isOwnCar && (
               <div className="flex gap-3">
-                {isPremiumUser && onLiveInquiry && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onLiveInquiry(car);
-                    }}
-                    className="group/btn relative flex-1 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 overflow-hidden shadow-lg shadow-yellow-500/30"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-600 to-amber-700 opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
-                    <div className="relative flex items-center justify-center gap-2">
-                      <Zap className="w-5 h-5 group-hover/btn:scale-110 transition-transform duration-300" />
-                      <span className="text-base">Live upit</span>
-                    </div>
-                  </button>
-                )}
-
                 {showSwapButton && (
                   <button
                     onClick={(e) => {
@@ -265,22 +248,6 @@ export function CarCard({ car, onSwapOffer, onLiveInquiry, showSwapButton = true
 
         {!isOwnCar && (
           <div className="space-y-1.5">
-            {isPremiumUser && onLiveInquiry && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onLiveInquiry(car);
-                }}
-                className="group/btn relative w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-1.5 px-2 rounded transition-all duration-300 transform hover:scale-105 overflow-hidden shadow-lg shadow-yellow-500/30"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-600 to-amber-700 opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
-                <div className="relative flex items-center justify-center gap-1">
-                  <Zap className="w-3 h-3 group-hover/btn:scale-110 transition-transform duration-300" />
-                  <span className="text-[11px]">Live</span>
-                </div>
-              </button>
-            )}
-
             {showSwapButton && (
               <button
                 onClick={(e) => {
