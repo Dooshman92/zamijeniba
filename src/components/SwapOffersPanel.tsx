@@ -125,7 +125,7 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
 
   const shouldShowPhone = (profile: UserProfile | undefined, offerStatus: string) => {
     if (!profile?.phone) return false;
-    return profile.show_phone_number || offerStatus === 'accepted';
+    return offerStatus === 'accepted';
   };
 
   if (loading) {
@@ -299,7 +299,7 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
               </div>
             )}
 
-            {onOpenChat && user && offer.offeredCar && offer.targetCar && (
+            {onOpenChat && user && offer.offeredCar && offer.targetCar && offer.status === 'accepted' && (
               <div className="mt-6">
                 {offer.targetCar.user_id === user.id && offer.offeredCar.user_id && (
                   <button
