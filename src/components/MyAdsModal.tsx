@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Car as CarIcon, Eye, EyeOff, Archive, Trash2, Edit, Zap } from 'lucide-react';
+import { X, Car as CarIcon, Eye, EyeOff, Archive, Trash2, Edit, Zap, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Car } from '../lib/supabase';
 import { AddCarFormMultiStep } from './AddCarFormMultiStep';
@@ -82,6 +82,29 @@ export function MyAdsModal({ onClose, userId, onCarUpdated }: MyAdsModalProps) {
 
   const getStatusCount = (status: CarStatus) => {
     return cars.filter(car => car.status === status).length;
+  };
+
+  const getRemainingFeaturedTime = (car: Car) => {
+    if (!car.is_featured || !car.featured_until) return null;
+
+    const now = new Date();
+    const featuredUntil = new Date(car.featured_until);
+    const diffMs = featuredUntil.getTime() - now.getTime();
+
+    if (diffMs <= 0) return null;
+
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+    const remainingHours = diffHours % 24;
+
+    if (diffDays > 0) {
+      return `${diffDays}d ${remainingHours}h`;
+    } else if (diffHours > 0) {
+      return `${diffHours}h ${diffMinutes}m`;
+    } else {
+      return `${diffMinutes}m`;
+    }
   };
 
   return (
@@ -204,9 +227,19 @@ export function MyAdsModal({ onClose, userId, onCarUpdated }: MyAdsModalProps) {
                           </button>
                         )}
                         {activeTab === 'active' && car.is_featured && (
-                          <div className="px-4 py-2 bg-yellow-500/20 border border-yellow-500 text-yellow-500 rounded-lg flex items-center gap-2">
-                            <Zap className="w-4 h-4" />
-                            Istaknut
+                          <div className="flex flex-col gap-1">
+                            <div className="px-4 py-2 bg-yellow-500/20 border border-yellow-500 text-yellow-500 rounded-lg flex items-center gap-2">
+                              <Zap className="w-4 h-4" />
+                              Istaknut
+                            </div>
+                            {getRemainingFeaturedTime(car) && (
+                              <div className="px-3 py-1 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-2 text-xs">
+                                <Clock className="w-3 h-3 text-yellow-400" />
+                                <span className="text-yellow-300 font-semibold">
+                                  Preostalo: {getRemainingFeaturedTime(car)}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         )}
                         {activeTab !== 'active' && (
