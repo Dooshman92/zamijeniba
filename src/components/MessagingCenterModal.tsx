@@ -85,8 +85,8 @@ export function MessagingCenterModal({
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[700px] flex flex-col">
-          <div className="px-6 py-3 border-b border-gray-200 bg-gray-50 rounded-t-2xl">
-            <div className="flex gap-2 items-center justify-center">
+          <div className="px-6 py-3 border-b border-gray-200 bg-gray-50 rounded-t-2xl flex items-center justify-between">
+            <div className="flex gap-2 items-center">
               <button
                 onClick={() => setActiveTab('messages')}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30"
@@ -102,6 +102,15 @@ export function MessagingCenterModal({
                 <span>Ponude</span>
               </button>
             </div>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 transition-colors p-2 hover:bg-gray-200 rounded-lg"
+              title="Zatvori"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
           <div className="flex-1 overflow-hidden flex flex-col">
             <InboxModal

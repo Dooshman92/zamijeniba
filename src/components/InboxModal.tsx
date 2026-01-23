@@ -102,7 +102,7 @@ export function InboxModal({ onClose, initialConversationId, onViewSwapOffer, on
 
     const conversationsMap = new Map();
     participantData.forEach(p => {
-      if (p.conversations) {
+      if (p.conversations && !p.conversations.car_id) {
         conversationsMap.set(p.conversation_id, {
           id: p.conversations.id,
           updated_at: p.conversations.updated_at,

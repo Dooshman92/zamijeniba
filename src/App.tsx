@@ -45,7 +45,8 @@ function App() {
   const [directChatOtherUserId, setDirectChatOtherUserId] = useState<string | null>(null);
   const [showCarDetail, setShowCarDetail] = useState(false);
   const [selectedCarForDetail, setSelectedCarForDetail] = useState<Car | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
+  const [offersUnreadCount, setOffersUnreadCount] = useState(0);
   const [selectedCarForSwap, setSelectedCarForSwap] = useState<Car | null>(null);
   const [selectedCarForLiveInquiry, setSelectedCarForLiveInquiry] = useState<Car | null>(null);
   const [activeTab, setActiveTab] = useState<'cars' | 'offers'>('cars');
@@ -73,12 +74,29 @@ function App() {
     if (!user) return;
     const { data } = await supabase
       .from('conversation_participants')
-      .select('unread_count')
+      .select(`
+        unread_count,
+        conversations (
+          car_id
+        )
+      `)
       .eq('user_id', user.id);
 
     if (data) {
-      const total = data.reduce((sum, p) => sum + (p.unread_count || 0), 0);
-      setUnreadCount(total);
+      let inboxTotal = 0;
+      let offersTotal = 0;
+
+      data.forEach(p => {
+        const hasCarId = p.conversations && (p.conversations as any).car_id;
+        if (hasCarId) {
+          offersTotal += p.unread_count || 0;
+        } else {
+          inboxTotal += p.unread_count || 0;
+        }
+      });
+
+      setInboxUnreadCount(inboxTotal);
+      setOffersUnreadCount(offersTotal);
     }
   };
 
@@ -134,7 +152,8 @@ function App() {
       };
     } else {
       setUserProfile(null);
-      setUnreadCount(0);
+      setInboxUnreadCount(0);
+      setOffersUnreadCount(0);
     }
   }, [user]);
 
@@ -386,9 +405,9 @@ function App() {
                       title="Poruke"
                     >
                       <MessageCircle className="w-5 h-5" />
-                      {unreadCount > 0 && (
+                      {inboxUnreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                          {unreadCount > 9 ? '9+' : unreadCount}
+                          {inboxUnreadCount > 9 ? '9+' : inboxUnreadCount}
                         </span>
                       )}
                     </button>
@@ -397,10 +416,15 @@ function App() {
                         setMessagingTab('offers');
                         setShowInbox(true);
                       }}
-                      className="backdrop-blur-md bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      className="relative backdrop-blur-md bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                       title="Ponude za zamjenu"
                     >
                       <ArrowRightLeft className="w-5 h-5" />
+                      {offersUnreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                          {offersUnreadCount > 9 ? '9+' : offersUnreadCount}
+                        </span>
+                      )}
                     </button>
                     <button
                       onClick={() => setShowProfileEdit(true)}
