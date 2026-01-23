@@ -124,7 +124,7 @@ export function PromoCodeModal({ onClose, onSuccess }: PromoCodeModalProps) {
             <div className="flex items-start gap-3">
               <Sparkles className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-white text-sm font-semibold mb-1">Iskoristi promo kod</p>
+                <p className="text-white text-sm font-semibold mb-1">Upisi kredit code</p>
                 <p className="text-gray-400 text-xs">
                   Unesite kod i dobijte kredite za dodatne slike i oglase!
                 </p>
