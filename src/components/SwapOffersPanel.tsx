@@ -373,7 +373,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="font-bold text-white text-sm">
+                      <p className={`text-white text-sm ${conv.unread_count > 0 ? 'font-black' : 'font-bold'}`}>
                         @{conv.other_user_nickname || conv.other_user_email.split('@')[0]}
                       </p>
                       {conv.unread_count > 0 && (
@@ -391,7 +391,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                       </p>
                     )}
                     {conv.last_message_content && (
-                      <p className="text-xs text-gray-400 truncate">{conv.last_message_content}</p>
+                      <p className={`text-xs truncate ${conv.unread_count > 0 ? 'text-white font-semibold' : 'text-gray-400'}`}>{conv.last_message_content}</p>
                     )}
                   </div>
                   <MessageSquare className="w-5 h-5 text-green-400 flex-shrink-0" />

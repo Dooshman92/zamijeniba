@@ -138,6 +138,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
       console.error('Error loading messages:', error);
     } else if (data) {
       setMessages(data);
+      markAsRead();
     }
     setLoading(false);
   };
