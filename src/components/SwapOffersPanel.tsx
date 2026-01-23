@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRightLeft, MessageSquare, Check, X, Phone, MapPin, User } from 'lucide-react';
+import { ArrowRightLeft, MessageSquare, Check, X, Phone, MapPin, User, MessageCircle } from 'lucide-react';
 import { Car, SwapOffer, supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { getOrCreateConversation } from '../lib/messaging';
@@ -551,19 +551,30 @@ export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
                           </div>
                           <div className="space-y-4">
                             <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/10">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                  <User className="w-5 h-5 text-cyan-400" />
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <User className="w-5 h-5 text-cyan-400" />
+                                  </div>
+                                  <button
+                                    onClick={() => setSelectedUserProfile({
+                                      userId: offer.offeredCar!.user_id,
+                                      userEmail: offer.offeredCar!.user_email || ''
+                                    })}
+                                    className="text-white text-lg font-bold hover:text-cyan-400 transition-all duration-300 hover:tracking-wide"
+                                  >
+                                    @{offer.offeredOwnerProfile.nickname || offer.offeredCar?.user_email?.split('@')[0]}
+                                  </button>
                                 </div>
-                                <button
-                                  onClick={() => setSelectedUserProfile({
-                                    userId: offer.offeredCar!.user_id,
-                                    userEmail: offer.offeredCar!.user_email || ''
-                                  })}
-                                  className="text-white text-lg font-bold hover:text-cyan-400 transition-all duration-300 hover:tracking-wide"
-                                >
-                                  @{offer.offeredOwnerProfile.nickname || offer.offeredCar?.user_email?.split('@')[0]}
-                                </button>
+                                {onAcceptOffer && offer.conversation_id && offer.offeredCar?.user_id && (
+                                  <button
+                                    onClick={() => onAcceptOffer(offer.conversation_id!, offer.offeredCar!.user_id)}
+                                    className="p-2.5 bg-gradient-to-br from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 rounded-xl transition-all duration-300 hover:scale-110"
+                                    title="Otvori chat"
+                                  >
+                                    <MessageCircle className="w-5 h-5 text-green-400" />
+                                  </button>
+                                )}
                               </div>
                             </div>
                             {offer.offeredOwnerProfile.location && (
@@ -604,19 +615,30 @@ export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
                           </div>
                           <div className="space-y-4">
                             <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                  <User className="w-5 h-5 text-blue-400" />
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <User className="w-5 h-5 text-blue-400" />
+                                  </div>
+                                  <button
+                                    onClick={() => setSelectedUserProfile({
+                                      userId: offer.targetCar!.user_id,
+                                      userEmail: offer.targetCar!.user_email || ''
+                                    })}
+                                    className="text-white text-lg font-bold hover:text-blue-400 transition-all duration-300 hover:tracking-wide"
+                                  >
+                                    @{offer.targetOwnerProfile.nickname || offer.targetCar?.user_email?.split('@')[0]}
+                                  </button>
                                 </div>
-                                <button
-                                  onClick={() => setSelectedUserProfile({
-                                    userId: offer.targetCar!.user_id,
-                                    userEmail: offer.targetCar!.user_email || ''
-                                  })}
-                                  className="text-white text-lg font-bold hover:text-blue-400 transition-all duration-300 hover:tracking-wide"
-                                >
-                                  @{offer.targetOwnerProfile.nickname || offer.targetCar?.user_email?.split('@')[0]}
-                                </button>
+                                {onAcceptOffer && offer.conversation_id && offer.targetCar?.user_id && (
+                                  <button
+                                    onClick={() => onAcceptOffer(offer.conversation_id!, offer.targetCar!.user_id)}
+                                    className="p-2.5 bg-gradient-to-br from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 rounded-xl transition-all duration-300 hover:scale-110"
+                                    title="Otvori chat"
+                                  >
+                                    <MessageCircle className="w-5 h-5 text-green-400" />
+                                  </button>
+                                )}
                               </div>
                             </div>
                             {offer.targetOwnerProfile.location && (
