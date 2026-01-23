@@ -376,7 +376,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
   const chatContent = (
     <div className="backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-lg w-full h-full flex flex-col shadow-2xl">
-        <div className="relative p-4 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
+        <div className="flex-shrink-0 relative p-4 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
           {!embedded && (
             <button
               onClick={onClose}
@@ -523,7 +523,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-3 border-t border-white/10 bg-gradient-to-r from-gray-900/50 to-gray-800/50">
+        <div className="flex-shrink-0 p-3 border-t border-white/10 bg-gradient-to-r from-gray-900/50 to-gray-800/50">
           {blockedByUserId && (
             <div className="mb-2 p-2 bg-red-500/20 border border-red-500/30 rounded-lg">
               <p className="text-xs text-red-400 text-center font-semibold">
