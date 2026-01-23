@@ -438,6 +438,29 @@ export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
               </span>
             </div>
 
+            {onAcceptOffer && user && offer.offeredCar && offer.targetCar && offer.status === 'accepted' && offer.conversation_id && (
+              <div className="mb-6">
+                {offer.targetCar.user_id === user.id && offer.offeredCar.user_id && (
+                  <button
+                    onClick={() => onAcceptOffer(offer.conversation_id!, offer.offeredCar!.user_id)}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 shadow-xl hover:shadow-green-500/50 animate-pulse"
+                  >
+                    <MessageSquare className="w-6 h-6" />
+                    <span className="text-lg">Otvori chat sa @{offer.offeredOwnerProfile?.nickname || offer.offeredCar.user_email?.split('@')[0]}</span>
+                  </button>
+                )}
+                {offer.offeredCar.user_id === user.id && offer.targetCar.user_id && (
+                  <button
+                    onClick={() => onAcceptOffer(offer.conversation_id!, offer.targetCar!.user_id)}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 shadow-xl hover:shadow-green-500/50 animate-pulse"
+                  >
+                    <MessageSquare className="w-6 h-6" />
+                    <span className="text-lg">Otvori chat sa @{offer.targetOwnerProfile?.nickname || offer.targetCar.user_email?.split('@')[0]}</span>
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               {offer.offeredCar && (
                 <div
@@ -623,29 +646,6 @@ export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
                       </div>
                     )}
                   </>
-                )}
-              </div>
-            )}
-
-            {onAcceptOffer && user && offer.offeredCar && offer.targetCar && offer.status === 'accepted' && offer.conversation_id && (
-              <div className="mt-6">
-                {offer.targetCar.user_id === user.id && offer.offeredCar.user_id && (
-                  <button
-                    onClick={() => onAcceptOffer(offer.conversation_id!, offer.offeredCar!.user_id)}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
-                  >
-                    <MessageSquare className="w-5 h-5" />
-                    Otvori chat sa @{offer.offeredOwnerProfile?.nickname || offer.offeredCar.user_email?.split('@')[0]}
-                  </button>
-                )}
-                {offer.offeredCar.user_id === user.id && offer.targetCar.user_id && (
-                  <button
-                    onClick={() => onAcceptOffer(offer.conversation_id!, offer.targetCar!.user_id)}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
-                  >
-                    <MessageSquare className="w-5 h-5" />
-                    Otvori chat sa @{offer.targetOwnerProfile?.nickname || offer.targetCar.user_email?.split('@')[0]}
-                  </button>
                 )}
               </div>
             )}
