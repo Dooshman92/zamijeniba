@@ -28,9 +28,14 @@ interface ConversationWithDetails {
 
 interface SwapOffersPanelProps {
   onAcceptOffer?: (conversationId: string, otherUserId: string) => void;
+  onSwapOffer?: (car: Car) => void;
+  onLiveInquiry?: (car: Car) => void;
+  onOwnerClick?: (userId: string) => void;
+  onSendMessage?: (userId: string, carId?: string) => void;
+  isPremiumUser?: boolean;
 }
 
-export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
+export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onOwnerClick, onSendMessage, isPremiumUser = false }: SwapOffersPanelProps) {
   const [offers, setOffers] = useState<SwapOfferWithDetails[]>([]);
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
@@ -698,6 +703,11 @@ export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
         <CarDetailModal
           car={selectedCar}
           onClose={() => setSelectedCar(null)}
+          onSwapOffer={onSwapOffer}
+          onLiveInquiry={onLiveInquiry}
+          onOwnerClick={onOwnerClick}
+          onSendMessage={onSendMessage}
+          isPremiumUser={isPremiumUser}
         />
       )}
 

@@ -703,6 +703,15 @@ function App() {
                 setDirectChatOtherUserId(otherUserId);
                 setShowDirectChat(true);
               }}
+              onSwapOffer={(car) => {
+                setSelectedCarForSwap(car);
+              }}
+              onLiveInquiry={(car) => {
+                setSelectedCarForLiveInquiry(car);
+              }}
+              onOwnerClick={handleOwnerClick}
+              onSendMessage={handleSendMessage}
+              isPremiumUser={userProfile?.is_premium || false}
             />
           )}
         </div>
@@ -788,6 +797,20 @@ function App() {
                 document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
               }, 100);
             }}
+            onSwapOffer={(car) => {
+              setShowInbox(false);
+              setSelectedCarForSwap(car);
+            }}
+            onLiveInquiry={(car) => {
+              setShowInbox(false);
+              setSelectedCarForLiveInquiry(car);
+            }}
+            onOwnerClick={(userId) => {
+              setShowInbox(false);
+              handleOwnerClick(userId);
+            }}
+            onSendMessage={handleSendMessage}
+            isPremiumUser={userProfile?.is_premium || false}
           />
         )}
 

@@ -1,15 +1,26 @@
 import { useState } from 'react';
 import { SwapOffersPanel } from './SwapOffersPanel';
 import { DirectChatModal } from './DirectChatModal';
+import { Car } from '../lib/supabase';
 
 interface MessagingCenterModalProps {
   onClose: () => void;
   onViewSwapOffer?: (offerId: string) => void;
+  onSwapOffer?: (car: Car) => void;
+  onLiveInquiry?: (car: Car) => void;
+  onOwnerClick?: (userId: string) => void;
+  onSendMessage?: (userId: string, carId?: string) => void;
+  isPremiumUser?: boolean;
 }
 
 export function MessagingCenterModal({
   onClose,
-  onViewSwapOffer
+  onViewSwapOffer,
+  onSwapOffer,
+  onLiveInquiry,
+  onOwnerClick,
+  onSendMessage,
+  isPremiumUser = false
 }: MessagingCenterModalProps) {
   const [showDirectChat, setShowDirectChat] = useState(false);
   const [directChatConversationId, setDirectChatConversationId] = useState<string | null>(null);
@@ -82,6 +93,11 @@ export function MessagingCenterModal({
               setDirectChatOtherUserId(otherUserId);
               setShowDirectChat(true);
             }}
+            onSwapOffer={onSwapOffer}
+            onLiveInquiry={onLiveInquiry}
+            onOwnerClick={onOwnerClick}
+            onSendMessage={onSendMessage}
+            isPremiumUser={isPremiumUser}
           />
         </div>
       </div>
