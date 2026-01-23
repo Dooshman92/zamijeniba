@@ -326,11 +326,12 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
     if (error) {
       console.error('Error sending message:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       if (error.message.includes('blocked conversation')) {
         alert('Razgovor je zatvoren. Poruke se ne mogu slati.');
         await loadBlockedStatus();
       } else {
-        alert('Greška pri slanju poruke');
+        alert(`Greška pri slanju poruke: ${error.message}`);
       }
     } else {
       setNewMessage('');
