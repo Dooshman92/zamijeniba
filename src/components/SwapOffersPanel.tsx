@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ArrowRightLeft, MessageSquare, Check, X, Phone } from 'lucide-react';
+import { ArrowRightLeft, MessageSquare, Check, X, Phone, MapPin, User } from 'lucide-react';
 import { Car, SwapOffer, supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { getOrCreateConversation } from '../lib/messaging';
 import { CarDetailModal } from './CarDetailModal';
+import { UserProfileModal } from './UserProfileModal';
 
 interface SwapOfferWithDetails extends SwapOffer {
   targetCar?: Car;
@@ -21,6 +22,7 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
   const [offers, setOffers] = useState<SwapOfferWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [selectedUserProfile, setSelectedUserProfile] = useState<{ userId: string; userEmail: string } | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -270,27 +272,68 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
                   </div>
                 )}
 
-                {(shouldShowPhone(offer.targetOwnerProfile, offer.status) ||
-                  shouldShowPhone(offer.offeredOwnerProfile, offer.status)) && (
+                {offer.status === 'accepted' && (offer.targetOwnerProfile || offer.offeredOwnerProfile) && (
                   <div className="backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
                     <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-3">Kontakt informacije</p>
-                    <div className="space-y-2">
-                      {shouldShowPhone(offer.offeredOwnerProfile, offer.status) && offer.offeredOwnerProfile && (
-                        <div className="flex items-center gap-3 text-sm">
-                          <Phone className="w-4 h-4 text-cyan-400" />
-                          <span className="text-gray-300">{offer.offeredCar?.user_email?.split('@')[0]}:</span>
-                          <a href={`tel:${offer.offeredOwnerProfile.phone}`} className="text-white font-semibold hover:text-cyan-400 transition-colors">
-                            {offer.offeredOwnerProfile.phone}
-                          </a>
+                    <div className="space-y-4">
+                      {offer.offeredOwnerProfile && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-cyan-400" />
+                            <button
+                              onClick={() => setSelectedUserProfile({
+                                userId: offer.offeredCar!.user_id,
+                                userEmail: offer.offeredCar!.user_email || ''
+                              })}
+                              className="text-white font-semibold hover:text-cyan-400 transition-colors underline decoration-dotted"
+                            >
+                              @{offer.offeredOwnerProfile.nickname || offer.offeredCar?.user_email?.split('@')[0]}
+                            </button>
+                          </div>
+                          {offer.offeredOwnerProfile.location && (
+                            <div className="flex items-center gap-2 text-sm text-gray-300">
+                              <MapPin className="w-4 h-4 text-cyan-400" />
+                              <span>{offer.offeredOwnerProfile.location}</span>
+                            </div>
+                          )}
+                          {shouldShowPhone(offer.offeredOwnerProfile, offer.status) && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="w-4 h-4 text-cyan-400" />
+                              <a href={`tel:${offer.offeredOwnerProfile.phone}`} className="text-white font-semibold hover:text-cyan-400 transition-colors">
+                                {offer.offeredOwnerProfile.phone}
+                              </a>
+                            </div>
+                          )}
                         </div>
                       )}
-                      {shouldShowPhone(offer.targetOwnerProfile, offer.status) && offer.targetOwnerProfile && (
-                        <div className="flex items-center gap-3 text-sm">
-                          <Phone className="w-4 h-4 text-blue-400" />
-                          <span className="text-gray-300">{offer.targetCar?.user_email?.split('@')[0]}:</span>
-                          <a href={`tel:${offer.targetOwnerProfile.phone}`} className="text-white font-semibold hover:text-blue-400 transition-colors">
-                            {offer.targetOwnerProfile.phone}
-                          </a>
+                      {offer.targetOwnerProfile && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-blue-400" />
+                            <button
+                              onClick={() => setSelectedUserProfile({
+                                userId: offer.targetCar!.user_id,
+                                userEmail: offer.targetCar!.user_email || ''
+                              })}
+                              className="text-white font-semibold hover:text-blue-400 transition-colors underline decoration-dotted"
+                            >
+                              @{offer.targetOwnerProfile.nickname || offer.targetCar?.user_email?.split('@')[0]}
+                            </button>
+                          </div>
+                          {offer.targetOwnerProfile.location && (
+                            <div className="flex items-center gap-2 text-sm text-gray-300">
+                              <MapPin className="w-4 h-4 text-blue-400" />
+                              <span>{offer.targetOwnerProfile.location}</span>
+                            </div>
+                          )}
+                          {shouldShowPhone(offer.targetOwnerProfile, offer.status) && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="w-4 h-4 text-blue-400" />
+                              <a href={`tel:${offer.targetOwnerProfile.phone}`} className="text-white font-semibold hover:text-blue-400 transition-colors">
+                                {offer.targetOwnerProfile.phone}
+                              </a>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -348,6 +391,14 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
         <CarDetailModal
           car={selectedCar}
           onClose={() => setSelectedCar(null)}
+        />
+      )}
+
+      {selectedUserProfile && (
+        <UserProfileModal
+          userId={selectedUserProfile.userId}
+          userEmail={selectedUserProfile.userEmail}
+          onClose={() => setSelectedUserProfile(null)}
         />
       )}
     </div>
