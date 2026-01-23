@@ -108,6 +108,7 @@ export interface UserProfile {
   premium_expires_at: string | null;
   created_at: string;
   updated_at: string;
+  email?: string;
 }
 
 export interface PromoCode {

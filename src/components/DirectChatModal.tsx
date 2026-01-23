@@ -20,39 +20,58 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
   useEffect(() => {
     loadOtherUserProfile();
     loadMessages();
-    subscribeToMessages();
-  }, [conversationId]);
+    const cleanup = subscribeToMessages();
+    return cleanup;
+  }, [conversationId, otherUserId]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
   const loadOtherUserProfile = async () => {
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', otherUserId)
-      .maybeSingle();
+    try {
+      console.log('Loading profile for user:', otherUserId);
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-profile-by-id`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: otherUserId }),
+      });
 
-    if (data) {
-      setOtherUserProfile(data);
+      if (response.ok) {
+        const profile = await response.json();
+        console.log('Loaded profile:', profile);
+        setOtherUserProfile(profile);
+      } else {
+        console.error('Failed to load profile, status:', response.status);
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
     }
   };
 
   const loadMessages = async () => {
-    const { data } = await supabase
+    console.log('Loading messages for conversation:', conversationId);
+    const { data, error } = await supabase
       .from('messages')
       .select('*')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
 
-    if (data) {
+    if (error) {
+      console.error('Error loading messages:', error);
+    } else if (data) {
+      console.log('Loaded messages:', data.length);
       setMessages(data);
     }
     setLoading(false);
   };
 
   const subscribeToMessages = () => {
+    console.log('Subscribing to messages for conversation:', conversationId);
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
@@ -64,12 +83,14 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
           filter: `conversation_id=eq.${conversationId}`,
         },
         (payload) => {
+          console.log('New message received:', payload.new);
           setMessages((prev) => [...prev, payload.new as Message]);
         }
       )
       .subscribe();
 
     return () => {
+      console.log('Unsubscribing from messages');
       supabase.removeChannel(channel);
     };
   };
@@ -79,7 +100,17 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !user) return;
+    if (!newMessage.trim() || !user) {
+      console.log('Cannot send message: empty message or no user');
+      return;
+    }
+
+    console.log('Sending message:', {
+      conversation_id: conversationId,
+      sender_id: user.id,
+      receiver_id: otherUserId,
+      content: newMessage.trim(),
+    });
 
     const { error } = await supabase.from('messages').insert({
       conversation_id: conversationId,
@@ -88,7 +119,11 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
       content: newMessage.trim(),
     });
 
-    if (!error) {
+    if (error) {
+      console.error('Error sending message:', error);
+      alert('Greška pri slanju poruke');
+    } else {
+      console.log('Message sent successfully');
       setNewMessage('');
     }
   };
@@ -151,10 +186,12 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
                   {otherUserProfile.nickname || 'Korisnik'}
                 </h2>
                 <div className="flex flex-wrap gap-3 mt-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-300">
-                    <Mail className="w-4 h-4 text-cyan-400" />
-                    <span>{otherUserProfile.email}</span>
-                  </div>
+                  {otherUserProfile.email && (
+                    <div className="flex items-center gap-2 text-sm text-gray-300">
+                      <Mail className="w-4 h-4 text-cyan-400" />
+                      <span>{otherUserProfile.email}</span>
+                    </div>
+                  )}
                   {otherUserProfile.phone && otherUserProfile.show_phone_number && (
                     <div className="flex items-center gap-2 text-sm text-gray-300">
                       <Phone className="w-4 h-4 text-green-400" />
