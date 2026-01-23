@@ -202,12 +202,19 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading promo codes:', error);
+        console.error('=== PROMO CODES ERROR ===');
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
+        console.error('Full error object:', JSON.stringify(error, null, 2));
+        console.error('=========================');
+      } else {
+        console.log('Promo codes loaded successfully:', data);
       }
 
       setPromoCodes(data || []);
     } catch (error) {
-      console.error('Error loading promo codes:', error);
+      console.error('Exception loading promo codes:', error);
     } finally {
       setLoading(false);
     }
