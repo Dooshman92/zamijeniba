@@ -202,8 +202,21 @@ function App() {
       });
 
       const sortedCars = carsWithOwnerInfo.sort((a, b) => {
+        const now = new Date();
+        const aIsFeatured = a.is_featured && (!a.featured_until || new Date(a.featured_until) > now);
+        const bIsFeatured = b.is_featured && (!b.featured_until || new Date(b.featured_until) > now);
+
+        if (aIsFeatured && !bIsFeatured) return -1;
+        if (!aIsFeatured && bIsFeatured) return 1;
+
+        if (aIsFeatured && bIsFeatured) {
+          const scoreDiff = (b.priority_score || 0) - (a.priority_score || 0);
+          if (scoreDiff !== 0) return scoreDiff;
+        }
+
         if (a.owner_is_premium && !b.owner_is_premium) return -1;
         if (!a.owner_is_premium && b.owner_is_premium) return 1;
+
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
 
@@ -795,7 +808,10 @@ function App() {
 
         {showMyAds && user && (
           <MyAdsModal
-            onClose={() => setShowMyAds(false)}
+            onClose={() => {
+              setShowMyAds(false);
+              loadCars();
+            }}
             userId={user.id}
           />
         )}
