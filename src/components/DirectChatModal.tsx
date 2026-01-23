@@ -404,7 +404,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
-      <div className="max-w-5xl w-full h-[90vh]">
+      <div className="max-w-2xl w-full h-[90vh]">
         {chatContent}
       </div>
     </div>

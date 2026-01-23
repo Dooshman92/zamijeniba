@@ -8,7 +8,7 @@ export async function getOrCreateConversation(userId1: string, userId2: string, 
 
   const { data: existingParticipants } = await supabase
     .from('conversation_participants')
-    .select('conversation_id')
+    .select('conversation_id, conversations(car_id)')
     .in('user_id', [userId1, userId2]);
 
   if (existingParticipants && existingParticipants.length > 0) {
@@ -17,12 +17,21 @@ export async function getOrCreateConversation(userId1: string, userId2: string, 
       return acc;
     }, {} as Record<string, number>);
 
-    const existingConversationId = Object.keys(conversationCounts).find(
-      id => conversationCounts[id] === 2
-    );
+    const matchingConversationId = Object.keys(conversationCounts).find(id => {
+      if (conversationCounts[id] !== 2) return false;
 
-    if (existingConversationId) {
-      return existingConversationId;
+      const participant = existingParticipants.find(p => p.conversation_id === id);
+      const conversationCarId = (participant as any)?.conversations?.car_id;
+
+      if (carId) {
+        return conversationCarId === carId;
+      } else {
+        return !conversationCarId;
+      }
+    });
+
+    if (matchingConversationId) {
+      return matchingConversationId;
     }
   }
 
