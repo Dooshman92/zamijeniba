@@ -308,7 +308,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
         is_featured: isPremium,
         featured_until: featuredUntil
       }])
-      .select()
+      .select('*')
       .single();
 
     if (carError || !carData) {
