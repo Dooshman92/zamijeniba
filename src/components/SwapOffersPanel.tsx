@@ -13,7 +13,7 @@ interface SwapOfferWithDetails extends SwapOffer {
 }
 
 interface SwapOffersPanelProps {
-  onAcceptOffer?: (conversationId: string) => void;
+  onAcceptOffer?: (conversationId: string, otherUserId: string) => void;
 }
 
 export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
@@ -117,7 +117,7 @@ export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
     if (conversationId) {
       loadOffers();
       if (onAcceptOffer) {
-        onAcceptOffer(conversationId);
+        onAcceptOffer(conversationId, offer.offeredCar.user_id);
       }
     }
   };

@@ -17,6 +17,7 @@ import { MyAdsModal } from './components/MyAdsModal';
 import { AdminPanel } from './components/AdminPanel';
 import { InboxModal } from './components/InboxModal';
 import { PromoCodeModal } from './components/PromoCodeModal';
+import { DirectChatModal } from './components/DirectChatModal';
 import { Logo } from './components/Logo';
 import { UserProfileModal } from './components/UserProfileModal';
 import { CarDetailModal } from './components/CarDetailModal';
@@ -38,6 +39,9 @@ function App() {
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [showDirectChat, setShowDirectChat] = useState(false);
+  const [directChatConversationId, setDirectChatConversationId] = useState<string | null>(null);
+  const [directChatOtherUserId, setDirectChatOtherUserId] = useState<string | null>(null);
   const [showCarDetail, setShowCarDetail] = useState(false);
   const [selectedCarForDetail, setSelectedCarForDetail] = useState<Car | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -675,9 +679,10 @@ function App() {
             </>
           ) : (
             <SwapOffersPanel
-              onAcceptOffer={(conversationId) => {
-                setSelectedConversationId(conversationId);
-                setShowInbox(true);
+              onAcceptOffer={(conversationId, otherUserId) => {
+                setDirectChatConversationId(conversationId);
+                setDirectChatOtherUserId(otherUserId);
+                setShowDirectChat(true);
               }}
             />
           )}
@@ -766,6 +771,18 @@ function App() {
               setTimeout(() => {
                 document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
               }, 100);
+            }}
+          />
+        )}
+
+        {showDirectChat && directChatConversationId && directChatOtherUserId && (
+          <DirectChatModal
+            conversationId={directChatConversationId}
+            otherUserId={directChatOtherUserId}
+            onClose={() => {
+              setShowDirectChat(false);
+              setDirectChatConversationId(null);
+              setDirectChatOtherUserId(null);
             }}
           />
         )}
