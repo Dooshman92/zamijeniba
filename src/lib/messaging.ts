@@ -6,32 +6,27 @@ export async function getOrCreateConversation(userId1: string, userId2: string, 
     return null;
   }
 
-  const { data: existingParticipants } = await supabase
-    .from('conversation_participants')
-    .select('conversation_id, conversations(car_id)')
-    .in('user_id', [userId1, userId2]);
+  const { data: existingConversations } = await supabase
+    .from('conversations')
+    .select('id, car_id')
+    .eq('car_id', carId || null)
+    .order('created_at', { ascending: false });
 
-  if (existingParticipants && existingParticipants.length > 0) {
-    const conversationCounts = existingParticipants.reduce((acc, p) => {
-      acc[p.conversation_id] = (acc[p.conversation_id] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+  if (existingConversations && existingConversations.length > 0) {
+    for (const conv of existingConversations) {
+      const { data: participants } = await supabase
+        .from('conversation_participants')
+        .select('user_id')
+        .eq('conversation_id', conv.id);
 
-    const matchingConversationId = Object.keys(conversationCounts).find(id => {
-      if (conversationCounts[id] !== 2) return false;
+      if (participants && participants.length === 2) {
+        const userIds = participants.map(p => p.user_id).sort();
+        const targetUserIds = [userId1, userId2].sort();
 
-      const participant = existingParticipants.find(p => p.conversation_id === id);
-      const conversationCarId = (participant as any)?.conversations?.car_id;
-
-      if (carId) {
-        return conversationCarId === carId;
-      } else {
-        return !conversationCarId;
+        if (userIds[0] === targetUserIds[0] && userIds[1] === targetUserIds[1]) {
+          return conv.id;
+        }
       }
-    });
-
-    if (matchingConversationId) {
-      return matchingConversationId;
     }
   }
 
