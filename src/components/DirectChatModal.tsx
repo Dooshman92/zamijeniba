@@ -28,7 +28,6 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   const { user } = useAuth();
 
   useEffect(() => {
-    loadOtherUserProfile();
     loadMessages();
     loadCarInfo();
     checkSwapStatus();
@@ -37,6 +36,10 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
     const cleanup = subscribeToMessages();
     return cleanup;
   }, [conversationId, otherUserId]);
+
+  useEffect(() => {
+    loadOtherUserProfile();
+  }, [conversationId, otherUserId, isSwapAccepted]);
 
   useEffect(() => {
     scrollToBottom();
@@ -107,22 +110,56 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
   const loadOtherUserProfile = async () => {
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-profile-by-id`;
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: otherUserId }),
-      });
+      console.log('Loading profile for user:', otherUserId);
+      const { data: profile, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', otherUserId)
+        .maybeSingle();
 
-      if (response.ok) {
-        const profile = await response.json();
+      console.log('Profile data:', profile, 'Error:', error);
+
+      if (error) {
+        console.error('Error loading user profile:', error);
+        setLoading(false);
+        return;
+      }
+
+      if (profile) {
+        console.log('Setting profile:', profile);
+        if (isSwapAccepted) {
+          try {
+            const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-profile-by-id`;
+            const response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ userId: otherUserId }),
+            });
+
+            if (response.ok) {
+              const fullProfile = await response.json();
+              console.log('Full profile with email:', fullProfile);
+              setOtherUserProfile(fullProfile);
+              setLoading(false);
+              return;
+            }
+          } catch (emailError) {
+            console.log('Could not fetch email, using basic profile');
+          }
+        }
+
         setOtherUserProfile(profile);
+        setLoading(false);
+      } else {
+        console.log('No profile found for user:', otherUserId);
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
+      setLoading(false);
     }
   };
 
@@ -173,7 +210,6 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
       setMessages(data);
       markAsRead();
     }
-    setLoading(false);
   };
 
   const subscribeToMessages = () => {
