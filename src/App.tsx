@@ -64,7 +64,7 @@ function App() {
     return audio;
   })[0];
 
-  const fetchUnreadCount = useCallback(async () => {
+  const fetchUnreadCount = async () => {
     if (!user) return;
     const { data } = await supabase
       .from('conversation_participants')
@@ -73,10 +73,9 @@ function App() {
 
     if (data) {
       const total = data.reduce((sum, p) => sum + (p.unread_count || 0), 0);
-      console.log('Fetched unread count:', total, 'from data:', data);
       setUnreadCount(total);
     }
-  }, [user]);
+  };
 
   useEffect(() => {
     initializeStorage();
@@ -85,7 +84,6 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      console.log('User logged in, fetching data for user:', user.id);
       fetchUserProfile();
       fetchUnreadCount();
 
@@ -99,8 +97,7 @@ function App() {
             table: 'conversation_participants',
             filter: `user_id=eq.${user.id}`,
           },
-          (payload) => {
-            console.log('Unread count UPDATE detected:', payload);
+          () => {
             fetchUnreadCount();
           }
         )
@@ -116,9 +113,7 @@ function App() {
             table: 'messages',
           },
           (payload: any) => {
-            console.log('New message detected:', payload.new);
             if (payload.new && payload.new.receiver_id === user.id && payload.new.sender_id !== user.id) {
-              console.log('Message is for me, playing sound');
               if (audioRef) {
                 audioRef.volume = 0.5;
                 audioRef.play().catch(err => console.log('Audio play failed:', err));
@@ -136,7 +131,7 @@ function App() {
       setUserProfile(null);
       setUnreadCount(0);
     }
-  }, [user, fetchUnreadCount]);
+  }, [user]);
 
   const fetchUserProfile = async () => {
     if (!user) return;
