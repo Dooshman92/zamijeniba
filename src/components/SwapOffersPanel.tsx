@@ -3,6 +3,7 @@ import { ArrowRightLeft, MessageSquare, Check, X, Phone, MapPin, User, MessageCi
 import { Car, SwapOffer, supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { getOrCreateConversation } from '../lib/messaging';
+import { formatDate } from '../lib/dateUtils';
 import { CarDetailModal } from './CarDetailModal';
 import { UserProfileModal } from './UserProfileModal';
 
@@ -431,7 +432,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                   : 'Na čekanju'}
               </span>
               <span className="text-xs text-gray-400 backdrop-blur-md bg-white/5 px-2 py-1 rounded-lg">
-                {new Date(offer.created_at).toLocaleDateString('hr-HR')}
+                {formatDate(offer.created_at)}
               </span>
             </div>
 

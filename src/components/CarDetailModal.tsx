@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, Clock } from 'lucide-react';
 import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
+import { formatDateTime } from '../lib/dateUtils';
 import { PremiumBadge } from './PremiumBadge';
 
 interface CarDetailModalProps {
@@ -117,19 +118,6 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
     setCurrentImageIndex((prev) => (prev - 1 + carImages.length) % carImages.length);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const dateStr = date.toLocaleDateString('bs-BA', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-    const timeStr = date.toLocaleTimeString('bs-BA', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    return `${dateStr} u ${timeStr}`;
-  };
 
   const getRemainingPremiumTime = () => {
     if (!userProfile?.is_premium || !userProfile?.premium_expires_at) {
@@ -495,7 +483,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
 
               <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
                 <div className="flex items-center justify-center text-sm text-gray-400">
-                  <span>Objavljeno: {formatDate(car.created_at)}</span>
+                  <span>Objavljeno: {formatDateTime(car.created_at)}</span>
                 </div>
               </div>
             </div>
@@ -575,13 +563,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                       </div>
                       {userProfile?.premium_expires_at && (
                         <p className="text-xs text-gray-500 mt-3">
-                          Ističe: {new Date(userProfile.premium_expires_at).toLocaleDateString('bs-BA', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          Ističe: {formatDateTime(userProfile.premium_expires_at)}
                         </p>
                       )}
                     </div>

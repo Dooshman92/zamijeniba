@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Shield, Crown, User, Search, CheckCircle, XCircle, Power, Gift, Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Users, Ban, UserX, Clock } from 'lucide-react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
+import { formatDate, formatDateTimeShort } from '../lib/dateUtils';
 
 interface PromoCode {
   code: string;
@@ -549,7 +550,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                           </div>
                           <div className="text-right text-sm text-gray-400">
                             <div>Kreirano:</div>
-                            <div className="text-gray-300">{new Date(promo.created_at).toLocaleDateString('sr-RS')}</div>
+                            <div className="text-gray-300">{formatDate(promo.created_at)}</div>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -608,7 +609,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                                 +{promo.redemption.credits_received} kredita
                               </div>
                               <div className="text-gray-400 text-xs">
-                                {new Date(promo.redemption.redeemed_at).toLocaleDateString('sr-RS')} {new Date(promo.redemption.redeemed_at).toLocaleTimeString('sr-RS')}
+                                {formatDateTimeShort(promo.redemption.redeemed_at)}
                               </div>
                             </div>
                           </div>
@@ -654,7 +655,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                                       +{redemption.credits_received} kredita
                                     </div>
                                     <div className="text-gray-400 text-xs">
-                                      {new Date(redemption.redeemed_at).toLocaleDateString('sr-RS')} {new Date(redemption.redeemed_at).toLocaleTimeString('sr-RS')}
+                                      {formatDateTimeShort(redemption.redeemed_at)}
                                     </div>
                                   </div>
                                 </div>
@@ -791,7 +792,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                       <div className="grid grid-cols-2 gap-2 text-sm text-gray-400 mb-3">
                         <div>Telefon: {user.phone || 'N/A'}</div>
                         <div>Lokacija: {user.location || 'N/A'}</div>
-                        <div>Kreiran: {new Date(user.created_at).toLocaleDateString('sr-RS')}</div>
+                        <div>Kreiran: {formatDate(user.created_at)}</div>
                       </div>
                       <div className="flex gap-2">
                         <button

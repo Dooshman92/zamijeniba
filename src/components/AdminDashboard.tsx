@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
+import { formatDate } from '../lib/dateUtils';
 
 type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'premium' | 'swaps' | 'inquiries';
 
@@ -626,7 +627,7 @@ export default function AdminDashboard() {
                           <span className="font-semibold text-gray-900">{user.credits}</span>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">
-                          {new Date(user.created_at).toLocaleDateString('sr-RS')}
+                          {formatDate(user.created_at)}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-2">
@@ -921,7 +922,7 @@ export default function AdminDashboard() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">
-                          {new Date(car.created_at).toLocaleDateString('sr-RS')}
+                          {formatDate(car.created_at)}
                         </td>
                       </tr>
                     ))}
