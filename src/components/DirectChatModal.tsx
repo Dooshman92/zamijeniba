@@ -376,7 +376,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   }
 
   const chatContent = (
-    <div className="backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-lg w-full h-full flex flex-col shadow-2xl">
+    <div className="backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-lg w-full h-full flex flex-col shadow-2xl overflow-hidden">
         <div className="flex-shrink-0 relative p-4 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
           {!embedded && (
             <button
