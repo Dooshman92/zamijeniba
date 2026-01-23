@@ -22,6 +22,7 @@ export interface Car {
   color: string;
   transmission: string;
   drive_type?: string;
+  kilowatts?: number;
   body_condition: number;
   mechanical_condition: number;
   interior_condition: number;
@@ -31,6 +32,12 @@ export interface Car {
   seats: number;
   location: string;
   status: 'active' | 'inactive' | 'hidden';
+  damaged?: boolean;
+  priority_score?: number;
+  is_featured?: boolean;
+  featured_until?: string;
+  view_count?: number;
+  last_promoted_at?: string;
   xenon_lights?: boolean;
   heated_seats?: boolean;
   leather_seats?: boolean;
