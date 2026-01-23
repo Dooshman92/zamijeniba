@@ -18,9 +18,10 @@ interface Conversation {
 interface InboxModalProps {
   onClose: () => void;
   initialConversationId?: string | null;
+  onViewSwapOffer?: (offerId: string) => void;
 }
 
-export function InboxModal({ onClose, initialConversationId }: InboxModalProps) {
+export function InboxModal({ onClose, initialConversationId, onViewSwapOffer }: InboxModalProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -205,6 +206,7 @@ export function InboxModal({ onClose, initialConversationId }: InboxModalProps) 
           fetchConversations();
         }}
         onClose={onClose}
+        onViewSwapOffer={onViewSwapOffer}
       />
     );
   }

@@ -343,10 +343,11 @@ export function ChatWindow({ conversationId, onBack, onClose, onViewSwapOffer }:
                             <p className="text-sm break-words text-gray-900 whitespace-pre-line mb-3">{message.content}</p>
                             <button
                               onClick={() => {
-                                onClose();
-                                window.location.href = '#swap-offers';
+                                if (onViewSwapOffer) {
+                                  onViewSwapOffer(message.swap_offer_id!);
+                                }
                               }}
-                              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 text-sm"
+                              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                             >
                               Pogledaj ponudu
                             </button>

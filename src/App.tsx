@@ -754,6 +754,14 @@ function App() {
               fetchUnreadCount();
             }}
             initialConversationId={selectedConversationId}
+            onViewSwapOffer={(offerId) => {
+              setShowInbox(false);
+              setSelectedConversationId(null);
+              setActiveTab('offers');
+              setTimeout(() => {
+                document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            }}
           />
         )}
 
