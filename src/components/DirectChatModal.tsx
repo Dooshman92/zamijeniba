@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { X, Send, User, Phone, Mail, Image as ImageIcon, ExternalLink, Car as CarIcon } from 'lucide-react';
 import { supabase, Message, UserProfile, Car } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
+import { CarDetailModal } from './CarDetailModal';
 
 interface DirectChatModalProps {
   conversationId: string;
@@ -14,12 +15,13 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [otherUserProfile, setOtherUserProfile] = useState<UserProfile | null>(null);
-  const [carInfo, setCarInfo] = useState<{ brand: string; model: string; year: number; image_url: string } | null>(null);
+  const [carInfo, setCarInfo] = useState<{ id: string; brand: string; model: string; year: number; image_url: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSwapAccepted, setIsSwapAccepted] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedCarId, setSelectedCarId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
@@ -92,27 +94,23 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   };
 
   const loadCarInfo = async () => {
-    const { data: conversationData } = await supabase
-      .from('conversations')
-      .select('car_id')
-      .eq('id', conversationId)
+    const { data: carData } = await supabase
+      .from('cars')
+      .select('id, brand, model, year, image_url')
+      .eq('user_id', otherUserId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
-    if (conversationData?.car_id) {
-      const { data: carData } = await supabase
-        .from('cars')
-        .select('brand, model, year, image_url')
-        .eq('id', conversationData.car_id)
-        .maybeSingle();
-
-      if (carData) {
-        setCarInfo({
-          brand: carData.brand,
-          model: carData.model,
-          year: carData.year,
-          image_url: carData.image_url
-        });
-      }
+    if (carData) {
+      setCarInfo({
+        id: carData.id,
+        brand: carData.brand,
+        model: carData.model,
+        year: carData.year,
+        image_url: carData.image_url
+      });
     }
   };
 
@@ -336,11 +334,20 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
               </div>
 
               {carInfo && (
-                <img
-                  src={carInfo.image_url}
-                  alt={`${carInfo.brand} ${carInfo.model}`}
-                  className="w-16 h-12 object-cover rounded-lg border border-white/20 flex-shrink-0"
-                />
+                <button
+                  onClick={() => setSelectedCarId(carInfo.id)}
+                  className="group relative flex-shrink-0"
+                  title="Vidi detalje auta"
+                >
+                  <img
+                    src={carInfo.image_url}
+                    alt={`${carInfo.brand} ${carInfo.model}`}
+                    className="w-16 h-12 object-cover rounded-lg border border-white/20 transition-all duration-300 group-hover:scale-105 group-hover:border-cyan-500/50"
+                  />
+                  <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/20 rounded-lg transition-all duration-300 flex items-center justify-center">
+                    <ExternalLink className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </button>
               )}
             </div>
           )}
@@ -457,14 +464,32 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   );
 
   if (embedded) {
-    return chatContent;
+    return (
+      <>
+        {chatContent}
+        {selectedCarId && (
+          <CarDetailModal
+            carId={selectedCarId}
+            onClose={() => setSelectedCarId(null)}
+          />
+        )}
+      </>
+    );
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full h-[90vh]">
-        {chatContent}
+    <>
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full h-[90vh]">
+          {chatContent}
+        </div>
       </div>
-    </div>
+      {selectedCarId && (
+        <CarDetailModal
+          carId={selectedCarId}
+          onClose={() => setSelectedCarId(null)}
+        />
+      )}
+    </>
   );
 }
