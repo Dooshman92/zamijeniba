@@ -384,16 +384,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   const chatContent = (
     <div className="h-full w-full flex flex-col backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-lg shadow-2xl">
       <div className="flex-shrink-0 relative p-4 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
-        {!embedded && (
-          <button
-            onClick={onClose}
-            className="absolute right-3 top-3 p-1.5 hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 group"
-          >
-            <X className="w-5 h-5 text-gray-400 group-hover:text-white" />
-          </button>
-        )}
-
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" style={{ paddingRight: embedded ? '0' : '3rem' }}>
           {otherUserProfile && (
             <>
             <div className="relative">
@@ -476,6 +467,16 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
             )}
           </div>
         </div>
+
+        {!embedded && (
+          <button
+            onClick={onClose}
+            className="absolute right-2 top-2 p-2.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-xl transition-all duration-300 hover:scale-110 group z-30 shadow-xl"
+            title="Zatvori"
+          >
+            <X className="w-6 h-6 text-red-400 group-hover:text-red-300" />
+          </button>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2">
