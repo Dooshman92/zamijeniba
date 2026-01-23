@@ -396,25 +396,7 @@ function App() {
                       <FileText className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => {
-                        setMessagingTab('messages');
-                        setShowInbox(true);
-                      }}
-                      className="relative backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
-                      title="Poruke"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      {inboxUnreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                          {inboxUnreadCount > 9 ? '9+' : inboxUnreadCount}
-                        </span>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMessagingTab('offers');
-                        setShowInbox(true);
-                      }}
+                      onClick={() => setShowInbox(true)}
                       className="relative backdrop-blur-md bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                       title="Ponude za zamjenu"
                     >
