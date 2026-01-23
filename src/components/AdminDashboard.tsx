@@ -193,7 +193,7 @@ export default function AdminDashboard() {
         .from('promo_codes')
         .select(`
           *,
-          creator:user_profiles!promo_codes_created_by_fkey(nickname),
+          creator:user_profiles!created_by(nickname),
           promo_code_redemptions(
             redeemed_at,
             user_profiles(nickname, email)
