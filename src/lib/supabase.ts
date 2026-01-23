@@ -161,6 +161,7 @@ export interface Message {
   is_read: boolean;
   private: boolean;
   message_type?: string;
+  image_url?: string;
   conversation_id?: string;
   created_at: string;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { X, Send, User, Phone, Mail } from 'lucide-react';
+import { X, Send, User, Phone, Mail, Image as ImageIcon } from 'lucide-react';
 import { supabase, Message, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 
@@ -16,7 +16,11 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   const [otherUserProfile, setOtherUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSwapAccepted, setIsSwapAccepted] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -125,15 +129,62 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+    const { error: uploadError, data } = await supabase.storage
+      .from('message-images')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error('Error uploading image:', uploadError);
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('message-images')
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  };
+
   const sendMessage = async () => {
-    if (!newMessage.trim() || !user) return;
+    if ((!newMessage.trim() && !selectedImage) || !user) return;
+
+    setUploading(true);
+
+    let imageUrl = null;
+    if (selectedImage) {
+      imageUrl = await uploadImage(selectedImage);
+      if (!imageUrl) {
+        alert('Greška pri uploadu slike');
+        setUploading(false);
+        return;
+      }
+    }
 
     const { error } = await supabase.from('messages').insert({
       conversation_id: conversationId,
       sender_id: user.id,
       receiver_id: otherUserId,
-      content: newMessage.trim(),
-      message_type: 'text',
+      content: newMessage.trim() || 'Slika',
+      message_type: imageUrl ? 'image' : 'text',
+      image_url: imageUrl,
     });
 
     if (error) {
@@ -141,7 +192,11 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
       alert('Greška pri slanju poruke');
     } else {
       setNewMessage('');
+      setSelectedImage(null);
+      setImagePreview(null);
     }
+
+    setUploading(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -158,7 +213,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
   if (loading) {
     const loadingContent = (
-      <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-3xl p-8 max-w-md w-full">
+      <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-lg p-8 max-w-md w-full">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-500"></div>
           <p className="text-gray-300">Učitavanje chata...</p>
@@ -178,49 +233,49 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   }
 
   const chatContent = (
-    <div className="backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-3xl w-full h-full flex flex-col shadow-2xl">
-        <div className="relative p-6 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
+    <div className="backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-lg w-full h-full flex flex-col shadow-2xl">
+        <div className="relative p-4 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
           {!embedded && (
             <button
               onClick={onClose}
-              className="absolute right-4 top-4 p-2 hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-110 group"
+              className="absolute right-3 top-3 p-1.5 hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 group"
             >
-              <X className="w-6 h-6 text-gray-400 group-hover:text-white" />
+              <X className="w-5 h-5 text-gray-400 group-hover:text-white" />
             </button>
           )}
 
           {otherUserProfile && (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <div className="relative">
                 {otherUserProfile.avatar_url ? (
                   <img
                     src={otherUserProfile.avatar_url}
                     alt={otherUserProfile.nickname || 'User'}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-cyan-500/50"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-cyan-500/50"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                    <User className="w-8 h-8 text-white" />
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <User className="w-6 h-6 text-white" />
                   </div>
                 )}
-                <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900"></div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
               </div>
 
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-lg font-bold text-white">
                   {otherUserProfile.nickname || 'Korisnik'}
                 </h2>
                 {isSwapAccepted && (
-                  <div className="flex flex-wrap gap-3 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-1">
                     {otherUserProfile.email && (
-                      <div className="flex items-center gap-2 text-sm text-gray-300">
-                        <Mail className="w-4 h-4 text-cyan-400" />
+                      <div className="flex items-center gap-1 text-xs text-gray-300">
+                        <Mail className="w-3 h-3 text-cyan-400" />
                         <span>{otherUserProfile.email}</span>
                       </div>
                     )}
                     {otherUserProfile.phone && (
-                      <div className="flex items-center gap-2 text-sm text-gray-300">
-                        <Phone className="w-4 h-4 text-green-400" />
+                      <div className="flex items-center gap-1 text-xs text-gray-300">
+                        <Phone className="w-3 h-3 text-green-400" />
                         <a href={`tel:${otherUserProfile.phone}`} className="hover:text-white transition-colors">
                           {otherUserProfile.phone}
                         </a>
@@ -233,15 +288,15 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?w=100')] bg-opacity-5">
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
-                  <Send className="w-10 h-10 text-white" />
+                <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-3 opacity-50">
+                  <Send className="w-8 h-8 text-white" />
                 </div>
-                <p className="text-gray-400 text-lg">Počnite razgovor</p>
-                <p className="text-gray-500 text-sm mt-2">Pošaljite prvu poruku</p>
+                <p className="text-gray-400 text-base">Počnite razgovor</p>
+                <p className="text-gray-500 text-sm mt-1">Pošaljite prvu poruku</p>
               </div>
             </div>
           ) : (
@@ -253,13 +308,23 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
                   className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} animate-fadeIn`}
                 >
                   <div
-                    className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+                    className={`max-w-[70%] rounded-lg px-3 py-2 ${
                       isMyMessage
-                        ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-br-sm'
-                        : 'bg-white/10 backdrop-blur-md text-gray-100 border border-white/10 rounded-bl-sm'
+                        ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white'
+                        : 'bg-white/10 backdrop-blur-md text-gray-100 border border-white/10'
                     }`}
                   >
-                    <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                    {message.image_url && (
+                      <img
+                        src={message.image_url}
+                        alt="Slika"
+                        className="rounded-lg mb-2 max-w-full cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(message.image_url, '_blank')}
+                      />
+                    )}
+                    {message.content && message.content !== 'Slika' && (
+                      <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                    )}
                     <p
                       className={`text-xs mt-1 ${
                         isMyMessage ? 'text-cyan-100' : 'text-gray-400'
@@ -275,27 +340,59 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-6 border-t border-white/10 bg-gradient-to-r from-gray-900/50 to-gray-800/50">
-          <div className="flex gap-3">
+        <div className="p-3 border-t border-white/10 bg-gradient-to-r from-gray-900/50 to-gray-800/50">
+          {imagePreview && (
+            <div className="mb-2 relative inline-block">
+              <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-white/20" />
+              <button
+                onClick={() => {
+                  setSelectedImage(null);
+                  setImagePreview(null);
+                }}
+                className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 hover:bg-red-600 transition-colors"
+              >
+                <X className="w-3 h-3 text-white" />
+              </button>
+            </div>
+          )}
+          <div className="flex gap-2 items-end">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageSelect}
+              accept="image/*"
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 p-2.5 rounded-lg transition-all"
+              title="Dodaj sliku"
+            >
+              <ImageIcon className="w-5 h-5 text-gray-400" />
+            </button>
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Napišite poruku..."
               rows={1}
-              className="flex-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all resize-none"
-              style={{ minHeight: '50px', maxHeight: '120px' }}
+              className="flex-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-lg px-3 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all resize-none text-sm"
+              style={{ minHeight: '42px', maxHeight: '100px' }}
             />
             <button
               onClick={sendMessage}
-              disabled={!newMessage.trim()}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold px-6 rounded-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-cyan-500/30"
+              disabled={(!newMessage.trim() && !selectedImage) || uploading}
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold px-4 py-2.5 rounded-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-cyan-500/30"
             >
-              <Send className="w-5 h-5" />
+              {uploading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            Pritisnite Enter za slanje • Shift + Enter za novi red
+          <p className="text-xs text-gray-500 mt-1.5 text-center">
+            Enter za slanje • Shift + Enter za novi red
           </p>
         </div>
     </div>
@@ -307,7 +404,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full h-[85vh]">
+      <div className="max-w-5xl w-full h-[90vh]">
         {chatContent}
       </div>
     </div>
