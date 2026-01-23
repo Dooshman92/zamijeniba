@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { SwapOffersPanel } from './SwapOffersPanel';
 import { DirectChatModal } from './DirectChatModal';
-import { useAuth } from '../lib/auth';
-import { getOrCreateConversation } from '../lib/messaging';
 
 interface MessagingCenterModalProps {
   onClose: () => void;
@@ -16,18 +14,6 @@ export function MessagingCenterModal({
   const [showDirectChat, setShowDirectChat] = useState(false);
   const [directChatConversationId, setDirectChatConversationId] = useState<string | null>(null);
   const [directChatOtherUserId, setDirectChatOtherUserId] = useState<string | null>(null);
-  const { user } = useAuth();
-
-  const handleOpenChat = async (userId: string, carId?: string) => {
-    if (!user) return;
-
-    const conversationId = await getOrCreateConversation(user.id, userId, carId);
-    if (conversationId) {
-      setDirectChatConversationId(conversationId);
-      setDirectChatOtherUserId(userId);
-      setShowDirectChat(true);
-    }
-  };
 
   if (showDirectChat && directChatConversationId && directChatOtherUserId) {
     return (
@@ -96,7 +82,6 @@ export function MessagingCenterModal({
               setDirectChatOtherUserId(otherUserId);
               setShowDirectChat(true);
             }}
-            onOpenChat={handleOpenChat}
           />
         </div>
       </div>

@@ -173,6 +173,7 @@ export interface SwapOffer {
   status: 'pending' | 'accepted' | 'rejected' | 'in_progress' | 'completed' | 'cancelled';
   message: string | null;
   additional_payment?: number;
+  conversation_id?: string | null;
   created_at: string;
 }
 

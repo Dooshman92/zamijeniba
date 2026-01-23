@@ -28,10 +28,9 @@ interface ConversationWithDetails {
 
 interface SwapOffersPanelProps {
   onAcceptOffer?: (conversationId: string, otherUserId: string) => void;
-  onOpenChat?: (userId: string, carId?: string) => void;
 }
 
-export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelProps) {
+export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
   const [offers, setOffers] = useState<SwapOfferWithDetails[]>([]);
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
@@ -137,6 +136,19 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
   const loadConversations = async () => {
     if (!user) return;
 
+    const { data: acceptedOffers } = await supabase
+      .from('swap_offers')
+      .select('conversation_id')
+      .eq('status', 'accepted')
+      .not('conversation_id', 'is', null);
+
+    if (!acceptedOffers || acceptedOffers.length === 0) {
+      setConversations([]);
+      return;
+    }
+
+    const offerConversationIds = acceptedOffers.map(o => o.conversation_id).filter(Boolean);
+
     const { data: participantData } = await supabase
       .from('conversation_participants')
       .select(`
@@ -149,20 +161,15 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
           last_message_at
         )
       `)
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .in('conversation_id', offerConversationIds);
 
-    if (!participantData) return;
-
-    const conversationsWithCarId = participantData.filter(
-      p => p.conversations && (p.conversations as any).car_id
-    );
-
-    if (conversationsWithCarId.length === 0) {
+    if (!participantData || participantData.length === 0) {
       setConversations([]);
       return;
     }
 
-    const conversationIds = conversationsWithCarId.map(p => p.conversation_id);
+    const conversationIds = participantData.map(p => p.conversation_id);
 
     const { data: otherParticipants } = await supabase
       .from('conversation_participants')
@@ -177,7 +184,7 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
       .order('created_at', { ascending: false });
 
     const conversationsMap = new Map();
-    conversationsWithCarId.forEach(p => {
+    participantData.forEach(p => {
       if (p.conversations) {
         conversationsMap.set(p.conversation_id, {
           id: (p.conversations as any).id,
@@ -220,8 +227,17 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
       .select('*')
       .in('id', carIds);
 
+    const { data: offerData } = await supabase
+      .from('swap_offers')
+      .select('*')
+      .in('conversation_id', conversationsList.map(c => c.id));
+
     conversationsList.forEach(conv => {
       conv.car = cars?.find(c => c.id === conv.car_id);
+      const offer = offerData?.find(o => o.conversation_id === conv.id);
+      if (offer) {
+        (conv as any).offer = offer;
+      }
     });
 
     conversationsList.sort((a, b) =>
@@ -259,9 +275,23 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
   const handleAcceptOffer = async (offer: SwapOfferWithDetails) => {
     if (!user || !offer.offeredCar?.user_id || !offer.targetCar) return;
 
+    const conversationId = await getOrCreateConversation(
+      user.id,
+      offer.offeredCar.user_id,
+      offer.targetCar.id
+    );
+
+    if (!conversationId) {
+      alert('Greška pri kreiranju konverzacije');
+      return;
+    }
+
     const { error } = await supabase
       .from('swap_offers')
-      .update({ status: 'accepted' })
+      .update({
+        status: 'accepted',
+        conversation_id: conversationId
+      })
       .eq('id', offer.id);
 
     if (error) {
@@ -270,18 +300,10 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
       return;
     }
 
-    const conversationId = await getOrCreateConversation(
-      user.id,
-      offer.offeredCar.user_id,
-      offer.targetCar.id
-    );
-
-    if (conversationId) {
-      loadOffers();
-      loadConversations();
-      if (onAcceptOffer) {
-        onAcceptOffer(conversationId, offer.offeredCar.user_id);
-      }
+    loadOffers();
+    loadConversations();
+    if (onAcceptOffer) {
+      onAcceptOffer(conversationId, offer.offeredCar.user_id);
     }
   };
 
@@ -329,11 +351,11 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
             {conversations.map((conv) => (
               <div
                 key={conv.id}
-                onClick={() => onOpenChat && onOpenChat(conv.other_user_id, conv.car_id)}
+                onClick={() => onAcceptOffer && onAcceptOffer(conv.id, conv.other_user_id)}
                 className={`backdrop-blur-md rounded-2xl p-4 transition-all cursor-pointer hover:scale-[1.02] ${
                   conv.unread_count > 0
-                    ? 'border-2 border-cyan-500/50 bg-cyan-500/10 hover:bg-cyan-500/20'
-                    : 'border border-white/10 bg-white/5 hover:border-cyan-500/30'
+                    ? 'border-2 border-green-500/50 bg-green-500/10 hover:bg-green-500/20'
+                    : 'border border-white/10 bg-white/5 hover:border-green-500/30'
                 }`}
               >
                 <div className="flex items-center gap-4">
@@ -354,6 +376,9 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
                           {conv.unread_count}
                         </span>
                       )}
+                      <span className="bg-green-500/20 text-green-400 text-xs font-bold rounded-full px-2 py-0.5 border border-green-500/30">
+                        Prihvaćeno
+                      </span>
                     </div>
                     {conv.car && (
                       <p className="text-xs text-cyan-400 mb-1">
@@ -364,7 +389,7 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
                       <p className="text-xs text-gray-400 truncate">{conv.last_message_content}</p>
                     )}
                   </div>
-                  <MessageSquare className="w-5 h-5 text-cyan-400 flex-shrink-0" />
+                  <MessageSquare className="w-5 h-5 text-green-400 flex-shrink-0" />
                 </div>
               </div>
             ))}
@@ -602,12 +627,12 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
               </div>
             )}
 
-            {onOpenChat && user && offer.offeredCar && offer.targetCar && offer.status === 'accepted' && (
+            {onAcceptOffer && user && offer.offeredCar && offer.targetCar && offer.status === 'accepted' && offer.conversation_id && (
               <div className="mt-6">
                 {offer.targetCar.user_id === user.id && offer.offeredCar.user_id && (
                   <button
-                    onClick={() => onOpenChat(offer.offeredCar!.user_id, offer.targetCar?.id)}
-                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/30"
+                    onClick={() => onAcceptOffer(offer.conversation_id!, offer.offeredCar!.user_id)}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
                   >
                     <MessageSquare className="w-5 h-5" />
                     Otvori chat sa @{offer.offeredOwnerProfile?.nickname || offer.offeredCar.user_email?.split('@')[0]}
@@ -615,8 +640,8 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
                 )}
                 {offer.offeredCar.user_id === user.id && offer.targetCar.user_id && (
                   <button
-                    onClick={() => onOpenChat(offer.targetCar!.user_id, offer.targetCar?.id)}
-                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/30"
+                    onClick={() => onAcceptOffer(offer.conversation_id!, offer.targetCar!.user_id)}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
                   >
                     <MessageSquare className="w-5 h-5" />
                     Otvori chat sa @{offer.targetOwnerProfile?.nickname || offer.targetCar.user_email?.split('@')[0]}
