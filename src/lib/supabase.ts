@@ -151,11 +151,17 @@ export interface Favorite {
 
 export interface Message {
   id: string;
-  swap_offer_id: string;
+  swap_offer_id?: string;
   sender_id: string;
   receiver_id: string;
   message: string;
+  content?: string;
+  topic: string;
+  extension: string;
   is_read: boolean;
+  private: boolean;
+  message_type?: string;
+  conversation_id?: string;
   created_at: string;
 }
 

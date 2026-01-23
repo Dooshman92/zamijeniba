@@ -30,7 +30,6 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
 
   const loadOtherUserProfile = async () => {
     try {
-      console.log('Loading profile for user:', otherUserId);
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-profile-by-id`;
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -43,10 +42,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
 
       if (response.ok) {
         const profile = await response.json();
-        console.log('Loaded profile:', profile);
         setOtherUserProfile(profile);
-      } else {
-        console.error('Failed to load profile, status:', response.status);
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
@@ -54,7 +50,6 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
   };
 
   const loadMessages = async () => {
-    console.log('Loading messages for conversation:', conversationId);
     const { data, error } = await supabase
       .from('messages')
       .select('*')
@@ -64,14 +59,12 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
     if (error) {
       console.error('Error loading messages:', error);
     } else if (data) {
-      console.log('Loaded messages:', data.length);
       setMessages(data);
     }
     setLoading(false);
   };
 
   const subscribeToMessages = () => {
-    console.log('Subscribing to messages for conversation:', conversationId);
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
@@ -83,14 +76,12 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
           filter: `conversation_id=eq.${conversationId}`,
         },
         (payload) => {
-          console.log('New message received:', payload.new);
           setMessages((prev) => [...prev, payload.new as Message]);
         }
       )
       .subscribe();
 
     return () => {
-      console.log('Unsubscribing from messages');
       supabase.removeChannel(channel);
     };
   };
@@ -100,30 +91,25 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !user) {
-      console.log('Cannot send message: empty message or no user');
-      return;
-    }
-
-    console.log('Sending message:', {
-      conversation_id: conversationId,
-      sender_id: user.id,
-      receiver_id: otherUserId,
-      content: newMessage.trim(),
-    });
+    if (!newMessage.trim() || !user) return;
 
     const { error } = await supabase.from('messages').insert({
       conversation_id: conversationId,
       sender_id: user.id,
       receiver_id: otherUserId,
       content: newMessage.trim(),
+      topic: 'chat',
+      extension: 'phx_reply',
+      message: newMessage.trim(),
+      is_read: false,
+      private: false,
+      message_type: 'text',
     });
 
     if (error) {
       console.error('Error sending message:', error);
       alert('Greška pri slanju poruke');
     } else {
-      console.log('Message sent successfully');
       setNewMessage('');
     }
   };
