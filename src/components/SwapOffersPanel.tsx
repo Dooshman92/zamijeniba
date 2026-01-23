@@ -20,7 +20,6 @@ interface ConversationWithDetails {
   last_message_at: string;
   unread_count: number;
   other_user_id: string;
-  other_user_email: string;
   other_user_nickname: string | null;
   car?: Car;
   last_message_content?: string;
@@ -199,7 +198,6 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
           unread_count: p.unread_count,
           other_user_id: '',
           other_user_nickname: null,
-          other_user_email: '',
         });
       }
     });
@@ -249,19 +247,6 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
       new Date(b.last_message_at || b.updated_at).getTime() -
       new Date(a.last_message_at || a.updated_at).getTime()
     );
-
-    const otherUserIds = conversationsList.map(c => c.other_user_id).filter(Boolean);
-    if (otherUserIds.length > 0) {
-      const { data: emails } = await supabase
-        .from('user_profiles')
-        .select('id, email')
-        .in('id', otherUserIds);
-
-      conversationsList.forEach(conv => {
-        const profile = emails?.find(e => e.id === conv.other_user_id);
-        conv.other_user_email = profile?.email || '';
-      });
-    }
 
     setConversations(conversationsList);
   };
@@ -374,7 +359,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <p className={`text-white text-sm ${conv.unread_count > 0 ? 'font-black' : 'font-bold'}`}>
-                        @{conv.other_user_nickname || conv.other_user_email.split('@')[0]}
+                        @{conv.other_user_nickname || 'Korisnik'}
                       </p>
                       {conv.unread_count > 0 && (
                         <span className="bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 animate-pulse">
