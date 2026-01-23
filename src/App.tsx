@@ -507,7 +507,7 @@ function App() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 pb-20">
+        <div id="results-section" className="max-w-7xl mx-auto px-4 pb-20">
           {activeTab === 'cars' ? (
             <>
               {loading ? (

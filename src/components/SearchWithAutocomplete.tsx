@@ -17,6 +17,7 @@ interface Suggestion {
 export function SearchWithAutocomplete({ searchQuery, onSearchChange, cars }: SearchWithAutocompleteProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export function SearchWithAutocomplete({ searchQuery, onSearchChange, cars }: Se
   }, []);
 
   useEffect(() => {
+    setSelectedIndex(-1);
     if (!searchQuery.trim()) {
       setSuggestions([]);
       return;
@@ -86,6 +88,36 @@ export function SearchWithAutocomplete({ searchQuery, onSearchChange, cars }: Se
   const handleSuggestionClick = (value: string) => {
     onSearchChange(value);
     setShowSuggestions(false);
+    setSelectedIndex(-1);
+    scrollToResults();
+  };
+
+  const scrollToResults = () => {
+    const resultsElement = document.getElementById('results-section');
+    if (resultsElement) {
+      resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+        handleSuggestionClick(suggestions[selectedIndex].value);
+      } else if (searchQuery.trim()) {
+        setShowSuggestions(false);
+        scrollToResults();
+      }
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+    }
   };
 
   const getTypeLabel = (type: string) => {
@@ -116,6 +148,7 @@ export function SearchWithAutocomplete({ searchQuery, onSearchChange, cars }: Se
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
         onFocus={() => setShowSuggestions(true)}
+        onKeyDown={handleKeyDown}
         placeholder="Pretraži automobile (marka, model, godina, cijena...)"
         className="w-full pl-12 pr-4 py-4 backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
       />
@@ -138,7 +171,10 @@ export function SearchWithAutocomplete({ searchQuery, onSearchChange, cars }: Se
               <button
                 key={`${suggestion.type}-${suggestion.value}-${index}`}
                 onClick={() => handleSuggestionClick(suggestion.value)}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/10 rounded-xl transition-colors text-left"
+                onMouseEnter={() => setSelectedIndex(index)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors text-left ${
+                  selectedIndex === index ? 'bg-cyan-500/20 border border-cyan-500/30' : 'hover:bg-white/10'
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-semibold px-2 py-1 rounded border ${getTypeColor(suggestion.type)}`}>

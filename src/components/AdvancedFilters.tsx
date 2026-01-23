@@ -25,6 +25,13 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
   const [showFilters, setShowFilters] = useState(false);
   const currentYear = new Date().getFullYear();
 
+  const scrollToResults = () => {
+    const resultsElement = document.getElementById('results-section');
+    if (resultsElement) {
+      resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const hasActiveFilters =
     filters.location ||
     filters.brand ||
@@ -41,6 +48,13 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
       ...filters,
       [key]: value,
     });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      setShowFilters(false);
+      scrollToResults();
+    }
   };
 
   return (
@@ -99,6 +113,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
               <select
                 value={filters.location}
                 onChange={(e) => handleFilterChange('location', e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
               >
                 <option value="">Sve lokacije</option>
@@ -117,6 +132,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
               <select
                 value={filters.brand}
                 onChange={(e) => handleFilterChange('brand', e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
               >
                 <option value="">Sve marke</option>
@@ -136,6 +152,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                 type="number"
                 value={filters.minYear || ''}
                 onChange={(e) => handleFilterChange('minYear', parseInt(e.target.value) || 1990)}
+                onKeyDown={handleKeyDown}
                 placeholder="1990"
                 min="1990"
                 max={currentYear}
@@ -151,6 +168,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                 type="number"
                 value={filters.maxYear === currentYear ? '' : filters.maxYear}
                 onChange={(e) => handleFilterChange('maxYear', parseInt(e.target.value) || currentYear)}
+                onKeyDown={handleKeyDown}
                 placeholder={currentYear.toString()}
                 min="1990"
                 max={currentYear}
@@ -166,6 +184,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                 type="number"
                 value={filters.minPrice || ''}
                 onChange={(e) => handleFilterChange('minPrice', parseInt(e.target.value) || 0)}
+                onKeyDown={handleKeyDown}
                 placeholder="0"
                 min="0"
                 step="100"
@@ -181,6 +200,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                 type="number"
                 value={filters.maxPrice === 1000000 ? '' : filters.maxPrice}
                 onChange={(e) => handleFilterChange('maxPrice', parseInt(e.target.value) || 1000000)}
+                onKeyDown={handleKeyDown}
                 placeholder="1000000"
                 min="0"
                 step="100"
@@ -195,6 +215,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
               <select
                 value={filters.fuelType}
                 onChange={(e) => handleFilterChange('fuelType', e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
               >
                 <option value="">Svi tipovi</option>
@@ -213,6 +234,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
               <select
                 value={filters.transmission}
                 onChange={(e) => handleFilterChange('transmission', e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
               >
                 <option value="">Svi tipovi</option>
@@ -239,7 +261,13 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
 
           <div className="sticky bottom-0 bg-gray-900/95 backdrop-blur-md p-6 pt-4 border-t border-white/10">
             <button
-              onClick={() => setShowFilters(false)}
+              onClick={() => {
+                setShowFilters(false);
+                const resultsElement = document.getElementById('results-section');
+                if (resultsElement) {
+                  resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
               className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-all"
             >
               Primijeni filtere
