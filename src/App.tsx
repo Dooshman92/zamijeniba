@@ -35,11 +35,9 @@ function App() {
   const [showMyAds, setShowMyAds] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showInbox, setShowInbox] = useState(false);
-  const [messagingTab, setMessagingTab] = useState<'messages' | 'offers'>('messages');
   const [showPromoCode, setShowPromoCode] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [showDirectChat, setShowDirectChat] = useState(false);
   const [directChatConversationId, setDirectChatConversationId] = useState<string | null>(null);
   const [directChatOtherUserId, setDirectChatOtherUserId] = useState<string | null>(null);
@@ -798,16 +796,10 @@ function App() {
           <MessagingCenterModal
             onClose={() => {
               setShowInbox(false);
-              setSelectedConversationId(null);
-              setMessagingTab('messages');
               fetchUnreadCount();
             }}
-            initialConversationId={selectedConversationId}
-            initialTab={messagingTab}
             onViewSwapOffer={(offerId) => {
               setShowInbox(false);
-              setSelectedConversationId(null);
-              setMessagingTab('messages');
               setActiveTab('offers');
               setTimeout(() => {
                 document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
