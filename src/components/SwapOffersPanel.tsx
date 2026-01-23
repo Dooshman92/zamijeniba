@@ -317,6 +317,8 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
     );
   }
 
+  const pendingOffers = offers.filter(o => o.status === 'pending' || o.status === 'rejected');
+
   if (offers.length === 0) {
     return (
       <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
@@ -391,16 +393,17 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
         </div>
       )}
 
-      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
-            <ArrowRightLeft className="w-4 h-4 text-white" />
-          </div>
-          Ponude za zamjenu
-        </h2>
+      {pendingOffers.length > 0 && (
+        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+              <ArrowRightLeft className="w-4 h-4 text-white" />
+            </div>
+            Ponude za zamjenu
+          </h2>
 
-        <div className="space-y-3">
-        {offers.map((offer) => (
+          <div className="space-y-3">
+          {pendingOffers.map((offer) => (
           <div
             key={offer.id}
             className={`backdrop-blur-md rounded-xl p-3 transition-all border ${
@@ -686,8 +689,9 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
             )}
           </div>
         ))}
-      </div>
-      </div>
+        </div>
+        </div>
+      )}
 
       {selectedCar && (
         <CarDetailModal
