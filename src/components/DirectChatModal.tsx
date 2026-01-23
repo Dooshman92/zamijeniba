@@ -7,9 +7,10 @@ interface DirectChatModalProps {
   conversationId: string;
   otherUserId: string;
   onClose: () => void;
+  embedded?: boolean;
 }
 
-export function DirectChatModal({ conversationId, otherUserId, onClose }: DirectChatModalProps) {
+export function DirectChatModal({ conversationId, otherUserId, onClose, embedded = false }: DirectChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [otherUserProfile, setOtherUserProfile] = useState<UserProfile | null>(null);
@@ -156,28 +157,37 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
   };
 
   if (loading) {
+    const loadingContent = (
+      <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-3xl p-8 max-w-md w-full">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-500"></div>
+          <p className="text-gray-300">Učitavanje chata...</p>
+        </div>
+      </div>
+    );
+
+    if (embedded) {
+      return <div className="flex items-center justify-center h-full">{loadingContent}</div>;
+    }
+
     return (
       <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
-        <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-3xl p-8 max-w-md w-full">
-          <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-500"></div>
-            <p className="text-gray-300">Učitavanje chata...</p>
-          </div>
-        </div>
+        {loadingContent}
       </div>
     );
   }
 
-  return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
-      <div className="backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-3xl max-w-4xl w-full h-[85vh] flex flex-col shadow-2xl">
+  const chatContent = (
+    <div className="backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-3xl w-full h-full flex flex-col shadow-2xl">
         <div className="relative p-6 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 p-2 hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-110 group"
-          >
-            <X className="w-6 h-6 text-gray-400 group-hover:text-white" />
-          </button>
+          {!embedded && (
+            <button
+              onClick={onClose}
+              className="absolute right-4 top-4 p-2 hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-110 group"
+            >
+              <X className="w-6 h-6 text-gray-400 group-hover:text-white" />
+            </button>
+          )}
 
           {otherUserProfile && (
             <div className="flex items-center gap-4">
@@ -288,6 +298,17 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
             Pritisnite Enter za slanje • Shift + Enter za novi red
           </p>
         </div>
+    </div>
+  );
+
+  if (embedded) {
+    return chatContent;
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
+      <div className="max-w-4xl w-full h-[85vh]">
+        {chatContent}
       </div>
     </div>
   );

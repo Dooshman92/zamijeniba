@@ -14,9 +14,10 @@ interface SwapOfferWithDetails extends SwapOffer {
 
 interface SwapOffersPanelProps {
   onAcceptOffer?: (conversationId: string, otherUserId: string) => void;
+  onOpenChat?: (userId: string, carId?: string) => void;
 }
 
-export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
+export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelProps) {
   const [offers, setOffers] = useState<SwapOfferWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
@@ -298,8 +299,31 @@ export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
               </div>
             )}
 
+            {onOpenChat && user && offer.offeredCar && offer.targetCar && (
+              <div className="mt-6">
+                {offer.targetCar.user_id === user.id && offer.offeredCar.user_id && (
+                  <button
+                    onClick={() => onOpenChat(offer.offeredCar!.user_id, offer.targetCar?.id)}
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/30"
+                  >
+                    <MessageSquare className="w-5 h-5" />
+                    Otvori chat sa @{offer.offeredOwnerProfile?.nickname || offer.offeredCar.user_email?.split('@')[0]}
+                  </button>
+                )}
+                {offer.offeredCar.user_id === user.id && offer.targetCar.user_id && (
+                  <button
+                    onClick={() => onOpenChat(offer.targetCar!.user_id, offer.targetCar?.id)}
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/30"
+                  >
+                    <MessageSquare className="w-5 h-5" />
+                    Otvori chat sa @{offer.targetOwnerProfile?.nickname || offer.targetCar.user_email?.split('@')[0]}
+                  </button>
+                )}
+              </div>
+            )}
+
             {offer.status === 'pending' && offer.targetCar && user && offer.targetCar.user_id === user.id && (
-              <div className="mt-6 flex gap-3">
+              <div className="mt-4 flex gap-3">
                 <button
                   onClick={() => updateOfferStatus(offer.id, 'rejected')}
                   className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-red-500/30"
