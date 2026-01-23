@@ -312,7 +312,8 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       .single();
 
     if (carError || !carData) {
-      alert('Greška pri dodavanju automobila');
+      console.error('Error creating car:', carError);
+      alert('Greška pri dodavanju automobila: ' + (carError?.message || 'Nepoznata greška'));
       setLoading(false);
       return;
     }

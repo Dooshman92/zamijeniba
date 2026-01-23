@@ -176,6 +176,11 @@ function App() {
       .order('priority_score', { ascending: false })
       .order('created_at', { ascending: false });
 
+    console.log('loadCars result:', { error, dataLength: data?.length });
+    if (error) {
+      console.error('loadCars error details:', error);
+    }
+
     if (!error && data) {
       const carIds = data.map(car => car.user_id).filter(Boolean);
       const { data: profiles } = await supabase
