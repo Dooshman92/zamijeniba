@@ -263,12 +263,16 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
   };
 
   const handleAcceptOffer = async (offer: SwapOfferWithDetails) => {
-    if (!user || !offer.offeredCar?.user_id || !offer.targetCar) return;
+    if (!user || !offer.offeredCar?.user_id || !offer.targetCar?.user_id) return;
+
+    const otherUserId = user.id === offer.targetCar.user_id
+      ? offer.offeredCar.user_id
+      : offer.targetCar.user_id;
 
     const conversationId = await getOrCreateConversation(
       user.id,
-      offer.offeredCar.user_id,
-      offer.targetCar.id
+      otherUserId,
+      offer.car_id
     );
 
     if (!conversationId) {
@@ -293,7 +297,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
     loadOffers();
     loadConversations();
     if (onAcceptOffer) {
-      onAcceptOffer(conversationId, offer.offeredCar.user_id);
+      onAcceptOffer(conversationId, otherUserId);
     }
   };
 
