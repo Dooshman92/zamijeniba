@@ -47,16 +47,17 @@ export function MessagingCenterModal({
                 setDirectChatConversationId(null);
                 setDirectChatOtherUserId(null);
               }}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              <span className="font-semibold">Nazad na ponude</span>
+              <span className="font-semibold">Nazad</span>
             </button>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+              title="Zatvori"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
