@@ -19,9 +19,10 @@ interface InboxModalProps {
   onClose: () => void;
   initialConversationId?: string | null;
   onViewSwapOffer?: (offerId: string) => void;
+  onSwitchToOffers?: () => void;
 }
 
-export function InboxModal({ onClose, initialConversationId, onViewSwapOffer }: InboxModalProps) {
+export function InboxModal({ onClose, initialConversationId, onViewSwapOffer, onSwitchToOffers }: InboxModalProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -211,21 +212,22 @@ export function InboxModal({ onClose, initialConversationId, onViewSwapOffer }: 
     );
   }
 
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[600px] flex flex-col">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <MessageCircle className="w-6 h-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Poruke</h2>
-          </div>
+  const content = (
+    <>
+      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <MessageCircle className="w-6 h-6 text-blue-600" />
+          <h2 className="text-2xl font-bold text-gray-900">Poruke</h2>
+        </div>
+        {!onSwitchToOffers && (
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
-        </div>
+        )}
+      </div>
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
@@ -300,6 +302,17 @@ export function InboxModal({ onClose, initialConversationId, onViewSwapOffer }: 
             </div>
           )}
         </div>
+    </>
+  );
+
+  if (onSwitchToOffers) {
+    return content;
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[600px] flex flex-col">
+        {content}
       </div>
     </div>
   );

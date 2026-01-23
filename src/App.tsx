@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, MessageCircle, Gift } from 'lucide-react';
+import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, MessageCircle, Gift, ArrowRightLeft } from 'lucide-react';
 import { Car, supabase, UserProfile } from './lib/supabase';
 import { useAuth } from './lib/auth';
 import { initializeStorage } from './lib/storage';
@@ -15,7 +15,7 @@ import { PremiumModal } from './components/PremiumModal';
 import { LiveInquiryModal } from './components/LiveInquiryModal';
 import { MyAdsModal } from './components/MyAdsModal';
 import { AdminPanel } from './components/AdminPanel';
-import { InboxModal } from './components/InboxModal';
+import { MessagingCenterModal } from './components/MessagingCenterModal';
 import { PromoCodeModal } from './components/PromoCodeModal';
 import { DirectChatModal } from './components/DirectChatModal';
 import { Logo } from './components/Logo';
@@ -35,6 +35,7 @@ function App() {
   const [showMyAds, setShowMyAds] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showInbox, setShowInbox] = useState(false);
+  const [messagingTab, setMessagingTab] = useState<'messages' | 'offers'>('messages');
   const [showPromoCode, setShowPromoCode] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -377,7 +378,10 @@ function App() {
                       <FileText className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => setShowInbox(true)}
+                      onClick={() => {
+                        setMessagingTab('messages');
+                        setShowInbox(true);
+                      }}
                       className="relative backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                       title="Poruke"
                     >
@@ -387,6 +391,16 @@ function App() {
                           {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                       )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMessagingTab('offers');
+                        setShowInbox(true);
+                      }}
+                      className="backdrop-blur-md bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      title="Ponude za zamjenu"
+                    >
+                      <ArrowRightLeft className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => setShowProfileEdit(true)}
@@ -757,16 +771,19 @@ function App() {
         )}
 
         {showInbox && user && (
-          <InboxModal
+          <MessagingCenterModal
             onClose={() => {
               setShowInbox(false);
               setSelectedConversationId(null);
+              setMessagingTab('messages');
               fetchUnreadCount();
             }}
             initialConversationId={selectedConversationId}
+            initialTab={messagingTab}
             onViewSwapOffer={(offerId) => {
               setShowInbox(false);
               setSelectedConversationId(null);
+              setMessagingTab('messages');
               setActiveTab('offers');
               setTimeout(() => {
                 document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
