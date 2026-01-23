@@ -42,7 +42,7 @@ interface Car {
 interface PromoCode {
   id: string;
   code: string;
-  credits: number;
+  credits_reward: number;
   is_active: boolean;
   created_by: string;
   created_at: string;
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
         .from('promo_codes')
         .select(`
           *,
-          user_profiles!promo_codes_created_by_fkey(nickname),
+          user_profiles!created_by(nickname),
           promo_code_redemptions(
             redeemed_at,
             user_profiles(nickname, email)
@@ -298,7 +298,8 @@ export default function AdminDashboard() {
         .from('promo_codes')
         .insert({
           code,
-          credits,
+          credits_reward: credits,
+          description: `${credits} kredita`,
           created_by: user!.id,
           is_active: true
         });
@@ -989,7 +990,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="space-y-2 mb-3">
                       <p className="text-sm text-gray-600">
-                        Krediti: <span className="font-semibold text-gray-900">{code.credits}</span>
+                        Krediti: <span className="font-semibold text-gray-900">{code.credits_reward}</span>
                       </p>
                       <p className="text-sm text-gray-600">
                         Kreirao: <span className="font-medium text-gray-900">{code.user_profiles?.nickname}</span>
