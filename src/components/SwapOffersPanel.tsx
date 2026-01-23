@@ -13,6 +13,19 @@ interface SwapOfferWithDetails extends SwapOffer {
   offeredOwnerProfile?: UserProfile;
 }
 
+interface ConversationWithDetails {
+  id: string;
+  car_id: string;
+  updated_at: string;
+  last_message_at: string;
+  unread_count: number;
+  other_user_id: string;
+  other_user_email: string;
+  other_user_nickname: string | null;
+  car?: Car;
+  last_message_content?: string;
+}
+
 interface SwapOffersPanelProps {
   onAcceptOffer?: (conversationId: string, otherUserId: string) => void;
   onOpenChat?: (userId: string, carId?: string) => void;
@@ -20,6 +33,7 @@ interface SwapOffersPanelProps {
 
 export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelProps) {
   const [offers, setOffers] = useState<SwapOfferWithDetails[]>([]);
+  const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [selectedUserProfile, setSelectedUserProfile] = useState<{ userId: string; userEmail: string } | null>(null);
@@ -27,7 +41,41 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
 
   useEffect(() => {
     loadOffers();
-  }, []);
+    loadConversations();
+
+    if (!user) return;
+
+    const messagesChannel = supabase
+      .channel('swap-offers-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+        },
+        () => {
+          loadConversations();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'conversation_participants',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          loadConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messagesChannel);
+    };
+  }, [user]);
 
   const loadOffers = async () => {
     const { data: offersData, error } = await supabase
@@ -86,6 +134,109 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
     setLoading(false);
   };
 
+  const loadConversations = async () => {
+    if (!user) return;
+
+    const { data: participantData } = await supabase
+      .from('conversation_participants')
+      .select(`
+        conversation_id,
+        unread_count,
+        conversations (
+          id,
+          car_id,
+          updated_at,
+          last_message_at
+        )
+      `)
+      .eq('user_id', user.id);
+
+    if (!participantData) return;
+
+    const conversationsWithCarId = participantData.filter(
+      p => p.conversations && (p.conversations as any).car_id
+    );
+
+    if (conversationsWithCarId.length === 0) {
+      setConversations([]);
+      return;
+    }
+
+    const conversationIds = conversationsWithCarId.map(p => p.conversation_id);
+
+    const { data: otherParticipants } = await supabase
+      .from('conversation_participants')
+      .select('conversation_id, user_id, user_profiles(id, nickname)')
+      .in('conversation_id', conversationIds)
+      .neq('user_id', user.id);
+
+    const { data: lastMessages } = await supabase
+      .from('messages')
+      .select('conversation_id, content, created_at')
+      .in('conversation_id', conversationIds)
+      .order('created_at', { ascending: false });
+
+    const conversationsMap = new Map();
+    conversationsWithCarId.forEach(p => {
+      if (p.conversations) {
+        conversationsMap.set(p.conversation_id, {
+          id: (p.conversations as any).id,
+          car_id: (p.conversations as any).car_id,
+          updated_at: (p.conversations as any).updated_at,
+          last_message_at: (p.conversations as any).last_message_at,
+          unread_count: p.unread_count,
+        });
+      }
+    });
+
+    otherParticipants?.forEach(op => {
+      const conv = conversationsMap.get(op.conversation_id);
+      if (conv) {
+        conv.other_user_id = op.user_id;
+        conv.other_user_nickname = op.user_profiles ? (op.user_profiles as any).nickname : null;
+      }
+    });
+
+    const messagesByConversation = new Map();
+    lastMessages?.forEach(msg => {
+      if (!messagesByConversation.has(msg.conversation_id)) {
+        messagesByConversation.set(msg.conversation_id, msg.content);
+      }
+    });
+
+    const conversationsList = Array.from(conversationsMap.values()).map(conv => ({
+      ...conv,
+      last_message_content: messagesByConversation.get(conv.id) || '',
+    }));
+
+    const carIds = conversationsList.map(c => c.car_id).filter(Boolean);
+    const { data: cars } = await supabase
+      .from('cars')
+      .select('*')
+      .in('id', carIds);
+
+    conversationsList.forEach(conv => {
+      conv.car = cars?.find(c => c.id === conv.car_id);
+    });
+
+    conversationsList.sort((a, b) =>
+      new Date(b.last_message_at || b.updated_at).getTime() -
+      new Date(a.last_message_at || a.updated_at).getTime()
+    );
+
+    const { data: emails } = await supabase
+      .from('user_profiles')
+      .select('id, email')
+      .in('id', conversationsList.map(c => c.other_user_id));
+
+    conversationsList.forEach(conv => {
+      const profile = emails?.find(e => e.id === conv.other_user_id);
+      conv.other_user_email = profile?.email || '';
+    });
+
+    setConversations(conversationsList);
+  };
+
   const updateOfferStatus = async (offerId: string, status: 'accepted' | 'rejected') => {
     const { error } = await supabase
       .from('swap_offers')
@@ -119,6 +270,7 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
 
     if (conversationId) {
       loadOffers();
+      loadConversations();
       if (onAcceptOffer) {
         onAcceptOffer(conversationId, offer.offeredCar.user_id);
       }
@@ -155,15 +307,72 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
   }
 
   return (
-    <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-8">
-      <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
-        <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl">
-          <ArrowRightLeft className="w-6 h-6 text-white" />
-        </div>
-        Ponude za zamjenu
-      </h2>
+    <div className="space-y-8">
+      {conversations.length > 0 && (
+        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-8">
+          <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl">
+              <MessageSquare className="w-6 h-6 text-white" />
+            </div>
+            Poruke o ponudama
+          </h2>
 
-      <div className="space-y-6">
+          <div className="space-y-3">
+            {conversations.map((conv) => (
+              <div
+                key={conv.id}
+                onClick={() => onOpenChat && onOpenChat(conv.other_user_id, conv.car_id)}
+                className={`backdrop-blur-md rounded-2xl p-4 transition-all cursor-pointer hover:scale-[1.02] ${
+                  conv.unread_count > 0
+                    ? 'border-2 border-cyan-500/50 bg-cyan-500/10 hover:bg-cyan-500/20'
+                    : 'border border-white/10 bg-white/5 hover:border-cyan-500/30'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  {conv.car && (
+                    <img
+                      src={conv.car.image_url}
+                      alt={conv.car.brand}
+                      className="w-20 h-16 object-cover rounded-lg"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-bold text-white text-sm">
+                        @{conv.other_user_nickname || conv.other_user_email.split('@')[0]}
+                      </p>
+                      {conv.unread_count > 0 && (
+                        <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 animate-pulse">
+                          {conv.unread_count}
+                        </span>
+                      )}
+                    </div>
+                    {conv.car && (
+                      <p className="text-xs text-cyan-400 mb-1">
+                        {conv.car.brand} {conv.car.model} ({conv.car.year})
+                      </p>
+                    )}
+                    {conv.last_message_content && (
+                      <p className="text-xs text-gray-400 truncate">{conv.last_message_content}</p>
+                    )}
+                  </div>
+                  <MessageSquare className="w-5 h-5 text-cyan-400 flex-shrink-0" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-8">
+        <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
+          <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl">
+            <ArrowRightLeft className="w-6 h-6 text-white" />
+          </div>
+          Ponude za zamjenu
+        </h2>
+
+        <div className="space-y-6">
         {offers.map((offer) => (
           <div
             key={offer.id}
@@ -444,6 +653,7 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
           onClose={() => setSelectedUserProfile(null)}
         />
       )}
+      </div>
     </div>
   );
 }

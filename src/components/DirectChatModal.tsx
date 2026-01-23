@@ -27,6 +27,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
     loadOtherUserProfile();
     loadMessages();
     checkSwapStatus();
+    markAsRead();
     const cleanup = subscribeToMessages();
     return cleanup;
   }, [conversationId, otherUserId]);
@@ -88,6 +89,19 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
     }
   };
 
+  const markAsRead = async () => {
+    if (!user) return;
+
+    await supabase
+      .from('conversation_participants')
+      .update({
+        unread_count: 0,
+        last_read_at: new Date().toISOString(),
+      })
+      .eq('conversation_id', conversationId)
+      .eq('user_id', user.id);
+  };
+
   const loadMessages = async () => {
     const { data, error } = await supabase
       .from('messages')
@@ -116,6 +130,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
         },
         (payload) => {
           setMessages((prev) => [...prev, payload.new as Message]);
+          markAsRead();
         }
       )
       .subscribe();
