@@ -545,70 +545,46 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
             )}
             {isOwnCar && (
               <div className="space-y-4">
-                {userProfile?.is_premium && getRemainingPremiumTime() && (
-                  <div className={`backdrop-blur-md rounded-xl p-6 border-2 ${
-                    getRemainingPremiumTime()?.expired
-                      ? 'bg-red-500/10 border-red-500/30'
-                      : 'bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30'
-                  }`}>
+                {userProfile?.is_premium && getRemainingPremiumTime() && !getRemainingPremiumTime()?.expired && (
+                  <div className="backdrop-blur-md rounded-xl p-6 border-2 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          getRemainingPremiumTime()?.expired
-                            ? 'bg-red-500/20'
-                            : 'bg-gradient-to-br from-yellow-500 to-amber-600'
-                        }`}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-yellow-500 to-amber-600">
                           <Crown className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h4 className={`font-bold text-lg ${
-                            getRemainingPremiumTime()?.expired
-                              ? 'text-red-400'
-                              : 'text-yellow-500'
-                          }`}>
+                          <h4 className="font-bold text-lg text-yellow-500">
                             Premium Oglas
                           </h4>
                           <p className="text-sm text-gray-400">
-                            {getRemainingPremiumTime()?.expired
-                              ? 'Vaš premium je istekao'
-                              : 'Vaš oglas je istaknut'}
+                            Vaš oglas je istaknut
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    {!getRemainingPremiumTime()?.expired && (
-                      <div className="backdrop-blur-md bg-white/5 rounded-lg p-4 border border-yellow-500/20">
-                        <div className="flex items-center gap-3 mb-3">
-                          <Clock className="w-5 h-5 text-yellow-400" />
-                          <p className="text-gray-300 font-semibold">Preostalo vrijeme:</p>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-black text-white">
-                            {getRemainingPremiumTime()?.text}
-                          </span>
-                        </div>
-                        {userProfile?.premium_expires_at && (
-                          <p className="text-xs text-gray-500 mt-3">
-                            Ističe: {new Date(userProfile.premium_expires_at).toLocaleDateString('bs-BA', {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        )}
+                    <div className="backdrop-blur-md bg-white/5 rounded-lg p-4 border border-yellow-500/20">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Clock className="w-5 h-5 text-yellow-400" />
+                        <p className="text-gray-300 font-semibold">Preostalo vrijeme:</p>
                       </div>
-                    )}
-
-                    {getRemainingPremiumTime()?.expired && (
-                      <div className="backdrop-blur-md bg-red-500/10 rounded-lg p-4 border border-red-500/20">
-                        <p className="text-red-300 text-sm text-center">
-                          Vaš oglas više nije istaknut. Produžite premium da bi oglas bio ponovo na vrhu rezultata.
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-black text-white">
+                          {getRemainingPremiumTime()?.text}
+                        </span>
+                      </div>
+                      {userProfile?.premium_expires_at && (
+                        <p className="text-xs text-gray-500 mt-3">
+                          Ističe: {new Date(userProfile.premium_expires_at).toLocaleDateString('bs-BA', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
                         </p>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
 
