@@ -5,9 +5,10 @@ import { useAuth } from '../lib/auth';
 import { PremiumBadge } from './PremiumBadge';
 
 interface CarDetailModalProps {
-  car: Car;
+  car?: Car;
+  carId?: string;
   onClose: () => void;
-  onSwapOffer: (car: Car) => void;
+  onSwapOffer?: (car: Car) => void;
   onLiveInquiry?: (car: Car) => void;
   onOwnerClick?: (userId: string) => void;
   onSendMessage?: (userId: string) => void;
@@ -15,37 +16,66 @@ interface CarDetailModalProps {
   isPremiumUser?: boolean;
 }
 
-export function CarDetailModal({ car, onClose, onSwapOffer, onLiveInquiry, onOwnerClick, onSendMessage, onEdit, isPremiumUser = false }: CarDetailModalProps) {
+export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, onLiveInquiry, onOwnerClick, onSendMessage, onEdit, isPremiumUser = false }: CarDetailModalProps) {
+  const [car, setCar] = useState<Car | null>(initialCar || null);
   const [carImages, setCarImages] = useState<CarImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const { user } = useAuth();
 
-  const isOwnCar = user && car.user_id === user.id;
-  const ownerDisplayName = car.owner_nickname
-    ? `@${car.owner_nickname}`
-    : car.user_email?.split('@')[0];
-
   useEffect(() => {
-    fetchCarImages();
-  }, [car.id]);
+    if (carId && !initialCar) {
+      loadCarById(carId);
+    } else if (initialCar) {
+      setCar(initialCar);
+      fetchCarImages(initialCar.id);
+    }
+  }, [carId, initialCar]);
 
-  const fetchCarImages = async () => {
+  const loadCarById = async (id: string) => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('cars')
+      .select(`
+        *,
+        owner_nickname:profiles!cars_user_id_fkey(nickname)
+      `)
+      .eq('id', id)
+      .maybeSingle();
+
+    if (data) {
+      const carData: Car = {
+        ...data,
+        owner_nickname: data.owner_nickname?.nickname || null
+      };
+      setCar(carData);
+      fetchCarImages(id);
+    } else {
+      setLoading(false);
+    }
+  };
+
+  const isOwnCar = user && car && car.user_id === user.id;
+  const ownerDisplayName = car?.owner_nickname
+    ? `@${car.owner_nickname}`
+    : car?.user_email?.split('@')[0];
+
+  const fetchCarImages = async (carIdToFetch: string) => {
     setLoading(true);
     setCurrentImageIndex(0);
     const { data } = await supabase
       .from('car_images')
       .select('*')
-      .eq('car_id', car.id)
+      .eq('car_id', carIdToFetch)
       .order('order_index', { ascending: true });
 
     if (data && data.length > 0) {
       setCarImages(data);
-    } else {
+    } else if (car) {
       setCarImages([{
         id: 'default',
-        car_id: car.id,
+        car_id: carIdToFetch,
         image_url: car.image_url,
         is_primary: true,
         order_index: 0,
@@ -80,6 +110,7 @@ export function CarDetailModal({ car, onClose, onSwapOffer, onLiveInquiry, onOwn
   };
 
   const getEquipmentList = () => {
+    if (!car) return [];
     const equipment: { label: string; value: boolean }[] = [];
 
     if (car.xenon_lights) equipment.push({ label: 'Xenon/LED farovi', value: true });
@@ -104,6 +135,19 @@ export function CarDetailModal({ car, onClose, onSwapOffer, onLiveInquiry, onOwn
     return equipment;
   };
 
+  if (loading || !car) {
+    return (
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 rounded-3xl p-8 border border-white/10 shadow-2xl">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-white text-lg">Učitavanje...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
       <div className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-hidden border border-white/10 shadow-2xl">
@@ -124,7 +168,7 @@ export function CarDetailModal({ car, onClose, onSwapOffer, onLiveInquiry, onOwn
 
         <div className="overflow-y-auto max-h-[calc(90vh-80px)] custom-scrollbar">
           <div className="relative h-96 overflow-hidden bg-black group/image">
-            {!loading && carImages.length > 0 && carImages[currentImageIndex] && (
+            {carImages.length > 0 && carImages[currentImageIndex] && (
               <>
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10"></div>
                 <img
@@ -424,16 +468,18 @@ export function CarDetailModal({ car, onClose, onSwapOffer, onLiveInquiry, onOwn
                       </div>
                     </button>
                   )}
-                  <button
-                    onClick={() => onSwapOffer(car)}
-                    className="group/btn relative w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
-                    <div className="relative flex items-center justify-center gap-2">
-                      <ArrowRightLeft className="w-6 h-6 group-hover/btn:rotate-180 transition-transform duration-500" />
-                      <span className="text-lg">Ponudi zamjenu</span>
-                    </div>
-                  </button>
+                  {onSwapOffer && (
+                    <button
+                      onClick={() => onSwapOffer(car)}
+                      className="group/btn relative w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
+                      <div className="relative flex items-center justify-center gap-2">
+                        <ArrowRightLeft className="w-6 h-6 group-hover/btn:rotate-180 transition-transform duration-500" />
+                        <span className="text-lg">Ponudi zamjenu</span>
+                      </div>
+                    </button>
+                  )}
                 </div>
               </div>
             )}
