@@ -495,7 +495,7 @@ function App() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
                 <Gift className="w-6 h-6 relative z-10" />
-                <span className="relative z-10 text-lg">Kupi Promo Code</span>
+                <span className="relative z-10 text-lg">Iskoristi kredit code</span>
               </button>
             </div>
 
