@@ -275,68 +275,108 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
                 {offer.status === 'accepted' && user && (
                   <>
                     {offer.targetCar?.user_id === user.id && offer.offeredOwnerProfile && (
-                      <div className="backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-                        <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-3">Kontakt informacije</p>
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-cyan-400" />
-                            <button
-                              onClick={() => setSelectedUserProfile({
-                                userId: offer.offeredCar!.user_id,
-                                userEmail: offer.offeredCar!.user_email || ''
-                              })}
-                              className="text-white font-semibold hover:text-cyan-400 transition-colors underline decoration-dotted"
-                            >
-                              @{offer.offeredOwnerProfile.nickname || offer.offeredCar?.user_email?.split('@')[0]}
-                            </button>
+                      <div className="relative backdrop-blur-md bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-cyan-500/10 border border-cyan-500/30 rounded-2xl p-6 shadow-lg shadow-cyan-500/10">
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 rounded-2xl"></div>
+                        <div className="relative">
+                          <div className="flex items-center gap-2 mb-5">
+                            <div className="p-2 bg-cyan-500/20 rounded-lg">
+                              <User className="w-4 h-4 text-cyan-400" />
+                            </div>
+                            <p className="text-xs text-cyan-400 font-bold uppercase tracking-wider">Kontakt informacije</p>
                           </div>
-                          {offer.offeredOwnerProfile.location && (
-                            <div className="flex items-center gap-2 text-sm text-gray-300">
-                              <MapPin className="w-4 h-4 text-cyan-400" />
-                              <span>{offer.offeredOwnerProfile.location}</span>
+                          <div className="space-y-4">
+                            <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/10">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                  <User className="w-5 h-5 text-cyan-400" />
+                                </div>
+                                <button
+                                  onClick={() => setSelectedUserProfile({
+                                    userId: offer.offeredCar!.user_id,
+                                    userEmail: offer.offeredCar!.user_email || ''
+                                  })}
+                                  className="text-white text-lg font-bold hover:text-cyan-400 transition-all duration-300 hover:tracking-wide"
+                                >
+                                  @{offer.offeredOwnerProfile.nickname || offer.offeredCar?.user_email?.split('@')[0]}
+                                </button>
+                              </div>
                             </div>
-                          )}
-                          {shouldShowPhone(offer.offeredOwnerProfile, offer.status) && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Phone className="w-4 h-4 text-cyan-400" />
-                              <a href={`tel:${offer.offeredOwnerProfile.phone}`} className="text-white font-semibold hover:text-cyan-400 transition-colors">
-                                {offer.offeredOwnerProfile.phone}
-                              </a>
-                            </div>
-                          )}
+                            {offer.offeredOwnerProfile.location && (
+                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/10">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <MapPin className="w-5 h-5 text-cyan-400" />
+                                  </div>
+                                  <span className="text-white font-medium text-base">{offer.offeredOwnerProfile.location}</span>
+                                </div>
+                              </div>
+                            )}
+                            {shouldShowPhone(offer.offeredOwnerProfile, offer.status) && (
+                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/10">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <Phone className="w-5 h-5 text-cyan-400" />
+                                  </div>
+                                  <a href={`tel:${offer.offeredOwnerProfile.phone}`} className="text-white text-lg font-bold hover:text-cyan-400 transition-all duration-300 hover:tracking-wide">
+                                    {offer.offeredOwnerProfile.phone}
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     )}
                     {offer.offeredCar?.user_id === user.id && offer.targetOwnerProfile && (
-                      <div className="backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-                        <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-3">Kontakt informacije</p>
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-blue-400" />
-                            <button
-                              onClick={() => setSelectedUserProfile({
-                                userId: offer.targetCar!.user_id,
-                                userEmail: offer.targetCar!.user_email || ''
-                              })}
-                              className="text-white font-semibold hover:text-blue-400 transition-colors underline decoration-dotted"
-                            >
-                              @{offer.targetOwnerProfile.nickname || offer.targetCar?.user_email?.split('@')[0]}
-                            </button>
+                      <div className="relative backdrop-blur-md bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-blue-500/10 border border-blue-500/30 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 rounded-2xl"></div>
+                        <div className="relative">
+                          <div className="flex items-center gap-2 mb-5">
+                            <div className="p-2 bg-blue-500/20 rounded-lg">
+                              <User className="w-4 h-4 text-blue-400" />
+                            </div>
+                            <p className="text-xs text-blue-400 font-bold uppercase tracking-wider">Kontakt informacije</p>
                           </div>
-                          {offer.targetOwnerProfile.location && (
-                            <div className="flex items-center gap-2 text-sm text-gray-300">
-                              <MapPin className="w-4 h-4 text-blue-400" />
-                              <span>{offer.targetOwnerProfile.location}</span>
+                          <div className="space-y-4">
+                            <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                  <User className="w-5 h-5 text-blue-400" />
+                                </div>
+                                <button
+                                  onClick={() => setSelectedUserProfile({
+                                    userId: offer.targetCar!.user_id,
+                                    userEmail: offer.targetCar!.user_email || ''
+                                  })}
+                                  className="text-white text-lg font-bold hover:text-blue-400 transition-all duration-300 hover:tracking-wide"
+                                >
+                                  @{offer.targetOwnerProfile.nickname || offer.targetCar?.user_email?.split('@')[0]}
+                                </button>
+                              </div>
                             </div>
-                          )}
-                          {shouldShowPhone(offer.targetOwnerProfile, offer.status) && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Phone className="w-4 h-4 text-blue-400" />
-                              <a href={`tel:${offer.targetOwnerProfile.phone}`} className="text-white font-semibold hover:text-blue-400 transition-colors">
-                                {offer.targetOwnerProfile.phone}
-                              </a>
-                            </div>
-                          )}
+                            {offer.targetOwnerProfile.location && (
+                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <MapPin className="w-5 h-5 text-blue-400" />
+                                  </div>
+                                  <span className="text-white font-medium text-base">{offer.targetOwnerProfile.location}</span>
+                                </div>
+                              </div>
+                            )}
+                            {shouldShowPhone(offer.targetOwnerProfile, offer.status) && (
+                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <Phone className="w-5 h-5 text-blue-400" />
+                                  </div>
+                                  <a href={`tel:${offer.targetOwnerProfile.phone}`} className="text-white text-lg font-bold hover:text-blue-400 transition-all duration-300 hover:tracking-wide">
+                                    {offer.targetOwnerProfile.phone}
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     )}
