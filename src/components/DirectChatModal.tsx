@@ -260,6 +260,19 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
     setUploading(true);
 
+    const { data: conversationCheck } = await supabase
+      .from('conversations')
+      .select('blocked_by_user_id')
+      .eq('id', conversationId)
+      .maybeSingle();
+
+    if (conversationCheck?.blocked_by_user_id) {
+      setBlockedByUserId(conversationCheck.blocked_by_user_id);
+      alert('Razgovor je zatvoren. Poruke se ne mogu slati.');
+      setUploading(false);
+      return;
+    }
+
     let imageUrl = null;
     if (selectedImage) {
       imageUrl = await uploadImage(selectedImage);
@@ -281,7 +294,12 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
     if (error) {
       console.error('Error sending message:', error);
-      alert('Greška pri slanju poruke');
+      if (error.message.includes('blocked conversation')) {
+        alert('Razgovor je zatvoren. Poruke se ne mogu slati.');
+        await loadBlockedStatus();
+      } else {
+        alert('Greška pri slanju poruke');
+      }
     } else {
       setNewMessage('');
       setSelectedImage(null);
