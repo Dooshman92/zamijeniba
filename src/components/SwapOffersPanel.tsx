@@ -185,6 +185,9 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
           updated_at: (p.conversations as any).updated_at,
           last_message_at: (p.conversations as any).last_message_at,
           unread_count: p.unread_count,
+          other_user_id: '',
+          other_user_nickname: null,
+          other_user_email: '',
         });
       }
     });
@@ -204,10 +207,12 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
       }
     });
 
-    const conversationsList = Array.from(conversationsMap.values()).map(conv => ({
-      ...conv,
-      last_message_content: messagesByConversation.get(conv.id) || '',
-    }));
+    const conversationsList = Array.from(conversationsMap.values())
+      .filter(conv => conv.other_user_id)
+      .map(conv => ({
+        ...conv,
+        last_message_content: messagesByConversation.get(conv.id) || '',
+      }));
 
     const carIds = conversationsList.map(c => c.car_id).filter(Boolean);
     const { data: cars } = await supabase
@@ -224,15 +229,18 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
       new Date(a.last_message_at || a.updated_at).getTime()
     );
 
-    const { data: emails } = await supabase
-      .from('user_profiles')
-      .select('id, email')
-      .in('id', conversationsList.map(c => c.other_user_id));
+    const otherUserIds = conversationsList.map(c => c.other_user_id).filter(Boolean);
+    if (otherUserIds.length > 0) {
+      const { data: emails } = await supabase
+        .from('user_profiles')
+        .select('id, email')
+        .in('id', otherUserIds);
 
-    conversationsList.forEach(conv => {
-      const profile = emails?.find(e => e.id === conv.other_user_id);
-      conv.other_user_email = profile?.email || '';
-    });
+      conversationsList.forEach(conv => {
+        const profile = emails?.find(e => e.id === conv.other_user_id);
+        conv.other_user_email = profile?.email || '';
+      });
+    }
 
     setConversations(conversationsList);
   };
