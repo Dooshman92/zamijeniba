@@ -5,6 +5,7 @@ import { uploadMultipleCarImages } from '../lib/storage';
 import { useAuth } from '../lib/auth';
 import { carBrands, carModels, carColors, fuelTypes, transmissionTypes, driveTypes, yearOptions } from '../data/carOptions';
 import { bosnianCities } from '../data/cities';
+import { calculateCarAdCost, spendCredits, markFirstCarAdUsed } from '../lib/credits';
 
 interface AddCarFormMultiStepProps {
   onClose: () => void;
@@ -254,21 +255,13 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       return;
     }
 
-    const { count: activeAdsCount } = await supabase
-      .from('cars')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('status', 'active');
+    const costInfo = await calculateCarAdCost(user.id);
 
-    if (!userProfile?.is_premium) {
-      const allowedAds = 1 + Math.floor((userProfile?.credits || 0) / 10);
-      if ((activeAdsCount || 0) >= allowedAds) {
+    if (!costInfo.isFree) {
+      const currentCredits = userProfile?.credits || 0;
+      if (currentCredits < costInfo.cost) {
         alert(
-          `Besplatni korisnici mogu imati ${allowedAds} aktivni oglas. ${
-            (userProfile?.credits || 0) < 10
-              ? 'Nadogradite na Premium ili koristite promo kod za dodatne kredite!'
-              : 'Potrebno je 10 kredita za dodatni oglas.'
-          }`
+          `Nemate dovoljno kredita za postavljanje oglasa.\n\nPotrebno: ${costInfo.cost} kredita\nImate: ${currentCredits} kredita\n\nNadogradite na Premium za neograničene oglase ili kupite kredite!`
         );
         setLoading(false);
         return;
@@ -333,23 +326,12 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       ...preferences,
     }]);
 
-    if (!userProfile?.is_premium) {
-      let creditsToDeduct = 0;
+    if (!costInfo.isFree) {
+      await spendCredits(user.id, costInfo.cost);
+    }
 
-      if ((activeAdsCount || 0) > 0) {
-        creditsToDeduct += 10;
-      }
-
-      const extraImages = Math.max(0, imageFiles.length - 5);
-      creditsToDeduct += extraImages;
-
-      if (creditsToDeduct > 0) {
-        const newCredits = Math.max(0, (userProfile?.credits || 0) - creditsToDeduct);
-        await supabase
-          .from('user_profiles')
-          .update({ credits: newCredits })
-          .eq('id', user.id);
-      }
+    if (costInfo.reason === 'Prvi oglas je besplatan') {
+      await markFirstCarAdUsed(user.id);
     }
 
     onSuccess();

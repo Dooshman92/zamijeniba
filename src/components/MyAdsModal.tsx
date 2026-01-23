@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, Car as CarIcon, Eye, EyeOff, Archive, Trash2, Edit } from 'lucide-react';
+import { X, Car as CarIcon, Eye, EyeOff, Archive, Trash2, Edit, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Car } from '../lib/supabase';
 import { AddCarFormMultiStep } from './AddCarFormMultiStep';
+import { BoostCarModal } from './BoostCarModal';
 
 interface MyAdsModalProps {
   onClose: () => void;
@@ -20,6 +21,7 @@ export function MyAdsModal({ onClose, userId }: MyAdsModalProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<CarStatus>('active');
   const [editingCar, setEditingCar] = useState<CarWithStatus | null>(null);
+  const [boostingCar, setBoostingCar] = useState<CarWithStatus | null>(null);
 
   useEffect(() => {
     loadMyCars();
@@ -185,6 +187,21 @@ export function MyAdsModal({ onClose, userId }: MyAdsModalProps) {
                           <Edit className="w-4 h-4" />
                           Uredi
                         </button>
+                        {activeTab === 'active' && !car.is_featured && (
+                          <button
+                            onClick={() => setBoostingCar(car)}
+                            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors flex items-center gap-2"
+                          >
+                            <Zap className="w-4 h-4" />
+                            Istakni
+                          </button>
+                        )}
+                        {activeTab === 'active' && car.is_featured && (
+                          <div className="px-4 py-2 bg-yellow-500/20 border border-yellow-500 text-yellow-500 rounded-lg flex items-center gap-2">
+                            <Zap className="w-4 h-4" />
+                            Istaknut
+                          </div>
+                        )}
                         {activeTab !== 'active' && (
                           <button
                             onClick={() => updateCarStatus(car.id, 'active')}
@@ -236,6 +253,18 @@ export function MyAdsModal({ onClose, userId }: MyAdsModalProps) {
           onClose={() => setEditingCar(null)}
           onSuccess={() => {
             setEditingCar(null);
+            loadMyCars();
+          }}
+        />
+      )}
+
+      {boostingCar && (
+        <BoostCarModal
+          carId={boostingCar.id}
+          carTitle={`${boostingCar.brand} ${boostingCar.model}`}
+          onClose={() => setBoostingCar(null)}
+          onSuccess={() => {
+            setBoostingCar(null);
             loadMyCars();
           }}
         />

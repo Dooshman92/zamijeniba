@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { Car, supabase } from '../lib/supabase';
 import { CarCard } from './CarCard';
 import { useAuth } from '../lib/auth';
+import { calculateSwapOfferCost, spendCredits, markFirstSwapOfferUsed } from '../lib/credits';
 
 interface SwapOfferModalProps {
   targetCar: Car;
@@ -69,6 +70,26 @@ export function SwapOfferModal({ targetCar, onClose, onSuccess }: SwapOfferModal
 
     setSubmitting(true);
 
+    const costInfo = await calculateSwapOfferCost(user.id);
+
+    if (!costInfo.isFree) {
+      const { data: userProfile } = await supabase
+        .from('user_profiles')
+        .select('credits')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const currentCredits = userProfile?.credits || 0;
+
+      if (currentCredits < costInfo.cost) {
+        alert(
+          `Nemate dovoljno kredita za slanje swap ponude.\n\nPotrebno: ${costInfo.cost} kredit\nImate: ${currentCredits} kredita\n\nNadogradite na Premium za neograničene ponude ili kupite kredite!`
+        );
+        setSubmitting(false);
+        return;
+      }
+    }
+
     const paymentAmount = parseFloat(additionalPayment) || 0;
 
     const { data: offerData, error } = await supabase.from('swap_offers').insert([{
@@ -84,6 +105,14 @@ export function SwapOfferModal({ targetCar, onClose, onSuccess }: SwapOfferModal
       alert('Greška pri slanju ponude');
       setSubmitting(false);
       return;
+    }
+
+    if (!costInfo.isFree) {
+      await spendCredits(user.id, costInfo.cost);
+    }
+
+    if (costInfo.reason === 'Prva swap ponuda je besplatna') {
+      await markFirstSwapOfferUsed(user.id);
     }
 
     alert('Ponuda uspješno poslata! Chat će se otvoriti kada vlasnik prihvati ponudu.');

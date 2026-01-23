@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, MessageCircle, Gift, ArrowRightLeft } from 'lucide-react';
+import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, MessageCircle, Gift, ArrowRightLeft, Coins } from 'lucide-react';
 import { Car, supabase, UserProfile } from './lib/supabase';
 import { useAuth } from './lib/auth';
 import { initializeStorage } from './lib/storage';
@@ -17,6 +17,7 @@ import { MyAdsModal } from './components/MyAdsModal';
 import AdminDashboard from './components/AdminDashboard';
 import { MessagingCenterModal } from './components/MessagingCenterModal';
 import { PromoCodeModal } from './components/PromoCodeModal';
+import { BuyCreditsModal } from './components/BuyCreditsModal';
 import { DirectChatModal } from './components/DirectChatModal';
 import { Logo } from './components/Logo';
 import { UserProfileModal } from './components/UserProfileModal';
@@ -36,6 +37,7 @@ function App() {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showInbox, setShowInbox] = useState(false);
   const [showPromoCode, setShowPromoCode] = useState(false);
+  const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showDirectChat, setShowDirectChat] = useState(false);
@@ -355,10 +357,14 @@ function App() {
                         )}
                         <span className="text-xs text-gray-400">{user.email}</span>
                         {!userProfile?.is_premium && (
-                          <span className="text-xs text-green-400 font-semibold flex items-center gap-1 mt-0.5">
-                            <Gift className="w-3 h-3" />
+                          <button
+                            onClick={() => setShowBuyCredits(true)}
+                            className="text-xs text-green-400 font-semibold flex items-center gap-1 mt-0.5 hover:text-green-300 transition-colors"
+                            title="Kupi kredite"
+                          >
+                            <Coins className="w-3 h-3" />
                             {userProfile?.credits || 0} kredita
-                          </span>
+                          </button>
                         )}
                       </div>
                       {userProfile?.is_premium && (
@@ -443,7 +449,7 @@ function App() {
 
         <header className="py-20 px-4">
           <div className="max-w-7xl mx-auto text-center">
-            <div className="flex justify-center gap-4 mb-8">
+            <div className="flex justify-center gap-4 mb-8 flex-wrap">
               <button
                 onClick={() => user ? setShowPremiumModal(true) : setShowAuthModal(true)}
                 className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 transform hover:scale-105"
@@ -451,6 +457,15 @@ function App() {
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
                 <Sparkles className="w-6 h-6 relative z-10" />
                 <span className="relative z-10 text-lg">Postani Premium</span>
+              </button>
+
+              <button
+                onClick={() => user ? setShowBuyCredits(true) : setShowAuthModal(true)}
+                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                <Coins className="w-6 h-6 relative z-10" />
+                <span className="relative z-10 text-lg">Kupi Kredite</span>
               </button>
 
               <button
@@ -847,6 +862,13 @@ function App() {
         {showPromoCode && (
           <PromoCodeModal
             onClose={() => setShowPromoCode(false)}
+            onSuccess={fetchUserProfile}
+          />
+        )}
+
+        {showBuyCredits && (
+          <BuyCreditsModal
+            onClose={() => setShowBuyCredits(false)}
             onSuccess={fetchUserProfile}
           />
         )}
