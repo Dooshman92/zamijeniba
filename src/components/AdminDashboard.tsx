@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserX, Car, Ticket, TrendingUp, MessageSquare,
   RefreshCw, Shield, Crown, Package, Search, Filter,
-  ChevronLeft, ChevronRight, Ban, Check, X, Mail, Phone
+  ChevronLeft, ChevronRight, Ban, Check, X, Mail, Phone, Plus
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -49,6 +49,13 @@ interface PromoCode {
   user_profiles: {
     nickname: string;
   };
+  promo_code_redemptions?: Array<{
+    redeemed_at: string;
+    user_profiles: {
+      nickname: string;
+      email: string;
+    };
+  }>;
 }
 
 interface DashboardStats {
@@ -184,7 +191,14 @@ export default function AdminDashboard() {
     try {
       const { data } = await supabase
         .from('promo_codes')
-        .select('*, user_profiles(nickname)')
+        .select(`
+          *,
+          user_profiles!promo_codes_created_by_fkey(nickname),
+          promo_code_redemptions(
+            redeemed_at,
+            user_profiles(nickname, email)
+          )
+        `)
         .order('created_at', { ascending: false });
 
       setPromoCodes(data || []);
@@ -264,6 +278,38 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error toggling premium:', error);
       alert('Greška pri promeni premium statusa');
+    }
+  };
+
+  const createPromoCode = async () => {
+    const creditsStr = prompt('Broj kredita za novi promo kod:');
+    if (!creditsStr) return;
+
+    const credits = parseInt(creditsStr);
+    if (isNaN(credits) || credits <= 0) {
+      alert('Unesite validan broj kredita');
+      return;
+    }
+
+    const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    try {
+      const { error } = await supabase
+        .from('promo_codes')
+        .insert({
+          code,
+          credits,
+          created_by: user!.id,
+          is_active: true
+        });
+
+      if (error) throw error;
+
+      alert(`Promo kod kreiran: ${code}`);
+      loadPromoCodes();
+    } catch (error) {
+      console.error('Error creating promo code:', error);
+      alert('Greška pri kreiranju promo koda');
     }
   };
 
@@ -901,13 +947,22 @@ export default function AdminDashboard() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Promo Kodovi</h2>
             <p className="text-gray-600">Ukupno {filteredCodes.length} promo kodova</p>
           </div>
-          <button
-            onClick={loadPromoCodes}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Osveži
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={createPromoCode}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              <Plus className="w-4 h-4" />
+              Kreiraj Kod
+            </button>
+            <button
+              onClick={loadPromoCodes}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Osveži
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -917,38 +972,55 @@ export default function AdminDashboard() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {paginatedCodes.map((code) => (
-                <div key={code.id} className="bg-white rounded-lg border border-gray-200 p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Ticket className="w-5 h-5 text-pink-600" />
-                      <span className="font-mono font-bold text-lg text-gray-900">{code.code}</span>
+              {paginatedCodes.map((code) => {
+                const redemption = code.promo_code_redemptions?.[0];
+                return (
+                  <div key={code.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Ticket className="w-5 h-5 text-pink-600" />
+                        <span className="font-mono font-bold text-lg text-gray-900">{code.code}</span>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        code.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {code.is_active ? 'Aktivan' : 'Iskorišćen'}
+                      </span>
                     </div>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      code.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {code.is_active ? 'Aktivan' : 'Iskorišćen'}
-                    </span>
+                    <div className="space-y-2 mb-3">
+                      <p className="text-sm text-gray-600">
+                        Krediti: <span className="font-semibold text-gray-900">{code.credits}</span>
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Kreirao: <span className="font-medium text-gray-900">{code.user_profiles?.nickname}</span>
+                      </p>
+                      {redemption && (
+                        <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-900 mb-1">Iskoristio:</p>
+                          <p className="text-xs text-blue-800">
+                            @{redemption.user_profiles?.nickname}
+                          </p>
+                          <p className="text-xs text-blue-600">
+                            {redemption.user_profiles?.email}
+                          </p>
+                          <p className="text-xs text-blue-500 mt-1">
+                            {new Date(redemption.redeemed_at).toLocaleString('sr-RS')}
+                          </p>
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-500">
+                        Kreiran: {new Date(code.created_at).toLocaleString('sr-RS')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => deletePromoCode(code.id)}
+                      className="w-full py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-sm font-medium"
+                    >
+                      Obriši
+                    </button>
                   </div>
-                  <div className="space-y-2 mb-3">
-                    <p className="text-sm text-gray-600">
-                      Krediti: <span className="font-semibold text-gray-900">{code.credits}</span>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Kreirao: <span className="font-medium text-gray-900">{code.user_profiles?.nickname}</span>
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(code.created_at).toLocaleString('sr-RS')}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => deletePromoCode(code.id)}
-                    className="w-full py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-sm font-medium"
-                  >
-                    Obriši
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {totalPages > 1 && (
