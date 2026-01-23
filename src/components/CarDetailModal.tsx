@@ -29,7 +29,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
       loadCarById(carId);
     } else if (initialCar) {
       setCar(initialCar);
-      fetchCarImages(initialCar.id);
+      fetchCarImages(initialCar.id, initialCar);
     }
   }, [carId, initialCar]);
 
@@ -61,7 +61,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
     ? `@${car.owner_nickname}`
     : car?.user_email?.split('@')[0];
 
-  const fetchCarImages = async (carIdToFetch: string) => {
+  const fetchCarImages = async (carIdToFetch: string, carData?: Car) => {
     setLoading(true);
     setCurrentImageIndex(0);
     const { data } = await supabase
@@ -70,16 +70,17 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
       .eq('car_id', carIdToFetch)
       .order('order_index', { ascending: true });
 
+    const currentCar = carData || car;
     if (data && data.length > 0) {
       setCarImages(data);
-    } else if (car) {
+    } else if (currentCar) {
       setCarImages([{
         id: 'default',
         car_id: carIdToFetch,
-        image_url: car.image_url,
+        image_url: currentCar.image_url,
         is_primary: true,
         order_index: 0,
-        created_at: car.created_at,
+        created_at: currentCar.created_at,
       }]);
     }
     setLoading(false);
