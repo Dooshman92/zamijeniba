@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { X, Send, User, Phone, Mail, Image as ImageIcon, ExternalLink, Car as CarIcon } from 'lucide-react';
+import { X, Send, User, Phone, Mail, Image as ImageIcon, ExternalLink, Car as CarIcon, Ban, Unlock } from 'lucide-react';
 import { supabase, Message, UserProfile, Car } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { CarDetailModal } from './CarDetailModal';
@@ -22,6 +22,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedCarId, setSelectedCarId] = useState<string | null>(null);
+  const [blockedByUserId, setBlockedByUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
@@ -31,6 +32,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
     loadMessages();
     loadCarInfo();
     checkSwapStatus();
+    loadBlockedStatus();
     markAsRead();
     const cleanup = subscribeToMessages();
     return cleanup;
@@ -39,6 +41,37 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const loadBlockedStatus = async () => {
+    const { data } = await supabase
+      .from('conversations')
+      .select('blocked_by_user_id')
+      .eq('id', conversationId)
+      .maybeSingle();
+
+    if (data) {
+      setBlockedByUserId(data.blocked_by_user_id);
+    }
+  };
+
+  const toggleBlockConversation = async () => {
+    if (!user) return;
+
+    const newBlockedStatus = blockedByUserId ? null : user.id;
+
+    const { error } = await supabase
+      .from('conversations')
+      .update({ blocked_by_user_id: newBlockedStatus })
+      .eq('id', conversationId);
+
+    if (error) {
+      console.error('Error toggling block status:', error);
+      alert('Greška pri promjeni statusa razgovora');
+      return;
+    }
+
+    setBlockedByUserId(newBlockedStatus);
+  };
 
   const checkSwapStatus = async () => {
     if (!user) return;
@@ -159,6 +192,19 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
           markAsRead();
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversations',
+          filter: `id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const newData = payload.new as any;
+          setBlockedByUserId(newData.blocked_by_user_id);
+        }
+      )
       .subscribe();
 
     return () => {
@@ -206,6 +252,11 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
   const sendMessage = async () => {
     if ((!newMessage.trim() && !selectedImage) || !user) return;
+
+    if (blockedByUserId) {
+      alert('Razgovor je zatvoren. Poruke se ne mogu slati.');
+      return;
+    }
 
     setUploading(true);
 
@@ -334,22 +385,36 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
                 )}
               </div>
 
-              {carInfo && (
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setSelectedCarId(carInfo.id)}
-                  className="group relative flex-shrink-0"
-                  title="Vidi detalje auta"
+                  onClick={toggleBlockConversation}
+                  className={`p-2 rounded-lg transition-all duration-300 hover:scale-110 ${
+                    blockedByUserId
+                      ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400'
+                      : 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
+                  }`}
+                  title={blockedByUserId ? 'Otvori razgovor' : 'Zatvori razgovor'}
                 >
-                  <img
-                    src={carInfo.image_url}
-                    alt={`${carInfo.brand} ${carInfo.model}`}
-                    className="w-16 h-12 object-cover rounded-lg border border-white/20 transition-all duration-300 group-hover:scale-105 group-hover:border-cyan-500/50"
-                  />
-                  <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/20 rounded-lg transition-all duration-300 flex items-center justify-center">
-                    <ExternalLink className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
+                  {blockedByUserId ? <Unlock className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
                 </button>
-              )}
+
+                {carInfo && (
+                  <button
+                    onClick={() => setSelectedCarId(carInfo.id)}
+                    className="group relative flex-shrink-0"
+                    title="Vidi detalje auta"
+                  >
+                    <img
+                      src={carInfo.image_url}
+                      alt={`${carInfo.brand} ${carInfo.model}`}
+                      className="w-16 h-12 object-cover rounded-lg border border-white/20 transition-all duration-300 group-hover:scale-105 group-hover:border-cyan-500/50"
+                    />
+                    <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/20 rounded-lg transition-all duration-300 flex items-center justify-center">
+                      <ExternalLink className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -407,6 +472,15 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
         </div>
 
         <div className="p-3 border-t border-white/10 bg-gradient-to-r from-gray-900/50 to-gray-800/50">
+          {blockedByUserId && (
+            <div className="mb-2 p-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+              <p className="text-xs text-red-400 text-center font-semibold">
+                {blockedByUserId === user?.id
+                  ? 'Zatvorili ste ovaj razgovor. Kliknite na ikonicu za otključavanje da nastavite.'
+                  : 'Ovaj razgovor je zatvoren od strane drugog korisnika.'}
+              </p>
+            </div>
+          )}
           {imagePreview && (
             <div className="mb-2 relative inline-block">
               <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-white/20" />
@@ -431,7 +505,8 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="bg-white/5 hover:bg-white/10 border border-white/10 p-2.5 rounded-lg transition-all"
+              disabled={!!blockedByUserId}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 p-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               title="Dodaj sliku"
             >
               <ImageIcon className="w-5 h-5 text-gray-400" />
@@ -440,14 +515,15 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Napišite poruku..."
+              placeholder={blockedByUserId ? "Razgovor je zatvoren..." : "Napišite poruku..."}
               rows={1}
-              className="flex-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-lg px-3 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all resize-none text-sm"
+              disabled={!!blockedByUserId}
+              className="flex-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-lg px-3 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all resize-none text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ minHeight: '42px', maxHeight: '100px' }}
             />
             <button
               onClick={sendMessage}
-              disabled={(!newMessage.trim() && !selectedImage) || uploading}
+              disabled={(!newMessage.trim() && !selectedImage) || uploading || !!blockedByUserId}
               className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold px-4 py-2.5 rounded-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-cyan-500/30"
             >
               {uploading ? (
@@ -457,9 +533,11 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
               )}
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-1.5 text-center">
-            Enter za slanje • Shift + Enter za novi red
-          </p>
+          {!blockedByUserId && (
+            <p className="text-xs text-gray-500 mt-1.5 text-center">
+              Enter za slanje • Shift + Enter za novi red
+            </p>
+          )}
         </div>
     </div>
   );
