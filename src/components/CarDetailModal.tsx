@@ -195,6 +195,14 @@ export function CarDetailModal({ car, onClose, onSwapOffer, onLiveInquiry, onOwn
                       {ownerDisplayName}
                     </button>
                   </div>
+                  {!isOwnCar && (
+                    <div className="mt-3 backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
+                      <p className="text-xs text-blue-300 flex items-center gap-2">
+                        <span className="text-blue-400">ℹ️</span>
+                        Kontakt informacije vlasnika vidljive su kada prihvatite ponudu za zamjenu
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="text-right">
                   <div className="backdrop-blur-md bg-green-500/90 px-6 py-3 rounded-xl shadow-lg">
