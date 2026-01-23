@@ -1,6 +1,7 @@
 import { Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, MapPin } from 'lucide-react';
 import { Car } from '../lib/supabase';
 import { PremiumBadge } from './PremiumBadge';
+import { FeaturedBadge } from './FeaturedBadge';
 
 interface CarCardProps {
   car: Car;
@@ -19,6 +20,9 @@ export function CarCard({ car, onSwapOffer, onLiveInquiry, showSwapButton = true
   const ownerDisplayName = car.owner_nickname
     ? `@${car.owner_nickname}`
     : car.user_email?.split('@')[0];
+
+  const now = new Date();
+  const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
 
   if (layout === 'list') {
     return (
@@ -40,11 +44,14 @@ export function CarCard({ car, onSwapOffer, onLiveInquiry, showSwapButton = true
               alt={`${car.brand} ${car.model}`}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
-            {car.owner_is_premium && (
-              <div className="absolute top-3 left-3 z-20">
+            <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
+              {isFeatured && (
+                <FeaturedBadge size="md" />
+              )}
+              {car.owner_is_premium && (
                 <PremiumBadge size="md" />
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <div className="flex-1 p-6">
@@ -193,11 +200,14 @@ export function CarCard({ car, onSwapOffer, onLiveInquiry, showSwapButton = true
         <div className="absolute top-2 right-2 backdrop-blur-md bg-cyan-500/90 px-2 py-0.5 rounded text-[10px] font-bold text-white shadow z-20">
           {car.year}
         </div>
-        {car.owner_is_premium && (
-          <div className="absolute top-2 left-2 z-20 scale-75">
+        <div className="absolute top-2 left-2 z-20 flex flex-col gap-1.5 scale-75">
+          {isFeatured && (
+            <FeaturedBadge size="sm" />
+          )}
+          {car.owner_is_premium && (
             <PremiumBadge size="sm" />
-          </div>
-        )}
+          )}
+        </div>
         <div className="absolute bottom-2 left-2 right-2 z-20">
           <h3 className={`text-base font-black text-white drop-shadow-lg ${car.owner_is_premium ? 'font-extrabold' : ''}`}>
             {car.brand} {car.model}
