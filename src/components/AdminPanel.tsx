@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X, Shield, Crown, User, Search, CheckCircle, XCircle, Power, Gift, Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Users } from 'lucide-react';
+import { X, Shield, Crown, User, Search, CheckCircle, XCircle, Power, Gift, Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Users, Ban, UserX, Clock } from 'lucide-react';
 import { supabase, UserProfile } from '../lib/supabase';
+import { useAuth } from '../lib/auth';
 
 interface PromoCode {
   code: string;
@@ -31,6 +32,7 @@ interface AdminPanelProps {
 }
 
 export function AdminPanel({ onClose }: AdminPanelProps) {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [promoCodes, setPromoCodes] = useState<PromoCodeWithRedemption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +46,11 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const [creating, setCreating] = useState(false);
   const [selectedCodeRedemptions, setSelectedCodeRedemptions] = useState<string | null>(null);
   const [redemptions, setRedemptions] = useState<PromoRedemption[]>([]);
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [banUserId, setBanUserId] = useState<string | null>(null);
+  const [banReason, setBanReason] = useState('');
+  const [banDuration, setBanDuration] = useState<'permanent' | '1day' | '7days' | '30days'>('permanent');
+  const [banning, setBanning] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -285,6 +292,102 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       ));
     } else {
       alert('Greška pri ažuriranju admin statusa');
+    }
+
+    setUpdating(null);
+  };
+
+  const openBanModal = (userId: string) => {
+    setBanUserId(userId);
+    setBanReason('');
+    setBanDuration('permanent');
+    setShowBanModal(true);
+  };
+
+  const handleBan = async () => {
+    if (!banUserId || !currentUser) return;
+
+    setBanning(true);
+
+    let banExpiresAt = null;
+    if (banDuration !== 'permanent') {
+      const expiryDate = new Date();
+      switch (banDuration) {
+        case '1day':
+          expiryDate.setDate(expiryDate.getDate() + 1);
+          break;
+        case '7days':
+          expiryDate.setDate(expiryDate.getDate() + 7);
+          break;
+        case '30days':
+          expiryDate.setDate(expiryDate.getDate() + 30);
+          break;
+      }
+      banExpiresAt = expiryDate.toISOString();
+    }
+
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({
+        is_banned: true,
+        ban_reason: banReason || 'Kršenje pravila',
+        banned_at: new Date().toISOString(),
+        banned_by: currentUser.id,
+        ban_expires_at: banExpiresAt
+      })
+      .eq('id', banUserId);
+
+    if (!error) {
+      setUsers(users.map(user =>
+        user.id === banUserId
+          ? {
+              ...user,
+              is_banned: true,
+              ban_reason: banReason || 'Kršenje pravila',
+              banned_at: new Date().toISOString(),
+              banned_by: currentUser.id,
+              ban_expires_at: banExpiresAt
+            }
+          : user
+      ));
+      setShowBanModal(false);
+      setBanUserId(null);
+    } else {
+      alert('Greška pri banovanju korisnika');
+    }
+
+    setBanning(false);
+  };
+
+  const handleUnban = async (userId: string) => {
+    setUpdating(userId);
+
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({
+        is_banned: false,
+        ban_reason: null,
+        banned_at: null,
+        banned_by: null,
+        ban_expires_at: null
+      })
+      .eq('id', userId);
+
+    if (!error) {
+      setUsers(users.map(user =>
+        user.id === userId
+          ? {
+              ...user,
+              is_banned: false,
+              ban_reason: null,
+              banned_at: null,
+              banned_by: null,
+              ban_expires_at: null
+            }
+          : user
+      ));
+    } else {
+      alert('Greška pri odbanovanju korisnika');
     }
 
     setUpdating(null);
@@ -619,6 +722,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
             <div>Ukupno korisnika: <span className="text-white font-bold">{users.length}</span></div>
             <div>Premium: <span className="text-yellow-400 font-bold">{users.filter(u => u.is_premium).length}</span></div>
             <div>Admini: <span className="text-red-400 font-bold">{users.filter(u => u.is_admin).length}</span></div>
+            <div>Banovani: <span className="text-gray-400 font-bold">{users.filter(u => u.is_banned).length}</span></div>
           </div>
         </div>
 
@@ -677,6 +781,12 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                             Admin
                           </span>
                         )}
+                        {user.is_banned && (
+                          <span className="flex items-center gap-1 px-2 py-1 bg-gray-900 text-gray-300 rounded-lg text-xs font-semibold border border-gray-600">
+                            <Ban className="w-3 h-3" />
+                            Banovan
+                          </span>
+                        )}
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm text-gray-400 mb-3">
                         <div>Telefon: {user.phone || 'N/A'}</div>
@@ -728,7 +838,49 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                             </>
                           )}
                         </button>
+                        {user.is_banned ? (
+                          <button
+                            onClick={() => handleUnban(user.id)}
+                            disabled={updating === user.id}
+                            className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 font-medium bg-green-600 hover:bg-green-700 text-white ${updating === user.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {updating === user.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                            ) : (
+                              <>
+                                <CheckCircle className="w-4 h-4" />
+                                Odbaniraj
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => openBanModal(user.id)}
+                            disabled={updating === user.id}
+                            className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 font-medium bg-gray-900 hover:bg-black text-white border border-gray-700 ${updating === user.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            <Ban className="w-4 h-4" />
+                            Baniraj
+                          </button>
+                        )}
                       </div>
+                      {user.is_banned && user.ban_reason && (
+                        <div className="mt-3 p-3 bg-gray-900 border border-gray-700 rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <UserX className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="text-xs font-semibold text-gray-400 mb-1">Razlog bana:</p>
+                              <p className="text-sm text-gray-300">{user.ban_reason}</p>
+                              {user.ban_expires_at && (
+                                <div className="flex items-center gap-1 mt-2 text-xs text-gray-400">
+                                  <Clock className="w-3 h-3" />
+                                  Ističe: {new Date(user.ban_expires_at).toLocaleString('sr-RS')}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -737,6 +889,83 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
           )}
         </div>
       </div>
+
+      {showBanModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-red-500/30">
+            <div className="bg-gradient-to-r from-red-900 via-red-800 to-red-900 border-b border-red-500/30 px-6 py-4 flex justify-between items-center rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <Ban className="w-6 h-6 text-red-400" />
+                <h2 className="text-xl font-bold text-white">Baniraj Korisnika</h2>
+              </div>
+              <button
+                onClick={() => setShowBanModal(false)}
+                className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                  Razlog bana
+                </label>
+                <textarea
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  placeholder="Unesite razlog banovanja..."
+                  rows={3}
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                  Trajanje bana
+                </label>
+                <select
+                  value={banDuration}
+                  onChange={(e) => setBanDuration(e.target.value as any)}
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                >
+                  <option value="permanent">Trajno</option>
+                  <option value="1day">1 Dan</option>
+                  <option value="7days">7 Dana</option>
+                  <option value="30days">30 Dana</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowBanModal(false)}
+                  className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
+                  disabled={banning}
+                >
+                  Odustani
+                </button>
+                <button
+                  onClick={handleBan}
+                  disabled={banning}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {banning ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Banovanje...
+                    </>
+                  ) : (
+                    <>
+                      <Ban className="w-4 h-4" />
+                      Potvrdi Ban
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -103,6 +103,11 @@ export interface UserProfile {
   gender: 'male' | 'female' | null;
   is_premium: boolean;
   is_admin: boolean;
+  is_banned: boolean;
+  ban_reason: string | null;
+  banned_at: string | null;
+  banned_by: string | null;
+  ban_expires_at: string | null;
   credits: number;
   show_phone_number: boolean;
   premium_expires_at: string | null;
