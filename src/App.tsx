@@ -14,7 +14,7 @@ import { ProfileEditModal } from './components/ProfileEditModal';
 import { PremiumModal } from './components/PremiumModal';
 import { LiveInquiryModal } from './components/LiveInquiryModal';
 import { MyAdsModal } from './components/MyAdsModal';
-import { AdminPanel } from './components/AdminPanel';
+import AdminDashboard from './components/AdminDashboard';
 import { MessagingCenterModal } from './components/MessagingCenterModal';
 import { PromoCodeModal } from './components/PromoCodeModal';
 import { DirectChatModal } from './components/DirectChatModal';
@@ -781,7 +781,20 @@ function App() {
         )}
 
         {showAdminPanel && userProfile?.is_admin && (
-          <AdminPanel onClose={() => setShowAdminPanel(false)} />
+          <div className="fixed inset-0 z-50 bg-gray-50">
+            <div className="absolute top-4 right-4 z-50">
+              <button
+                onClick={() => setShowAdminPanel(false)}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-lg"
+              >
+                <span className="text-gray-700">Zatvori Admin Panel</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <AdminDashboard />
+          </div>
         )}
 
         {showInbox && user && (
