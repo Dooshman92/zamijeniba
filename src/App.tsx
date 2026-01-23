@@ -674,7 +674,12 @@ function App() {
               )}
             </>
           ) : (
-            <SwapOffersPanel />
+            <SwapOffersPanel
+              onAcceptOffer={(conversationId) => {
+                setSelectedConversationId(conversationId);
+                setShowInbox(true);
+              }}
+            />
           )}
         </div>
 

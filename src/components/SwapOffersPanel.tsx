@@ -12,7 +12,11 @@ interface SwapOfferWithDetails extends SwapOffer {
   offeredOwnerProfile?: UserProfile;
 }
 
-export function SwapOffersPanel() {
+interface SwapOffersPanelProps {
+  onAcceptOffer?: (conversationId: string) => void;
+}
+
+export function SwapOffersPanel({ onAcceptOffer }: SwapOffersPanelProps) {
   const [offers, setOffers] = useState<SwapOfferWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
@@ -112,7 +116,9 @@ export function SwapOffersPanel() {
 
     if (conversationId) {
       loadOffers();
-      window.location.href = '#inbox';
+      if (onAcceptOffer) {
+        onAcceptOffer(conversationId);
+      }
     }
   };
 
