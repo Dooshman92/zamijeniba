@@ -255,7 +255,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
 
     const { count: activeAdsCount } = await supabase
       .from('cars')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .eq('status', 'active');
 
@@ -449,10 +449,10 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Godina *</label>
                   <select
                     required
-                    value={formData.year}
+                    value={formData.year || ''}
                     onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      setFormData({ ...formData, year: isNaN(value) ? '' : value });
+                      const value = e.target.value === '' ? '' : parseInt(e.target.value);
+                      setFormData({ ...formData, year: value });
                     }}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
@@ -468,10 +468,10 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   <input
                     type="number"
                     required
-                    value={formData.mileage}
+                    value={formData.mileage || ''}
                     onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      setFormData({ ...formData, mileage: isNaN(value) ? '' : value });
+                      const value = e.target.value === '' ? '' : parseInt(e.target.value);
+                      setFormData({ ...formData, mileage: value });
                     }}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
@@ -482,10 +482,10 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   <input
                     type="number"
                     required
-                    value={formData.price}
+                    value={formData.price || ''}
                     onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      setFormData({ ...formData, price: isNaN(value) ? '' : value });
+                      const value = e.target.value === '' ? '' : parseInt(e.target.value);
+                      setFormData({ ...formData, price: value });
                     }}
                     placeholder="npr. 15000"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
