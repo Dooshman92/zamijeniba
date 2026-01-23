@@ -8,6 +8,7 @@ import { BoostCarModal } from './BoostCarModal';
 interface MyAdsModalProps {
   onClose: () => void;
   userId: string;
+  onCarUpdated?: () => void;
 }
 
 type CarStatus = 'active' | 'inactive' | 'hidden';
@@ -16,7 +17,7 @@ interface CarWithStatus extends Car {
   status: CarStatus;
 }
 
-export function MyAdsModal({ onClose, userId }: MyAdsModalProps) {
+export function MyAdsModal({ onClose, userId, onCarUpdated }: MyAdsModalProps) {
   const [cars, setCars] = useState<CarWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<CarStatus>('active');
@@ -51,6 +52,9 @@ export function MyAdsModal({ onClose, userId }: MyAdsModalProps) {
       setCars(cars.map(car =>
         car.id === carId ? { ...car, status: newStatus } : car
       ));
+      if (onCarUpdated) {
+        onCarUpdated();
+      }
     } else {
       alert('Greška pri ažuriranju statusa');
     }
@@ -66,6 +70,9 @@ export function MyAdsModal({ onClose, userId }: MyAdsModalProps) {
 
     if (!error) {
       setCars(cars.filter(car => car.id !== carId));
+      if (onCarUpdated) {
+        onCarUpdated();
+      }
     } else {
       alert('Greška pri brisanju oglasa');
     }
@@ -254,6 +261,9 @@ export function MyAdsModal({ onClose, userId }: MyAdsModalProps) {
           onSuccess={() => {
             setEditingCar(null);
             loadMyCars();
+            if (onCarUpdated) {
+              onCarUpdated();
+            }
           }}
         />
       )}
@@ -266,6 +276,9 @@ export function MyAdsModal({ onClose, userId }: MyAdsModalProps) {
           onSuccess={() => {
             setBoostingCar(null);
             loadMyCars();
+            if (onCarUpdated) {
+              onCarUpdated();
+            }
           }}
         />
       )}

@@ -171,6 +171,7 @@ function App() {
   };
 
   const loadCars = async () => {
+    console.log('loadCars called at:', new Date().toISOString());
     setLoading(true);
     const { data, error } = await supabase
       .from('cars')
@@ -178,7 +179,7 @@ function App() {
       .order('priority_score', { ascending: false })
       .order('created_at', { ascending: false });
 
-    console.log('loadCars result:', { error, dataLength: data?.length });
+    console.log('loadCars result:', { error, dataLength: data?.length, timestamp: new Date().toISOString() });
     if (error) {
       console.error('loadCars error details:', error);
     }
@@ -219,6 +220,15 @@ function App() {
 
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
+
+      console.log('Featured cars:', sortedCars.filter(c => c.is_featured).map(c => ({
+        id: c.id,
+        brand: c.brand,
+        model: c.model,
+        is_featured: c.is_featured,
+        featured_until: c.featured_until,
+        priority_score: c.priority_score
+      })));
 
       setCars(sortedCars as Car[]);
     }
@@ -598,24 +608,27 @@ function App() {
                     </p>
                   </div>
 
-                  {filteredCars.filter(car => car.owner_is_premium).length > 0 && (
-                    <div className="mb-8">
-                      <div className="relative mb-6">
-                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-yellow-500/20 rounded-2xl blur-2xl"></div>
-                        <div className="relative backdrop-blur-md bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-yellow-500/10 border-2 border-yellow-500/30 rounded-2xl p-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-                            <h3 className="text-2xl font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
-                              Premium Oglasi
-                            </h3>
-                            <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
+                  {(() => {
+                    const now = new Date();
+                    const featuredCars = filteredCars.filter(car =>
+                      car.is_featured && (!car.featured_until || new Date(car.featured_until) > now)
+                    );
+                    return featuredCars.length > 0 && (
+                      <div className="mb-8">
+                        <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-yellow-500/20 rounded-2xl blur-2xl"></div>
+                          <div className="relative backdrop-blur-md bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-yellow-500/10 border-2 border-yellow-500/30 rounded-2xl p-4">
+                            <div className="flex items-center justify-center gap-2">
+                              <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
+                              <h3 className="text-2xl font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
+                                Premium Oglasi
+                              </h3>
+                              <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="space-y-4">
-                        {filteredCars
-                          .filter(car => car.owner_is_premium)
-                          .map((car) => (
+                        <div className="space-y-4">
+                          {featuredCars.map((car) => (
                             <CarCard
                               key={car.id}
                               car={car}
@@ -628,23 +641,27 @@ function App() {
                               layout="list"
                             />
                           ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {filteredCars.filter(car => !car.owner_is_premium).length > 0 && (
-                    <div>
-                      <div className="mb-6">
-                        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
-                          <h3 className="text-xl font-bold text-white text-center">
-                            Svi Oglasi
-                          </h3>
                         </div>
                       </div>
-                      <div className="space-y-4">
-                        {filteredCars
-                          .filter(car => !car.owner_is_premium)
-                          .map((car) => (
+                    );
+                  })()}
+
+                  {(() => {
+                    const now = new Date();
+                    const nonFeaturedCars = filteredCars.filter(car =>
+                      !car.is_featured || (car.featured_until && new Date(car.featured_until) <= now)
+                    );
+                    return nonFeaturedCars.length > 0 && (
+                      <div>
+                        <div className="mb-6">
+                          <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
+                            <h3 className="text-xl font-bold text-white text-center">
+                              Svi Oglasi
+                            </h3>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          {nonFeaturedCars.map((car) => (
                             <CarCard
                               key={car.id}
                               car={car}
@@ -657,33 +674,37 @@ function App() {
                               layout="list"
                             />
                           ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               ) : (
                 <>
-                  {filteredCars.filter(car => car.owner_is_premium).length > 0 && (
-                    <div className="mb-16">
-                      <div className="relative mb-8">
-                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-yellow-500/20 rounded-3xl blur-3xl"></div>
-                        <div className="relative backdrop-blur-md bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl p-6">
-                          <div className="flex items-center justify-center gap-3">
-                            <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
-                            <h2 className="text-4xl font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
-                              Premium Oglasi
-                            </h2>
-                            <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
+                  {(() => {
+                    const now = new Date();
+                    const featuredCars = filteredCars.filter(car =>
+                      car.is_featured && (!car.featured_until || new Date(car.featured_until) > now)
+                    );
+                    return featuredCars.length > 0 && (
+                      <div className="mb-16">
+                        <div className="relative mb-8">
+                          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-yellow-500/20 rounded-3xl blur-3xl"></div>
+                          <div className="relative backdrop-blur-md bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl p-6">
+                            <div className="flex items-center justify-center gap-3">
+                              <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
+                              <h2 className="text-4xl font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
+                                Premium Oglasi
+                              </h2>
+                              <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
+                            </div>
+                            <p className="text-center text-yellow-200/80 mt-2 font-medium">
+                              Istakni svoj oglas i dobij do 10x više pregleda
+                            </p>
                           </div>
-                          <p className="text-center text-yellow-200/80 mt-2 font-medium">
-                            Istakni svoj oglas i dobij do 10x više pregleda
-                          </p>
                         </div>
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                        {filteredCars
-                          .filter(car => car.owner_is_premium)
-                          .map((car) => (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                          {featuredCars.map((car) => (
                             <CarCard
                               key={car.id}
                               car={car}
@@ -695,23 +716,27 @@ function App() {
                               onCardClick={handleCarClick}
                             />
                           ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
-                  {filteredCars.filter(car => !car.owner_is_premium).length > 0 && (
-                    <div>
-                      <div className="mb-8">
-                        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-5">
-                          <h2 className="text-3xl font-bold text-white text-center">
-                            Svi Oglasi
-                          </h2>
+                  {(() => {
+                    const now = new Date();
+                    const nonFeaturedCars = filteredCars.filter(car =>
+                      !car.is_featured || (car.featured_until && new Date(car.featured_until) <= now)
+                    );
+                    return nonFeaturedCars.length > 0 && (
+                      <div>
+                        <div className="mb-8">
+                          <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-5">
+                            <h2 className="text-3xl font-bold text-white text-center">
+                              Svi Oglasi
+                            </h2>
+                          </div>
                         </div>
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                        {filteredCars
-                          .filter(car => !car.owner_is_premium)
-                          .map((car) => (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                          {nonFeaturedCars.map((car) => (
                             <CarCard
                               key={car.id}
                               car={car}
@@ -723,9 +748,10 @@ function App() {
                               onCardClick={handleCarClick}
                             />
                           ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </>
               )}
             </>
@@ -813,6 +839,7 @@ function App() {
               loadCars();
             }}
             userId={user.id}
+            onCarUpdated={loadCars}
           />
         )}
 
