@@ -104,6 +104,7 @@ export interface UserProfile {
   is_premium: boolean;
   is_admin: boolean;
   credits: number;
+  show_phone_number: boolean;
   premium_expires_at: string | null;
   created_at: string;
   updated_at: string;

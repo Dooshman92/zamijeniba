@@ -142,13 +142,13 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                   {userProfile?.full_name && (
                     <p className="text-gray-400 mb-2">{userProfile.full_name}</p>
                   )}
-                  {userProfile?.city && (
+                  {userProfile?.location && (
                     <div className="flex items-center gap-2 text-cyan-400 mb-3">
                       <MapPin className="w-4 h-4" />
-                      <span>{userProfile.city}</span>
+                      <span>{userProfile.location}</span>
                     </div>
                   )}
-                  {userProfile?.phone && (
+                  {userProfile?.phone && userProfile?.show_phone_number && (
                     <p className="text-gray-400 mb-3">Tel: {userProfile.phone}</p>
                   )}
 

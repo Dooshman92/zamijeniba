@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ArrowRightLeft, MessageSquare, Check, X } from 'lucide-react';
-import { Car, SwapOffer, supabase } from '../lib/supabase';
+import { ArrowRightLeft, MessageSquare, Check, X, Phone } from 'lucide-react';
+import { Car, SwapOffer, supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { getOrCreateConversation } from '../lib/messaging';
 import { CarDetailModal } from './CarDetailModal';
@@ -8,6 +8,8 @@ import { CarDetailModal } from './CarDetailModal';
 interface SwapOfferWithDetails extends SwapOffer {
   targetCar?: Car;
   offeredCar?: Car;
+  targetOwnerProfile?: UserProfile;
+  offeredOwnerProfile?: UserProfile;
 }
 
 export function SwapOffersPanel() {
@@ -41,10 +43,33 @@ export function SwapOffersPanel() {
             .eq('id', offer.offered_car_id)
             .maybeSingle();
 
+          let targetOwnerProfile;
+          let offeredOwnerProfile;
+
+          if (targetCar?.user_id) {
+            const { data: profile } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .eq('id', targetCar.user_id)
+              .maybeSingle();
+            targetOwnerProfile = profile || undefined;
+          }
+
+          if (offeredCar?.user_id) {
+            const { data: profile } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .eq('id', offeredCar.user_id)
+              .maybeSingle();
+            offeredOwnerProfile = profile || undefined;
+          }
+
           return {
             ...offer,
             targetCar: targetCar || undefined,
-            offeredCar: offeredCar || undefined
+            offeredCar: offeredCar || undefined,
+            targetOwnerProfile,
+            offeredOwnerProfile
           };
         })
       );
@@ -89,6 +114,11 @@ export function SwapOffersPanel() {
       loadOffers();
       window.location.href = '#inbox';
     }
+  };
+
+  const shouldShowPhone = (profile: UserProfile | undefined, offerStatus: string) => {
+    if (!profile?.phone) return false;
+    return profile.show_phone_number || offerStatus === 'accepted';
   };
 
   if (loading) {
@@ -211,7 +241,9 @@ export function SwapOffersPanel() {
               )}
             </div>
 
-            {(offer.message || (offer.additional_payment && offer.additional_payment > 0)) && (
+            {(offer.message || (offer.additional_payment && offer.additional_payment > 0) ||
+              shouldShowPhone(offer.targetOwnerProfile, offer.status) ||
+              shouldShowPhone(offer.offeredOwnerProfile, offer.status)) && (
               <div className="mt-6 space-y-3">
                 {offer.message && (
                   <div className="backdrop-blur-md bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-4 flex gap-3">
@@ -227,6 +259,33 @@ export function SwapOffersPanel() {
                     <div>
                       <p className="text-xs text-green-400 font-semibold uppercase tracking-wider mb-1">Doplata</p>
                       <p className="text-lg font-bold text-white">{Number(offer.additional_payment).toLocaleString('de-DE')} KM</p>
+                    </div>
+                  </div>
+                )}
+
+                {(shouldShowPhone(offer.targetOwnerProfile, offer.status) ||
+                  shouldShowPhone(offer.offeredOwnerProfile, offer.status)) && (
+                  <div className="backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                    <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-3">Kontakt informacije</p>
+                    <div className="space-y-2">
+                      {shouldShowPhone(offer.offeredOwnerProfile, offer.status) && offer.offeredOwnerProfile && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <Phone className="w-4 h-4 text-cyan-400" />
+                          <span className="text-gray-300">{offer.offeredCar?.user_email?.split('@')[0]}:</span>
+                          <a href={`tel:${offer.offeredOwnerProfile.phone}`} className="text-white font-semibold hover:text-cyan-400 transition-colors">
+                            {offer.offeredOwnerProfile.phone}
+                          </a>
+                        </div>
+                      )}
+                      {shouldShowPhone(offer.targetOwnerProfile, offer.status) && offer.targetOwnerProfile && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <Phone className="w-4 h-4 text-blue-400" />
+                          <span className="text-gray-300">{offer.targetCar?.user_email?.split('@')[0]}:</span>
+                          <a href={`tel:${offer.targetOwnerProfile.phone}`} className="text-white font-semibold hover:text-blue-400 transition-colors">
+                            {offer.targetOwnerProfile.phone}
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

@@ -23,7 +23,8 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
     nickname: currentProfile?.nickname || '',
     phone: currentProfile?.phone || '',
     location: currentProfile?.location || '',
-    gender: currentProfile?.gender || null as 'male' | 'female' | null
+    gender: currentProfile?.gender || null as 'male' | 'female' | null,
+    show_phone_number: currentProfile?.show_phone_number || false
   });
 
   const checkNicknameAvailability = async (nickname: string) => {
@@ -128,6 +129,7 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
         location: formData.location || null,
         avatar_url: avatarUrl || null,
         gender: formData.gender || null,
+        show_phone_number: formData.show_phone_number,
         updated_at: new Date().toISOString()
       });
 
@@ -334,6 +336,17 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
               placeholder="Unesite broj telefona"
               className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 transition-colors"
             />
+            <label className="flex items-center gap-3 mt-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={formData.show_phone_number}
+                onChange={(e) => setFormData({ ...formData, show_phone_number: e.target.checked })}
+                className="w-5 h-5 text-cyan-500 bg-white/10 border-white/20 rounded focus:ring-cyan-500 focus:ring-2"
+              />
+              <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
+                Prikaži broj telefona svima (inače samo kada prihvatim ponudu)
+              </span>
+            </label>
           </div>
 
           <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
