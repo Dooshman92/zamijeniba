@@ -356,7 +356,13 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
   if (loading) {
     const loadingContent = (
-      <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-lg p-8 max-w-md w-full">
+      <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-lg p-8 max-w-md w-full relative">
+        <button
+          onClick={onClose}
+          className="absolute right-3 top-3 p-1.5 hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 group"
+        >
+          <X className="w-5 h-5 text-gray-400 group-hover:text-white" />
+        </button>
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-500"></div>
           <p className="text-gray-300">Učitavanje chata...</p>

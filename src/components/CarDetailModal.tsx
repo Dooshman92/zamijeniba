@@ -186,7 +186,13 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
   if (loading || !car) {
     return (
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 rounded-3xl p-8 border border-white/10 shadow-2xl">
+        <div className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 rounded-3xl p-8 border border-white/10 shadow-2xl relative">
+          <button
+            onClick={onClose}
+            className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-xl z-10"
+          >
+            <X className="w-6 h-6" />
+          </button>
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
             <p className="text-white text-lg">Učitavanje...</p>
