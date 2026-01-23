@@ -14,12 +14,14 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
   const [newMessage, setNewMessage] = useState('');
   const [otherUserProfile, setOtherUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSwapAccepted, setIsSwapAccepted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
   useEffect(() => {
     loadOtherUserProfile();
     loadMessages();
+    checkSwapStatus();
     const cleanup = subscribeToMessages();
     return cleanup;
   }, [conversationId, otherUserId]);
@@ -27,6 +29,38 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const checkSwapStatus = async () => {
+    if (!user) return;
+
+    const { data: conversation } = await supabase
+      .from('conversations')
+      .select('car_id')
+      .eq('id', conversationId)
+      .maybeSingle();
+
+    if (!conversation?.car_id) return;
+
+    const { data: swapOffers } = await supabase
+      .from('swap_offers')
+      .select('status, offered_car_id')
+      .eq('car_id', conversation.car_id);
+
+    if (!swapOffers || swapOffers.length === 0) return;
+
+    for (const offer of swapOffers) {
+      const { data: offeredCar } = await supabase
+        .from('cars')
+        .select('user_id')
+        .eq('id', offer.offered_car_id)
+        .maybeSingle();
+
+      if (offeredCar?.user_id === otherUserId && offer.status === 'accepted') {
+        setIsSwapAccepted(true);
+        break;
+      }
+    }
+  };
 
   const loadOtherUserProfile = async () => {
     try {
@@ -171,22 +205,24 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
                 <h2 className="text-2xl font-bold text-white">
                   {otherUserProfile.nickname || 'Korisnik'}
                 </h2>
-                <div className="flex flex-wrap gap-3 mt-2">
-                  {otherUserProfile.email && (
-                    <div className="flex items-center gap-2 text-sm text-gray-300">
-                      <Mail className="w-4 h-4 text-cyan-400" />
-                      <span>{otherUserProfile.email}</span>
-                    </div>
-                  )}
-                  {otherUserProfile.phone && otherUserProfile.show_phone_number && (
-                    <div className="flex items-center gap-2 text-sm text-gray-300">
-                      <Phone className="w-4 h-4 text-green-400" />
-                      <a href={`tel:${otherUserProfile.phone}`} className="hover:text-white transition-colors">
-                        {otherUserProfile.phone}
-                      </a>
-                    </div>
-                  )}
-                </div>
+                {isSwapAccepted && (
+                  <div className="flex flex-wrap gap-3 mt-2">
+                    {otherUserProfile.email && (
+                      <div className="flex items-center gap-2 text-sm text-gray-300">
+                        <Mail className="w-4 h-4 text-cyan-400" />
+                        <span>{otherUserProfile.email}</span>
+                      </div>
+                    )}
+                    {otherUserProfile.phone && (
+                      <div className="flex items-center gap-2 text-sm text-gray-300">
+                        <Phone className="w-4 h-4 text-green-400" />
+                        <a href={`tel:${otherUserProfile.phone}`} className="hover:text-white transition-colors">
+                          {otherUserProfile.phone}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
