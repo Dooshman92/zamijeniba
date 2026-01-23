@@ -28,22 +28,52 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   const { user } = useAuth();
 
   useEffect(() => {
-    loadMessages();
-    loadCarInfo();
-    checkSwapStatus();
-    loadBlockedStatus();
-    markAsRead();
+    const initChat = async () => {
+      await Promise.all([
+        loadOtherUserProfile(),
+        loadMessages(),
+        loadCarInfo(),
+        loadBlockedStatus(),
+        checkSwapStatus(),
+      ]);
+      markAsRead();
+      setLoading(false);
+    };
+
+    initChat();
     const cleanup = subscribeToMessages();
     return cleanup;
   }, [conversationId, otherUserId]);
 
   useEffect(() => {
-    loadOtherUserProfile();
-  }, [conversationId, otherUserId, isSwapAccepted]);
-
-  useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (isSwapAccepted && otherUserProfile && !otherUserProfile.email) {
+      const loadEmail = async () => {
+        try {
+          const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-profile-by-id`;
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: otherUserId }),
+          });
+
+          if (response.ok) {
+            const fullProfile = await response.json();
+            setOtherUserProfile(fullProfile);
+          }
+        } catch (error) {
+          console.error('Could not fetch email:', error);
+        }
+      };
+      loadEmail();
+    }
+  }, [isSwapAccepted, otherUserProfile]);
 
   const loadBlockedStatus = async () => {
     const { data } = await supabase
@@ -110,56 +140,22 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
   const loadOtherUserProfile = async () => {
     try {
-      console.log('Loading profile for user:', otherUserId);
       const { data: profile, error } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('id', otherUserId)
         .maybeSingle();
 
-      console.log('Profile data:', profile, 'Error:', error);
-
       if (error) {
         console.error('Error loading user profile:', error);
-        setLoading(false);
         return;
       }
 
       if (profile) {
-        console.log('Setting profile:', profile);
-        if (isSwapAccepted) {
-          try {
-            const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-profile-by-id`;
-            const response = await fetch(apiUrl, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ userId: otherUserId }),
-            });
-
-            if (response.ok) {
-              const fullProfile = await response.json();
-              console.log('Full profile with email:', fullProfile);
-              setOtherUserProfile(fullProfile);
-              setLoading(false);
-              return;
-            }
-          } catch (emailError) {
-            console.log('Could not fetch email, using basic profile');
-          }
-        }
-
         setOtherUserProfile(profile);
-        setLoading(false);
-      } else {
-        console.log('No profile found for user:', otherUserId);
-        setLoading(false);
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
-      setLoading(false);
     }
   };
 
@@ -390,8 +386,9 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
             </button>
           )}
 
-          {otherUserProfile && (
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
+            {otherUserProfile && (
+              <>
               <div className="relative">
                 {otherUserProfile.avatar_url ? (
                   <img
@@ -438,39 +435,40 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
                   </div>
                 )}
               </div>
+              </>
+            )}
 
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                onClick={toggleBlockConversation}
+                className={`p-2 rounded-lg transition-all duration-300 hover:scale-110 ${
+                  blockedByUserId
+                    ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400'
+                    : 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
+                }`}
+                title={blockedByUserId ? 'Otvori razgovor' : 'Zatvori razgovor'}
+              >
+                {blockedByUserId ? <Unlock className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+              </button>
+
+              {carInfo && (
                 <button
-                  onClick={toggleBlockConversation}
-                  className={`p-2 rounded-lg transition-all duration-300 hover:scale-110 ${
-                    blockedByUserId
-                      ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400'
-                      : 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
-                  }`}
-                  title={blockedByUserId ? 'Otvori razgovor' : 'Zatvori razgovor'}
+                  onClick={() => setSelectedCarId(carInfo.id)}
+                  className="group relative flex-shrink-0"
+                  title="Vidi detalje auta"
                 >
-                  {blockedByUserId ? <Unlock className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                  <img
+                    src={carInfo.image_url}
+                    alt={`${carInfo.brand} ${carInfo.model}`}
+                    className="w-16 h-12 object-cover rounded-lg border border-white/20 transition-all duration-300 group-hover:scale-105 group-hover:border-cyan-500/50"
+                  />
+                  <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/20 rounded-lg transition-all duration-300 flex items-center justify-center">
+                    <ExternalLink className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
                 </button>
-
-                {carInfo && (
-                  <button
-                    onClick={() => setSelectedCarId(carInfo.id)}
-                    className="group relative flex-shrink-0"
-                    title="Vidi detalje auta"
-                  >
-                    <img
-                      src={carInfo.image_url}
-                      alt={`${carInfo.brand} ${carInfo.model}`}
-                      className="w-16 h-12 object-cover rounded-lg border border-white/20 transition-all duration-300 group-hover:scale-105 group-hover:border-cyan-500/50"
-                    />
-                    <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/20 rounded-lg transition-all duration-300 flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-                  </button>
-                )}
-              </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
