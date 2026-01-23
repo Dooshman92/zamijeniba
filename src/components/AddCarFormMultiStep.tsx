@@ -122,9 +122,10 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
     front_parking_sensors: carToEdit?.front_parking_sensors || false,
   });
 
-  const handleKilowattsChange = (kw: number) => {
-    if (isNaN(kw) || kw === 0) {
-      setFormData({ ...formData, kilowatts: '', horse_power: '' });
+  const handleKilowattsChange = (value: string) => {
+    const kw = parseInt(value);
+    if (!value || isNaN(kw) || kw === 0) {
+      setFormData({ ...formData, kilowatts: '' as any, horse_power: '' as any });
     } else {
       const hp = Math.round(kw * 1.35962);
       setFormData({ ...formData, kilowatts: kw, horse_power: hp });
@@ -293,8 +294,8 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       seats: formData.seats || 5,
     };
 
-    const isPremium = userProfile?.is_premium && userProfile?.premium_expires_at;
-    const featuredUntil = isPremium ? userProfile.premium_expires_at : null;
+    const isPremium = !!(userProfile?.is_premium && userProfile?.premium_expires_at);
+    const featuredUntil = isPremium && userProfile?.premium_expires_at ? userProfile.premium_expires_at : null;
 
     const { data: carData, error: carError } = await supabase
       .from('cars')
@@ -572,11 +573,11 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   <input
                     type="number"
                     value={formData.kilowatts || ''}
-                    onChange={(e) => handleKilowattsChange(parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleKilowattsChange(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="npr. 110"
                   />
-                  {formData.kilowatts > 0 && (
+                  {typeof formData.kilowatts === 'number' && formData.kilowatts > 0 && (
                     <p className="text-xs text-gray-600 mt-1">≈ {formData.horse_power} KS</p>
                   )}
                 </div>
