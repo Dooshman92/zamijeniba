@@ -319,74 +319,74 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
 
   if (loading) {
     return (
-      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-12 text-center">
-        <div className="inline-block relative mb-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-500"></div>
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+        <div className="inline-block relative mb-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-4 border-cyan-500/30 border-t-cyan-500"></div>
         </div>
-        <p className="text-gray-300">Učitavanje ponuda...</p>
+        <p className="text-gray-300 text-sm">Učitavanje ponuda...</p>
       </div>
     );
   }
 
   if (offers.length === 0) {
     return (
-      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-16 text-center">
-        <div className="relative inline-block mb-6">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-3xl blur-2xl opacity-20 animate-pulse"></div>
-          <ArrowRightLeft className="relative w-20 h-20 text-gray-400" />
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
+        <div className="relative inline-block mb-3">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur-xl opacity-20 animate-pulse"></div>
+          <ArrowRightLeft className="relative w-12 h-12 text-gray-400" />
         </div>
-        <h3 className="text-2xl font-bold text-white mb-2">Nema aktivnih ponuda</h3>
-        <p className="text-gray-400">Ponude za zamjenu će se prikazati ovdje</p>
+        <h3 className="text-lg font-bold text-white mb-1">Nema aktivnih ponuda</h3>
+        <p className="text-gray-400 text-sm">Ponude za zamjenu će se prikazati ovdje</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {conversations.length > 0 && (
-        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-8">
-          <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl">
-              <MessageSquare className="w-6 h-6 text-white" />
+        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
+              <MessageSquare className="w-4 h-4 text-white" />
             </div>
             Poruke o ponudama
           </h2>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {conversations.map((conv) => (
               <div
                 key={conv.id}
                 onClick={() => onAcceptOffer && onAcceptOffer(conv.id, conv.other_user_id)}
-                className={`backdrop-blur-md rounded-2xl p-4 transition-all cursor-pointer hover:scale-[1.02] ${
+                className={`backdrop-blur-md rounded-xl p-3 transition-all cursor-pointer hover:scale-[1.01] ${
                   conv.unread_count > 0
                     ? 'border-2 border-green-500/50 bg-green-500/10 hover:bg-green-500/20'
                     : 'border border-white/10 bg-white/5 hover:border-green-500/30'
                 }`}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   {conv.car && (
                     <img
                       src={conv.car.image_url}
                       alt={conv.car.brand}
-                      className="w-20 h-16 object-cover rounded-lg"
+                      className="w-16 h-12 object-cover rounded-lg"
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-0.5">
                       <p className={`text-white text-sm ${conv.unread_count > 0 ? 'font-black' : 'font-bold'}`}>
                         @{conv.other_user_nickname || conv.other_user_email.split('@')[0]}
                       </p>
                       {conv.unread_count > 0 && (
-                        <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 animate-pulse">
+                        <span className="bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 animate-pulse">
                           {conv.unread_count}
                         </span>
                       )}
-                      <span className="bg-green-500/20 text-green-400 text-xs font-bold rounded-full px-2 py-0.5 border border-green-500/30">
+                      <span className="bg-green-500/20 text-green-400 text-xs font-bold rounded-full px-1.5 py-0.5 border border-green-500/30">
                         Prihvaćeno
                       </span>
                     </div>
                     {conv.car && (
-                      <p className="text-xs text-cyan-400 mb-1">
+                      <p className="text-xs text-cyan-400 mb-0.5">
                         {conv.car.brand} {conv.car.model} ({conv.car.year})
                       </p>
                     )}
@@ -394,7 +394,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                       <p className={`text-xs truncate ${conv.unread_count > 0 ? 'text-white font-semibold' : 'text-gray-400'}`}>{conv.last_message_content}</p>
                     )}
                   </div>
-                  <MessageSquare className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <MessageSquare className="w-4 h-4 text-green-400 flex-shrink-0" />
                 </div>
               </div>
             ))}
@@ -402,19 +402,19 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
         </div>
       )}
 
-      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-8">
-        <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl">
-            <ArrowRightLeft className="w-6 h-6 text-white" />
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
+        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+            <ArrowRightLeft className="w-4 h-4 text-white" />
           </div>
           Ponude za zamjenu
         </h2>
 
-        <div className="space-y-6">
+        <div className="space-y-3">
         {offers.map((offer) => (
           <div
             key={offer.id}
-            className={`backdrop-blur-md rounded-2xl p-6 transition-all border-2 ${
+            className={`backdrop-blur-md rounded-xl p-3 transition-all border ${
               offer.status === 'accepted'
                 ? 'border-green-500/50 bg-green-500/10'
                 : offer.status === 'rejected'
@@ -422,9 +422,9 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                 : 'border-white/10 bg-white/5 hover:border-cyan-500/30'
             }`}
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-3">
               <span
-                className={`px-4 py-2 rounded-xl text-xs font-bold backdrop-blur-md ${
+                className={`px-2 py-1 rounded-lg text-xs font-bold backdrop-blur-md ${
                   offer.status === 'accepted'
                     ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                     : offer.status === 'rejected'
@@ -438,49 +438,49 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                   ? 'Odbijeno'
                   : 'Na čekanju'}
               </span>
-              <span className="text-xs text-gray-400 backdrop-blur-md bg-white/5 px-3 py-1 rounded-lg">
+              <span className="text-xs text-gray-400 backdrop-blur-md bg-white/5 px-2 py-1 rounded-lg">
                 {new Date(offer.created_at).toLocaleDateString('hr-HR')}
               </span>
             </div>
 
             {onAcceptOffer && user && offer.offeredCar && offer.targetCar && offer.status === 'accepted' && offer.conversation_id && (
-              <div className="mb-6">
+              <div className="mb-3">
                 {offer.targetCar.user_id === user.id && offer.offeredCar.user_id && (
                   <button
                     onClick={() => onAcceptOffer(offer.conversation_id!, offer.offeredCar!.user_id)}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 shadow-xl hover:shadow-green-500/50 animate-pulse"
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/50 animate-pulse"
                   >
-                    <MessageSquare className="w-6 h-6" />
-                    <span className="text-lg">Otvori chat sa @{offer.offeredOwnerProfile?.nickname || offer.offeredCar.user_email?.split('@')[0]}</span>
+                    <MessageSquare className="w-4 h-4" />
+                    <span className="text-sm">Otvori chat sa @{offer.offeredOwnerProfile?.nickname || offer.offeredCar.user_email?.split('@')[0]}</span>
                   </button>
                 )}
                 {offer.offeredCar.user_id === user.id && offer.targetCar.user_id && (
                   <button
                     onClick={() => onAcceptOffer(offer.conversation_id!, offer.targetCar!.user_id)}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 shadow-xl hover:shadow-green-500/50 animate-pulse"
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/50 animate-pulse"
                   >
-                    <MessageSquare className="w-6 h-6" />
-                    <span className="text-lg">Otvori chat sa @{offer.targetOwnerProfile?.nickname || offer.targetCar.user_email?.split('@')[0]}</span>
+                    <MessageSquare className="w-4 h-4" />
+                    <span className="text-sm">Otvori chat sa @{offer.targetOwnerProfile?.nickname || offer.targetCar.user_email?.split('@')[0]}</span>
                   </button>
                 )}
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
               {offer.offeredCar && (
                 <div
                   onClick={() => setSelectedCar(offer.offeredCar!)}
-                  className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyan-500/30 transition-colors cursor-pointer hover:scale-105 transform duration-200"
+                  className="backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-2 hover:border-cyan-500/30 transition-colors cursor-pointer hover:scale-[1.02] transform duration-200"
                 >
-                  <p className="text-xs text-cyan-400 mb-3 font-semibold uppercase tracking-wider">Nudi se:</p>
-                  <div className="flex items-center gap-3">
+                  <p className="text-xs text-cyan-400 mb-1.5 font-semibold uppercase tracking-wide">Nudi se:</p>
+                  <div className="flex items-center gap-2">
                     <img
                       src={offer.offeredCar.image_url}
                       alt={offer.offeredCar.brand}
-                      className="w-24 h-20 object-cover rounded-lg"
+                      className="w-16 h-12 object-cover rounded-lg"
                     />
                     <div>
-                      <p className="font-bold text-white text-sm mb-1">
+                      <p className="font-bold text-white text-xs mb-0.5">
                         {offer.offeredCar.brand} {offer.offeredCar.model}
                       </p>
                       <p className="text-xs text-cyan-400">{offer.offeredCar.year}</p>
@@ -491,25 +491,25 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
               )}
 
               <div className="flex justify-center">
-                <div className="p-4 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-lg shadow-cyan-500/20">
-                  <ArrowRightLeft className="w-8 h-8 text-white" />
+                <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg shadow-lg shadow-cyan-500/20">
+                  <ArrowRightLeft className="w-5 h-5 text-white" />
                 </div>
               </div>
 
               {offer.targetCar && (
                 <div
                   onClick={() => setSelectedCar(offer.targetCar!)}
-                  className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyan-500/30 transition-colors cursor-pointer hover:scale-105 transform duration-200"
+                  className="backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-2 hover:border-cyan-500/30 transition-colors cursor-pointer hover:scale-[1.02] transform duration-200"
                 >
-                  <p className="text-xs text-blue-400 mb-3 font-semibold uppercase tracking-wider">Za:</p>
-                  <div className="flex items-center gap-3">
+                  <p className="text-xs text-blue-400 mb-1.5 font-semibold uppercase tracking-wide">Za:</p>
+                  <div className="flex items-center gap-2">
                     <img
                       src={offer.targetCar.image_url}
                       alt={offer.targetCar.brand}
-                      className="w-24 h-20 object-cover rounded-lg"
+                      className="w-16 h-12 object-cover rounded-lg"
                     />
                     <div>
-                      <p className="font-bold text-white text-sm mb-1">
+                      <p className="font-bold text-white text-xs mb-0.5">
                         {offer.targetCar.brand} {offer.targetCar.model}
                       </p>
                       <p className="text-xs text-blue-400">{offer.targetCar.year}</p>
@@ -523,21 +523,21 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
             {(offer.message || (offer.additional_payment && offer.additional_payment > 0) ||
               shouldShowPhone(offer.targetOwnerProfile, offer.status) ||
               shouldShowPhone(offer.offeredOwnerProfile, offer.status)) && (
-              <div className="mt-6 space-y-3">
+              <div className="mt-3 space-y-2">
                 {offer.message && (
-                  <div className="backdrop-blur-md bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-4 flex gap-3">
-                    <MessageSquare className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-gray-300 leading-relaxed">{offer.message}</p>
+                  <div className="backdrop-blur-md bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-2 flex gap-2">
+                    <MessageSquare className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-gray-300 leading-relaxed">{offer.message}</p>
                   </div>
                 )}
                 {offer.additional_payment && offer.additional_payment > 0 && (
-                  <div className="backdrop-blur-md bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex gap-3 items-center">
-                    <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                      <span className="text-green-400 text-lg font-bold">💰</span>
+                  <div className="backdrop-blur-md bg-green-500/10 border border-green-500/20 rounded-lg p-2 flex gap-2 items-center">
+                    <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-green-400 text-sm font-bold">💰</span>
                     </div>
                     <div>
-                      <p className="text-xs text-green-400 font-semibold uppercase tracking-wider mb-1">Doplata</p>
-                      <p className="text-lg font-bold text-white">{Number(offer.additional_payment).toLocaleString('de-DE')} KM</p>
+                      <p className="text-xs text-green-400 font-semibold uppercase tracking-wide">Doplata</p>
+                      <p className="text-sm font-bold text-white">{Number(offer.additional_payment).toLocaleString('de-DE')} KM</p>
                     </div>
                   </div>
                 )}
@@ -545,28 +545,28 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                 {offer.status === 'accepted' && user && (
                   <>
                     {offer.targetCar?.user_id === user.id && offer.offeredOwnerProfile && (
-                      <div className="relative backdrop-blur-md bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-cyan-500/10 border border-cyan-500/30 rounded-2xl p-6 shadow-lg shadow-cyan-500/10">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 rounded-2xl"></div>
+                      <div className="relative backdrop-blur-md bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-cyan-500/10 border border-cyan-500/30 rounded-lg p-3 shadow-lg shadow-cyan-500/10">
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 rounded-lg"></div>
                         <div className="relative">
-                          <div className="flex items-center gap-2 mb-5">
-                            <div className="p-2 bg-cyan-500/20 rounded-lg">
-                              <User className="w-4 h-4 text-cyan-400" />
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <div className="p-1.5 bg-cyan-500/20 rounded-lg">
+                              <User className="w-3 h-3 text-cyan-400" />
                             </div>
-                            <p className="text-xs text-cyan-400 font-bold uppercase tracking-wider">Kontakt informacije</p>
+                            <p className="text-xs text-cyan-400 font-bold uppercase tracking-wide">Kontakt</p>
                           </div>
-                          <div className="space-y-4">
-                            <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/10">
-                              <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <User className="w-5 h-5 text-cyan-400" />
+                          <div className="space-y-2">
+                            <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-lg p-2 transition-all duration-300 border border-white/10 hover:border-cyan-500/30">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                                    <User className="w-3 h-3 text-cyan-400" />
                                   </div>
                                   <button
                                     onClick={() => setSelectedUserProfile({
                                       userId: offer.offeredCar!.user_id,
                                       userEmail: offer.offeredCar!.user_email || ''
                                     })}
-                                    className="text-white text-lg font-bold hover:text-cyan-400 transition-all duration-300 hover:tracking-wide"
+                                    className="text-white text-sm font-bold hover:text-cyan-400 transition-all duration-300"
                                   >
                                     @{offer.offeredOwnerProfile.nickname || offer.offeredCar?.user_email?.split('@')[0]}
                                   </button>
@@ -574,31 +574,31 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                                 {onAcceptOffer && offer.conversation_id && offer.offeredCar?.user_id && (
                                   <button
                                     onClick={() => onAcceptOffer(offer.conversation_id!, offer.offeredCar!.user_id)}
-                                    className="p-2.5 bg-gradient-to-br from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 rounded-xl transition-all duration-300 hover:scale-110"
+                                    className="p-1.5 bg-gradient-to-br from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 rounded-lg transition-all duration-300 hover:scale-110"
                                     title="Otvori chat"
                                   >
-                                    <MessageCircle className="w-5 h-5 text-green-400" />
+                                    <MessageCircle className="w-3 h-3 text-green-400" />
                                   </button>
                                 )}
                               </div>
                             </div>
                             {offer.offeredOwnerProfile.location && (
-                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/10">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <MapPin className="w-5 h-5 text-cyan-400" />
+                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-lg p-2 transition-all duration-300 border border-white/10 hover:border-cyan-500/30">
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                                    <MapPin className="w-3 h-3 text-cyan-400" />
                                   </div>
-                                  <span className="text-white font-medium text-base">{offer.offeredOwnerProfile.location}</span>
+                                  <span className="text-white font-medium text-xs">{offer.offeredOwnerProfile.location}</span>
                                 </div>
                               </div>
                             )}
                             {shouldShowPhone(offer.offeredOwnerProfile, offer.status) && (
-                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/10">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <Phone className="w-5 h-5 text-cyan-400" />
+                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-lg p-2 transition-all duration-300 border border-white/10 hover:border-cyan-500/30">
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                                    <Phone className="w-3 h-3 text-cyan-400" />
                                   </div>
-                                  <a href={`tel:${offer.offeredOwnerProfile.phone}`} className="text-white text-lg font-bold hover:text-cyan-400 transition-all duration-300 hover:tracking-wide">
+                                  <a href={`tel:${offer.offeredOwnerProfile.phone}`} className="text-white text-sm font-bold hover:text-cyan-400 transition-all duration-300">
                                     {offer.offeredOwnerProfile.phone}
                                   </a>
                                 </div>
@@ -609,28 +609,28 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                       </div>
                     )}
                     {offer.offeredCar?.user_id === user.id && offer.targetOwnerProfile && (
-                      <div className="relative backdrop-blur-md bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-blue-500/10 border border-blue-500/30 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 rounded-2xl"></div>
+                      <div className="relative backdrop-blur-md bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-blue-500/10 border border-blue-500/30 rounded-lg p-3 shadow-lg shadow-blue-500/10">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 rounded-lg"></div>
                         <div className="relative">
-                          <div className="flex items-center gap-2 mb-5">
-                            <div className="p-2 bg-blue-500/20 rounded-lg">
-                              <User className="w-4 h-4 text-blue-400" />
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <div className="p-1.5 bg-blue-500/20 rounded-lg">
+                              <User className="w-3 h-3 text-blue-400" />
                             </div>
-                            <p className="text-xs text-blue-400 font-bold uppercase tracking-wider">Kontakt informacije</p>
+                            <p className="text-xs text-blue-400 font-bold uppercase tracking-wide">Kontakt</p>
                           </div>
-                          <div className="space-y-4">
-                            <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10">
-                              <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <User className="w-5 h-5 text-blue-400" />
+                          <div className="space-y-2">
+                            <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-lg p-2 transition-all duration-300 border border-white/10 hover:border-blue-500/30">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                                    <User className="w-3 h-3 text-blue-400" />
                                   </div>
                                   <button
                                     onClick={() => setSelectedUserProfile({
                                       userId: offer.targetCar!.user_id,
                                       userEmail: offer.targetCar!.user_email || ''
                                     })}
-                                    className="text-white text-lg font-bold hover:text-blue-400 transition-all duration-300 hover:tracking-wide"
+                                    className="text-white text-sm font-bold hover:text-blue-400 transition-all duration-300"
                                   >
                                     @{offer.targetOwnerProfile.nickname || offer.targetCar?.user_email?.split('@')[0]}
                                   </button>
@@ -638,31 +638,31 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
                                 {onAcceptOffer && offer.conversation_id && offer.targetCar?.user_id && (
                                   <button
                                     onClick={() => onAcceptOffer(offer.conversation_id!, offer.targetCar!.user_id)}
-                                    className="p-2.5 bg-gradient-to-br from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 rounded-xl transition-all duration-300 hover:scale-110"
+                                    className="p-1.5 bg-gradient-to-br from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 rounded-lg transition-all duration-300 hover:scale-110"
                                     title="Otvori chat"
                                   >
-                                    <MessageCircle className="w-5 h-5 text-green-400" />
+                                    <MessageCircle className="w-3 h-3 text-green-400" />
                                   </button>
                                 )}
                               </div>
                             </div>
                             {offer.targetOwnerProfile.location && (
-                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <MapPin className="w-5 h-5 text-blue-400" />
+                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-lg p-2 transition-all duration-300 border border-white/10 hover:border-blue-500/30">
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                                    <MapPin className="w-3 h-3 text-blue-400" />
                                   </div>
-                                  <span className="text-white font-medium text-base">{offer.targetOwnerProfile.location}</span>
+                                  <span className="text-white font-medium text-xs">{offer.targetOwnerProfile.location}</span>
                                 </div>
                               </div>
                             )}
                             {shouldShowPhone(offer.targetOwnerProfile, offer.status) && (
-                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all duration-300 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <Phone className="w-5 h-5 text-blue-400" />
+                              <div className="group backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-lg p-2 transition-all duration-300 border border-white/10 hover:border-blue-500/30">
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                                    <Phone className="w-3 h-3 text-blue-400" />
                                   </div>
-                                  <a href={`tel:${offer.targetOwnerProfile.phone}`} className="text-white text-lg font-bold hover:text-blue-400 transition-all duration-300 hover:tracking-wide">
+                                  <a href={`tel:${offer.targetOwnerProfile.phone}`} className="text-white text-sm font-bold hover:text-blue-400 transition-all duration-300">
                                     {offer.targetOwnerProfile.phone}
                                   </a>
                                 </div>
@@ -678,20 +678,20 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
             )}
 
             {offer.status === 'pending' && offer.targetCar && user && offer.targetCar.user_id === user.id && (
-              <div className="mt-4 flex gap-3">
+              <div className="mt-3 flex gap-2">
                 <button
                   onClick={() => updateOfferStatus(offer.id, 'rejected')}
-                  className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-red-500/30"
+                  className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-bold py-2 px-3 rounded-lg transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg hover:shadow-red-500/30"
                 >
-                  <X className="w-5 h-5" />
-                  Odbij
+                  <X className="w-4 h-4" />
+                  <span className="text-sm">Odbij</span>
                 </button>
                 <button
                   onClick={() => handleAcceptOffer(offer)}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold py-2 px-3 rounded-lg transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
                 >
-                  <Check className="w-5 h-5" />
-                  Prihvati
+                  <Check className="w-4 h-4" />
+                  <span className="text-sm">Prihvati</span>
                 </button>
               </div>
             )}
