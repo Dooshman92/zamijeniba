@@ -46,9 +46,9 @@ interface PromoCode {
   is_active: boolean;
   created_by: string;
   created_at: string;
-  user_profiles: {
+  creator: {
     nickname: string;
-  };
+  } | null;
   promo_code_redemptions?: Array<{
     redeemed_at: string;
     user_profiles: {
@@ -189,17 +189,21 @@ export default function AdminDashboard() {
   const loadPromoCodes = async () => {
     setLoading(true);
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('promo_codes')
         .select(`
           *,
-          user_profiles!created_by(nickname),
+          creator:user_profiles!promo_codes_created_by_fkey(nickname),
           promo_code_redemptions(
             redeemed_at,
             user_profiles(nickname, email)
           )
         `)
         .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading promo codes:', error);
+      }
 
       setPromoCodes(data || []);
     } catch (error) {
@@ -993,7 +997,7 @@ export default function AdminDashboard() {
                         Krediti: <span className="font-semibold text-gray-900">{code.credits_reward}</span>
                       </p>
                       <p className="text-sm text-gray-600">
-                        Kreirao: <span className="font-medium text-gray-900">{code.user_profiles?.nickname}</span>
+                        Kreirao: <span className="font-medium text-gray-900">{code.creator?.nickname || 'Sistem'}</span>
                       </p>
                       {redemption && (
                         <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
