@@ -126,7 +126,7 @@ export function PromoCodeModal({ onClose, onSuccess }: PromoCodeModalProps) {
               <div>
                 <p className="text-white text-sm font-semibold mb-1">Upisi kredit code</p>
                 <p className="text-gray-400 text-xs">
-                  Unesite kod i dobijte kredite za dodatne slike i oglase!
+                  Unesite kod i dobijte kredite za razne pogodnosti!
                 </p>
               </div>
             </div>
