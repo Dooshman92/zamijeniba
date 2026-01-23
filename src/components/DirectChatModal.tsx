@@ -376,222 +376,222 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   }
 
   const chatContent = (
-    <div className="backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-lg w-full flex-1 flex flex-col shadow-2xl">
-        <div className="flex-shrink-0 relative p-4 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
-          {!embedded && (
-            <button
-              onClick={onClose}
-              className="absolute right-3 top-3 p-1.5 hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 group"
-            >
-              <X className="w-5 h-5 text-gray-400 group-hover:text-white" />
-            </button>
-          )}
+    <div className="h-full w-full flex flex-col backdrop-blur-md bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-white/20 rounded-lg shadow-2xl">
+      <div className="flex-shrink-0 relative p-4 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
+        {!embedded && (
+          <button
+            onClick={onClose}
+            className="absolute right-3 top-3 p-1.5 hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 group"
+          >
+            <X className="w-5 h-5 text-gray-400 group-hover:text-white" />
+          </button>
+        )}
 
-          <div className="flex items-center gap-3">
-            {otherUserProfile && (
-              <>
-              <div className="relative">
-                {otherUserProfile.avatar_url ? (
-                  <img
-                    src={otherUserProfile.avatar_url}
-                    alt={otherUserProfile.nickname || 'User'}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-cyan-500/50"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                    <User className="w-6 h-6 text-white" />
-                  </div>
-                )}
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
-              </div>
+        <div className="flex items-center gap-3">
+          {otherUserProfile && (
+            <>
+            <div className="relative">
+              {otherUserProfile.avatar_url ? (
+                <img
+                  src={otherUserProfile.avatar_url}
+                  alt={otherUserProfile.nickname || 'User'}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-cyan-500/50"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                  <User className="w-6 h-6 text-white" />
+                </div>
+              )}
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
+            </div>
 
-              <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold text-white">
-                  {otherUserProfile.nickname || 'Korisnik'}
-                </h2>
-                {carInfo && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <CarIcon className="w-3 h-3 text-cyan-400 flex-shrink-0" />
-                    <span className="text-xs text-cyan-300 truncate">
-                      {carInfo.brand} {carInfo.model} ({carInfo.year})
-                    </span>
-                  </div>
-                )}
-                {isSwapAccepted && (
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {otherUserProfile.email && (
-                      <div className="flex items-center gap-1 text-xs text-gray-300">
-                        <Mail className="w-3 h-3 text-cyan-400" />
-                        <span className="truncate">{otherUserProfile.email}</span>
-                      </div>
-                    )}
-                    {otherUserProfile.phone && (
-                      <div className="flex items-center gap-1 text-xs text-gray-300">
-                        <Phone className="w-3 h-3 text-green-400" />
-                        <a href={`tel:${otherUserProfile.phone}`} className="hover:text-white transition-colors">
-                          {otherUserProfile.phone}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              </>
-            )}
-
-            <div className="flex items-center gap-2 ml-auto">
-              <button
-                onClick={toggleBlockConversation}
-                className={`p-2 rounded-lg transition-all duration-300 hover:scale-110 ${
-                  blockedByUserId
-                    ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400'
-                    : 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
-                }`}
-                title={blockedByUserId ? 'Otvori razgovor' : 'Zatvori razgovor'}
-              >
-                {blockedByUserId ? <Unlock className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
-              </button>
-
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-white">
+                {otherUserProfile.nickname || 'Korisnik'}
+              </h2>
               {carInfo && (
-                <button
-                  onClick={() => setSelectedCarId(carInfo.id)}
-                  className="group relative flex-shrink-0"
-                  title="Vidi detalje auta"
-                >
-                  <img
-                    src={carInfo.image_url}
-                    alt={`${carInfo.brand} ${carInfo.model}`}
-                    className="w-16 h-12 object-cover rounded-lg border border-white/20 transition-all duration-300 group-hover:scale-105 group-hover:border-cyan-500/50"
-                  />
-                  <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/20 rounded-lg transition-all duration-300 flex items-center justify-center">
-                    <ExternalLink className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </button>
+                <div className="flex items-center gap-2 mt-1">
+                  <CarIcon className="w-3 h-3 text-cyan-400 flex-shrink-0" />
+                  <span className="text-xs text-cyan-300 truncate">
+                    {carInfo.brand} {carInfo.model} ({carInfo.year})
+                  </span>
+                </div>
+              )}
+              {isSwapAccepted && (
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {otherUserProfile.email && (
+                    <div className="flex items-center gap-1 text-xs text-gray-300">
+                      <Mail className="w-3 h-3 text-cyan-400" />
+                      <span className="truncate">{otherUserProfile.email}</span>
+                    </div>
+                  )}
+                  {otherUserProfile.phone && (
+                    <div className="flex items-center gap-1 text-xs text-gray-300">
+                      <Phone className="w-3 h-3 text-green-400" />
+                      <a href={`tel:${otherUserProfile.phone}`} className="hover:text-white transition-colors">
+                        {otherUserProfile.phone}
+                      </a>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
+            </>
+          )}
+
+          <div className="flex items-center gap-2 ml-auto">
+            <button
+              onClick={toggleBlockConversation}
+              className={`p-2 rounded-lg transition-all duration-300 hover:scale-110 ${
+                blockedByUserId
+                  ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400'
+                  : 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
+              }`}
+              title={blockedByUserId ? 'Otvori razgovor' : 'Zatvori razgovor'}
+            >
+              {blockedByUserId ? <Unlock className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+            </button>
+
+            {carInfo && (
+              <button
+                onClick={() => setSelectedCarId(carInfo.id)}
+                className="group relative flex-shrink-0"
+                title="Vidi detalje auta"
+              >
+                <img
+                  src={carInfo.image_url}
+                  alt={`${carInfo.brand} ${carInfo.model}`}
+                  className="w-16 h-12 object-cover rounded-lg border border-white/20 transition-all duration-300 group-hover:scale-105 group-hover:border-cyan-500/50"
+                />
+                <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/20 rounded-lg transition-all duration-300 flex items-center justify-center">
+                  <ExternalLink className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+              </button>
+            )}
           </div>
         </div>
+      </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2">
-          {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-3 opacity-50">
-                  <Send className="w-8 h-8 text-white" />
-                </div>
-                <p className="text-gray-400 text-base">Počnite razgovor</p>
-                <p className="text-gray-500 text-sm mt-1">Pošaljite prvu poruku</p>
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2">
+        {messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-3 opacity-50">
+                <Send className="w-8 h-8 text-white" />
               </div>
+              <p className="text-gray-400 text-base">Počnite razgovor</p>
+              <p className="text-gray-500 text-sm mt-1">Pošaljite prvu poruku</p>
             </div>
-          ) : (
-            messages.map((message) => {
-              const isMyMessage = message.sender_id === user?.id;
-              return (
+          </div>
+        ) : (
+          messages.map((message) => {
+            const isMyMessage = message.sender_id === user?.id;
+            return (
+              <div
+                key={message.id}
+                className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+              >
                 <div
-                  key={message.id}
-                  className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+                  className={`max-w-[70%] rounded-lg px-3 py-2 ${
+                    isMyMessage
+                      ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white'
+                      : 'bg-white/10 backdrop-blur-md text-gray-100 border border-white/10'
+                  }`}
                 >
-                  <div
-                    className={`max-w-[70%] rounded-lg px-3 py-2 ${
-                      isMyMessage
-                        ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white'
-                        : 'bg-white/10 backdrop-blur-md text-gray-100 border border-white/10'
+                  {message.image_url && (
+                    <img
+                      src={message.image_url}
+                      alt="Slika"
+                      className="rounded-lg mb-2 max-w-full cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => window.open(message.image_url, '_blank')}
+                    />
+                  )}
+                  {message.content && message.content !== 'Slika' && (
+                    <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                  )}
+                  <p
+                    className={`text-xs mt-1 ${
+                      isMyMessage ? 'text-cyan-100' : 'text-gray-400'
                     }`}
                   >
-                    {message.image_url && (
-                      <img
-                        src={message.image_url}
-                        alt="Slika"
-                        className="rounded-lg mb-2 max-w-full cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => window.open(message.image_url, '_blank')}
-                      />
-                    )}
-                    {message.content && message.content !== 'Slika' && (
-                      <p className="text-sm leading-relaxed break-words">{message.content}</p>
-                    )}
-                    <p
-                      className={`text-xs mt-1 ${
-                        isMyMessage ? 'text-cyan-100' : 'text-gray-400'
-                      }`}
-                    >
-                      {formatTime(message.created_at)}
-                    </p>
-                  </div>
+                    {formatTime(message.created_at)}
+                  </p>
                 </div>
-              );
-            })
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+              </div>
+            );
+          })
+        )}
+        <div ref={messagesEndRef} />
+      </div>
 
-        <div className="flex-shrink-0 p-3 border-t border-white/10 bg-gradient-to-r from-gray-900/50 to-gray-800/50">
-          {blockedByUserId && (
-            <div className="mb-2 p-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-              <p className="text-xs text-red-400 text-center font-semibold">
-                {blockedByUserId === user?.id
-                  ? 'Zatvorili ste ovaj razgovor. Kliknite na ikonicu za otključavanje da nastavite.'
-                  : 'Ovaj razgovor je zatvoren od strane drugog korisnika.'}
-              </p>
-            </div>
-          )}
-          {imagePreview && (
-            <div className="mb-2 relative inline-block">
-              <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-white/20" />
-              <button
-                onClick={() => {
-                  setSelectedImage(null);
-                  setImagePreview(null);
-                }}
-                className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 hover:bg-red-600 transition-colors"
-              >
-                <X className="w-3 h-3 text-white" />
-              </button>
-            </div>
-          )}
-          <div className="flex gap-2 items-end">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageSelect}
-              accept="image/*"
-              className="hidden"
-            />
+      <div className="flex-shrink-0 p-3 border-t border-white/10 bg-gradient-to-r from-gray-900/50 to-gray-800/50">
+        {blockedByUserId && (
+          <div className="mb-2 p-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+            <p className="text-xs text-red-400 text-center font-semibold">
+              {blockedByUserId === user?.id
+                ? 'Zatvorili ste ovaj razgovor. Kliknite na ikonicu za otključavanje da nastavite.'
+                : 'Ovaj razgovor je zatvoren od strane drugog korisnika.'}
+            </p>
+          </div>
+        )}
+        {imagePreview && (
+          <div className="mb-2 relative inline-block">
+            <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-white/20" />
             <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={!!blockedByUserId}
-              className="bg-white/5 hover:bg-white/10 border border-white/10 p-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Dodaj sliku"
+              onClick={() => {
+                setSelectedImage(null);
+                setImagePreview(null);
+              }}
+              className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 hover:bg-red-600 transition-colors"
             >
-              <ImageIcon className="w-5 h-5 text-gray-400" />
-            </button>
-            <textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={blockedByUserId ? "Razgovor je zatvoren..." : "Napišite poruku..."}
-              rows={1}
-              disabled={!!blockedByUserId}
-              className="flex-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-lg px-3 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all resize-none text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ minHeight: '42px', maxHeight: '100px' }}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={(!newMessage.trim() && !selectedImage) || uploading || !!blockedByUserId}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold px-4 py-2.5 rounded-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-cyan-500/30"
-            >
-              {uploading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
+              <X className="w-3 h-3 text-white" />
             </button>
           </div>
-          {!blockedByUserId && (
-            <p className="text-xs text-gray-500 mt-1.5 text-center">
-              Enter za slanje • Shift + Enter za novi red
-            </p>
-          )}
+        )}
+        <div className="flex gap-2 items-end">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageSelect}
+            accept="image/*"
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={!!blockedByUserId}
+            className="flex-shrink-0 bg-white/5 hover:bg-white/10 border border-white/10 p-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Dodaj sliku"
+          >
+            <ImageIcon className="w-5 h-5 text-gray-400" />
+          </button>
+          <textarea
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder={blockedByUserId ? "Razgovor je zatvoren..." : "Napišite poruku..."}
+            rows={1}
+            disabled={!!blockedByUserId}
+            className="flex-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-lg px-3 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all resize-none text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ minHeight: '42px', maxHeight: '100px' }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={(!newMessage.trim() && !selectedImage) || uploading || !!blockedByUserId}
+            className="flex-shrink-0 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold px-4 py-2.5 rounded-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-cyan-500/30"
+          >
+            {uploading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+          </button>
         </div>
+        {!blockedByUserId && (
+          <p className="text-xs text-gray-500 mt-1.5 text-center">
+            Enter za slanje • Shift + Enter za novi red
+          </p>
+        )}
+      </div>
     </div>
   );
 
