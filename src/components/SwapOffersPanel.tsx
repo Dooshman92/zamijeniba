@@ -272,11 +272,11 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
                   </div>
                 )}
 
-                {offer.status === 'accepted' && (offer.targetOwnerProfile || offer.offeredOwnerProfile) && (
-                  <div className="backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-                    <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-3">Kontakt informacije</p>
-                    <div className="space-y-4">
-                      {offer.offeredOwnerProfile && (
+                {offer.status === 'accepted' && user && (
+                  <>
+                    {offer.targetCar?.user_id === user.id && offer.offeredOwnerProfile && (
+                      <div className="backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                        <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-3">Kontakt informacije</p>
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-cyan-400" />
@@ -305,8 +305,11 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
                             </div>
                           )}
                         </div>
-                      )}
-                      {offer.targetOwnerProfile && (
+                      </div>
+                    )}
+                    {offer.offeredCar?.user_id === user.id && offer.targetOwnerProfile && (
+                      <div className="backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                        <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-3">Kontakt informacije</p>
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-blue-400" />
@@ -335,9 +338,9 @@ export function SwapOffersPanel({ onAcceptOffer, onOpenChat }: SwapOffersPanelPr
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
