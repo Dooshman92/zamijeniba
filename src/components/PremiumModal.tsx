@@ -8,49 +8,56 @@ interface PremiumModalProps {
   onSuccess: () => void;
 }
 
-type PlanDuration = '1month' | '3months' | '6months' | '1year';
+type PlanDuration = '3days' | '5days' | '10days' | '15days' | '30days';
 
 interface Plan {
   id: PlanDuration;
   name: string;
   duration: string;
+  days: number;
   price: number;
-  pricePerMonth: number;
   discount?: string;
   popular?: boolean;
 }
 
 const plans: Plan[] = [
   {
-    id: '1month',
-    name: '1 Mjesec',
-    duration: '30 dana',
-    price: 9.99,
-    pricePerMonth: 9.99,
+    id: '3days',
+    name: '3 Dana',
+    duration: '3 dana',
+    days: 3,
+    price: 2.99,
   },
   {
-    id: '3months',
-    name: '3 Mjeseca',
-    duration: '90 dana',
-    price: 24.99,
-    pricePerMonth: 8.33,
-    discount: '-17%',
+    id: '5days',
+    name: '5 Dana',
+    duration: '5 dana',
+    days: 5,
+    price: 4.99,
+  },
+  {
+    id: '10days',
+    name: '10 Dana',
+    duration: '10 dana',
+    days: 10,
+    price: 8.99,
+    discount: '-10%',
     popular: true,
   },
   {
-    id: '6months',
-    name: '6 Mjeseci',
-    duration: '180 dana',
-    price: 44.99,
-    pricePerMonth: 7.50,
-    discount: '-25%',
+    id: '15days',
+    name: '15 Dana',
+    duration: '15 dana',
+    days: 15,
+    price: 12.99,
+    discount: '-14%',
   },
   {
-    id: '1year',
-    name: '1 Godina',
-    duration: '365 dana',
-    price: 79.99,
-    pricePerMonth: 6.67,
+    id: '30days',
+    name: '30 Dana',
+    duration: '30 dana',
+    days: 30,
+    price: 19.99,
     discount: '-33%',
   },
 ];
@@ -80,7 +87,7 @@ const premiumFeatures = [
 
 export function PremiumModal({ onClose, onSuccess }: PremiumModalProps) {
   const { user } = useAuth();
-  const [selectedPlan, setSelectedPlan] = useState<PlanDuration>('3months');
+  const [selectedPlan, setSelectedPlan] = useState<PlanDuration>('10days');
   const [loading, setLoading] = useState(false);
 
   const handlePurchase = async () => {
@@ -93,20 +100,7 @@ export function PremiumModal({ onClose, onSuccess }: PremiumModalProps) {
       if (!plan) return;
 
       const expiresAt = new Date();
-      switch (selectedPlan) {
-        case '1month':
-          expiresAt.setMonth(expiresAt.getMonth() + 1);
-          break;
-        case '3months':
-          expiresAt.setMonth(expiresAt.getMonth() + 3);
-          break;
-        case '6months':
-          expiresAt.setMonth(expiresAt.getMonth() + 6);
-          break;
-        case '1year':
-          expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-          break;
-      }
+      expiresAt.setDate(expiresAt.getDate() + plan.days);
 
       const { error: subscriptionError } = await supabase
         .from('premium_subscriptions')
@@ -127,12 +121,13 @@ export function PremiumModal({ onClose, onSuccess }: PremiumModalProps) {
           id: user.id,
           is_premium: true,
           premium_expires_at: expiresAt.toISOString(),
+          premium_package_days: plan.days,
           updated_at: new Date().toISOString(),
         });
 
       if (profileError) throw profileError;
 
-      alert('✨ Čestitamo! Uspješno ste aktivirali Premium nalog!');
+      alert(`✨ Čestitamo! Uspješno ste aktivirali Premium nalog na ${plan.days} dana!`);
       onSuccess();
       onClose();
     } catch (error) {
@@ -185,9 +180,9 @@ export function PremiumModal({ onClose, onSuccess }: PremiumModalProps) {
           <div>
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
               <Star className="w-6 h-6 text-yellow-500" />
-              Odaberi Plan
+              Odaberi Paket
             </h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {plans.map((plan) => (
                 <button
                   key={plan.id}
@@ -216,7 +211,7 @@ export function PremiumModal({ onClose, onSuccess }: PremiumModalProps) {
                         €{plan.price.toFixed(2)}
                       </div>
                       <div className="text-xs text-gray-500">
-                        €{plan.pricePerMonth.toFixed(2)}/mjesec
+                        €{(plan.price / plan.days).toFixed(2)}/dan
                       </div>
                     </div>
                     {selectedPlan === plan.id && (

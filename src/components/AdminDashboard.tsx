@@ -269,12 +269,45 @@ export default function AdminDashboard() {
 
   const togglePremium = async (userId: string, currentStatus: boolean) => {
     try {
+      if (currentStatus) {
+        await supabase
+          .from('user_profiles')
+          .update({
+            is_premium: false,
+            premium_expires_at: null,
+            premium_package_days: null
+          })
+          .eq('id', userId);
+
+        alert('Premium status uklonjen');
+        loadUsers();
+        return;
+      }
+
+      const daysStr = prompt('Broj dana za premium paket (3, 5, 10, 15, 30):');
+      if (!daysStr) return;
+
+      const days = parseInt(daysStr);
+      const validDays = [3, 5, 10, 15, 30];
+
+      if (isNaN(days) || !validDays.includes(days)) {
+        alert('Unesite validan broj dana: 3, 5, 10, 15 ili 30');
+        return;
+      }
+
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + days);
+
       await supabase
         .from('user_profiles')
-        .update({ is_premium: !currentStatus })
+        .update({
+          is_premium: true,
+          premium_expires_at: expiresAt.toISOString(),
+          premium_package_days: days
+        })
         .eq('id', userId);
 
-      alert(currentStatus ? 'Premium status uklonjen' : 'Premium status dodeljen');
+      alert(`Premium status dodeljen na ${days} dana`);
       loadUsers();
     } catch (error) {
       console.error('Error toggling premium:', error);
