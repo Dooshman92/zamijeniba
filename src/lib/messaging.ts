@@ -54,7 +54,6 @@ export async function sendMessage(
     sender_id: senderId,
     receiver_id: receiverId,
     content: content,
-    message: content,
     message_type: messageType,
   };
 

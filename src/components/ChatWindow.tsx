@@ -206,7 +206,6 @@ export function ChatWindow({ conversationId, onBack, onClose, onViewSwapOffer }:
       sender_id: user.id,
       receiver_id: otherUser.id,
       content: messageContent,
-      message: messageContent,
       message_type: 'text',
     };
 

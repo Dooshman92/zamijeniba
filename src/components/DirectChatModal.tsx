@@ -132,11 +132,6 @@ export function DirectChatModal({ conversationId, otherUserId, onClose }: Direct
       sender_id: user.id,
       receiver_id: otherUserId,
       content: newMessage.trim(),
-      topic: 'chat',
-      extension: 'phx_reply',
-      message: newMessage.trim(),
-      is_read: false,
-      private: false,
       message_type: 'text',
     });
 
