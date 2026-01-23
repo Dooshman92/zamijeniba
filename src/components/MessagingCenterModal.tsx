@@ -54,7 +54,7 @@ export function MessagingCenterModal({
               </svg>
             </button>
           </div>
-          <div className="flex-1 flex min-h-0 overflow-hidden">
+          <div className="flex-1 flex min-h-0">
             <DirectChatModal
               conversationId={directChatConversationId}
               otherUserId={directChatOtherUserId}
