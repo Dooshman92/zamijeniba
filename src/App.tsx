@@ -262,14 +262,15 @@ function App() {
   };
 
   const handleSendMessage = async (userId: string, carId?: string) => {
-    if (!user) return;
+    if (!user || !userProfile?.is_premium) return;
 
     setShowCarDetail(false);
 
     const conversationId = await getOrCreateConversation(user.id, userId, carId);
     if (conversationId) {
-      setSelectedConversationId(conversationId);
-      setShowInbox(true);
+      setDirectChatConversationId(conversationId);
+      setDirectChatOtherUserId(userId);
+      setShowDirectChat(true);
     }
   };
 

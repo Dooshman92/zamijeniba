@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Car, supabase } from '../lib/supabase';
 import { CarCard } from './CarCard';
-import { getOrCreateConversation, sendMessage } from '../lib/messaging';
 import { useAuth } from '../lib/auth';
 
 interface SwapOfferModalProps {
@@ -70,29 +69,7 @@ export function SwapOfferModal({ targetCar, onClose, onSuccess }: SwapOfferModal
       return;
     }
 
-    const conversationId = await getOrCreateConversation(user.id, targetCar.user_id, targetCar.id);
-
-    if (conversationId) {
-      let messageContent = `Ponuda za zamenu: ${selectedCar.brand} ${selectedCar.model} za ${targetCar.brand} ${targetCar.model}`;
-
-      if (paymentAmount > 0) {
-        messageContent += `\n💰 Doplata: ${paymentAmount.toLocaleString('de-DE')} KM`;
-      }
-
-      if (message) {
-        messageContent += `\n\n${message}`;
-      }
-
-      await sendMessage(
-        conversationId,
-        user.id,
-        targetCar.user_id,
-        messageContent,
-        'swap_offer',
-        offerData.id
-      );
-    }
-
+    alert('Ponuda uspješno poslata! Chat će se otvoriti kada vlasnik prihvati ponudu.');
     onSuccess();
     onClose();
     setSubmitting(false);

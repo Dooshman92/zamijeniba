@@ -15,12 +15,28 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userCars, setUserCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
   const { user: currentUser } = useAuth();
 
   useEffect(() => {
     fetchUserProfile();
     fetchUserCars();
-  }, [userId]);
+    if (currentUser) {
+      fetchCurrentUserProfile();
+    }
+  }, [userId, currentUser]);
+
+  const fetchCurrentUserProfile = async () => {
+    if (!currentUser) return;
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+    if (data) {
+      setCurrentUserProfile(data);
+    }
+  };
 
   const fetchUserProfile = async () => {
     const { data } = await supabase
@@ -152,7 +168,7 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                     <p className="text-gray-400 mb-3">Tel: {userProfile.phone}</p>
                   )}
 
-                  {!isOwnProfile && currentUser && (
+                  {!isOwnProfile && currentUser && currentUserProfile?.is_premium && (
                     <button
                       onClick={handleSendMessage}
                       className="mt-4 flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-2.5 px-5 rounded-xl transition-all duration-300 transform hover:scale-105"

@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { Car } from '../lib/supabase';
-import { getOrCreateConversation, sendMessage } from '../lib/messaging';
 
 interface LiveInquiryModalProps {
   car: Car;
@@ -42,13 +41,6 @@ export function LiveInquiryModal({ car, onClose, onSuccess }: LiveInquiryModalPr
         });
 
       if (error) throw error;
-
-      const conversationId = await getOrCreateConversation(user.id, car.user_id, car.id);
-
-      if (conversationId) {
-        const messageContent = `🔥 LIVE UPIT - ${car.brand} ${car.model}\n\n${message}\n\nKontakt telefon: ${phone}`;
-        await sendMessage(conversationId, user.id, car.user_id, messageContent, 'text');
-      }
 
       alert('Live upit je uspješno poslan! Vlasnik će biti odmah obaviješten.');
       onSuccess();
