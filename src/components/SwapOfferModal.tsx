@@ -37,7 +37,24 @@ export function SwapOfferModal({ targetCar, onClose, onSuccess }: SwapOfferModal
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      setMyCars(data);
+      const carIds = data.map(car => car.user_id).filter(Boolean);
+      const { data: profiles } = await supabase
+        .from('user_profiles')
+        .select('id, is_premium, nickname')
+        .in('id', carIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      const carsWithOwnerInfo = data.map(car => {
+        const profile = profileMap.get(car.user_id);
+        return {
+          ...car,
+          owner_is_premium: profile?.is_premium || false,
+          owner_nickname: profile?.nickname || null,
+        };
+      });
+
+      setMyCars(carsWithOwnerInfo as Car[]);
     }
     setLoading(false);
   };

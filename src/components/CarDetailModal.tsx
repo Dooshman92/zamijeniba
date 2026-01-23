@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2 } from 'lucide-react';
+import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown } from 'lucide-react';
 import { Car, supabase, CarImage } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { PremiumBadge } from './PremiumBadge';
