@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserX, Car, Ticket, TrendingUp, MessageSquare,
   RefreshCw, Shield, Crown, Package, Search, Filter,
-  ChevronLeft, ChevronRight, Ban, Check, X, Mail, Phone, Plus
+  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -11,9 +11,8 @@ type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'premi
 
 interface UserProfile {
   id: string;
-  email: string;
   nickname: string;
-  phone_number: string;
+  phone: string;
   is_admin: boolean;
   is_premium: boolean;
   is_banned: boolean;
@@ -35,7 +34,6 @@ interface Car {
   created_at: string;
   user_profiles: {
     nickname: string;
-    email: string;
   };
 }
 
@@ -53,7 +51,6 @@ interface PromoCode {
     redeemed_at: string;
     user_profiles: {
       nickname: string;
-      email: string;
     };
   }>;
 }
@@ -175,7 +172,7 @@ export default function AdminDashboard() {
     try {
       const { data } = await supabase
         .from('cars')
-        .select('*, user_profiles(nickname, email)')
+        .select('*, user_profiles(nickname)')
         .order('created_at', { ascending: false });
 
       setCars(data || []);
@@ -196,25 +193,18 @@ export default function AdminDashboard() {
           creator:user_profiles!created_by(nickname),
           promo_code_redemptions(
             redeemed_at,
-            user_profiles(nickname, email)
+            user_profiles(nickname)
           )
         `)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('=== PROMO CODES ERROR ===');
-        console.error('Error message:', error.message);
-        console.error('Error details:', error.details);
-        console.error('Error hint:', error.hint);
-        console.error('Full error object:', JSON.stringify(error, null, 2));
-        console.error('=========================');
-      } else {
-        console.log('Promo codes loaded successfully:', data);
+        console.error('Error loading promo codes:', error);
       }
 
       setPromoCodes(data || []);
     } catch (error) {
-      console.error('Exception loading promo codes:', error);
+      console.error('Error loading promo codes:', error);
     } finally {
       setLoading(false);
     }
@@ -563,20 +553,16 @@ export default function AdminDashboard() {
                             </div>
                             <div>
                               <p className="font-medium text-gray-900">{user.nickname}</p>
-                              <p className="text-sm text-gray-500">{user.email}</p>
+                              <p className="text-sm text-gray-500">ID: {user.id.slice(0, 8)}</p>
                             </div>
                           </div>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Mail className="w-4 h-4" />
-                              {user.email}
-                            </div>
-                            {user.phone_number && (
+                            {user.phone && (
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Phone className="w-4 h-4" />
-                                {user.phone_number}
+                                {user.phone}
                               </div>
                             )}
                           </div>
@@ -748,14 +734,11 @@ export default function AdminDashboard() {
                           </span>
                         </div>
                         <div className="space-y-1 text-sm text-gray-600">
-                          <p className="flex items-center gap-2">
-                            <Mail className="w-4 h-4" />
-                            {user.email}
-                          </p>
-                          {user.phone_number && (
+                          <p className="text-gray-500">ID: {user.id}</p>
+                          {user.phone && (
                             <p className="flex items-center gap-2">
                               <Phone className="w-4 h-4" />
-                              {user.phone_number}
+                              {user.phone}
                             </p>
                           )}
                         </div>
@@ -890,7 +873,6 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-4 py-3">
                           <p className="font-medium text-gray-900">{car.user_profiles?.nickname}</p>
-                          <p className="text-sm text-gray-500">{car.user_profiles?.email}</p>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">{car.location}</td>
                         <td className="px-4 py-3">
@@ -1011,9 +993,6 @@ export default function AdminDashboard() {
                           <p className="text-xs font-semibold text-blue-900 mb-1">Iskoristio:</p>
                           <p className="text-xs text-blue-800">
                             @{redemption.user_profiles?.nickname}
-                          </p>
-                          <p className="text-xs text-blue-600">
-                            {redemption.user_profiles?.email}
                           </p>
                           <p className="text-xs text-blue-500 mt-1">
                             {new Date(redemption.redeemed_at).toLocaleString('sr-RS')}
