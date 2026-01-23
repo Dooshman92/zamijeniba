@@ -698,6 +698,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
           </div>
         ))}
       </div>
+      </div>
 
       {selectedCar && (
         <CarDetailModal
@@ -718,7 +719,6 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onLiveInquiry, onO
           onClose={() => setSelectedUserProfile(null)}
         />
       )}
-      </div>
     </div>
   );
 }
