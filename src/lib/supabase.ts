@@ -111,6 +111,7 @@ export interface UserProfile {
   credits: number;
   show_phone_number: boolean;
   premium_expires_at: string | null;
+  premium_package_days: number | null;
   created_at: string;
   updated_at: string;
   email?: string;

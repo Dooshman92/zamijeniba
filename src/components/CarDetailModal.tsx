@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown } from 'lucide-react';
-import { Car, supabase, CarImage } from '../lib/supabase';
+import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, Clock } from 'lucide-react';
+import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { PremiumBadge } from './PremiumBadge';
 
@@ -22,6 +22,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [fullscreenImage, setFullscreenImage] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -32,6 +33,26 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
       fetchCarImages(initialCar.id, initialCar);
     }
   }, [carId, initialCar]);
+
+  useEffect(() => {
+    if (user && car && car.user_id === user.id) {
+      loadUserProfile();
+    }
+  }, [user, car]);
+
+  const loadUserProfile = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (data) {
+      setUserProfile(data);
+    }
+  };
 
   const loadCarById = async (id: string) => {
     setLoading(true);
@@ -108,6 +129,44 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
       minute: '2-digit'
     });
     return `${dateStr} u ${timeStr}`;
+  };
+
+  const getRemainingPremiumTime = () => {
+    if (!userProfile?.is_premium || !userProfile?.premium_expires_at) {
+      return null;
+    }
+
+    const now = new Date();
+    const expiresAt = new Date(userProfile.premium_expires_at);
+    const diffMs = expiresAt.getTime() - now.getTime();
+
+    if (diffMs <= 0) {
+      return { expired: true, text: 'Premium je istekao' };
+    }
+
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (diffDays > 0) {
+      return {
+        expired: false,
+        text: `${diffDays} ${diffDays === 1 ? 'dan' : diffDays < 5 ? 'dana' : 'dana'}`,
+        detailed: `${diffDays}d ${diffHours}h`
+      };
+    } else if (diffHours > 0) {
+      return {
+        expired: false,
+        text: `${diffHours} ${diffHours === 1 ? 'sat' : diffHours < 5 ? 'sata' : 'sati'}`,
+        detailed: `${diffHours}h ${diffMinutes}m`
+      };
+    } else {
+      return {
+        expired: false,
+        text: `${diffMinutes} ${diffMinutes === 1 ? 'minuta' : diffMinutes < 5 ? 'minute' : 'minuta'}`,
+        detailed: `${diffMinutes}m`
+      };
+    }
   };
 
   const getEquipmentList = () => {
@@ -485,16 +544,85 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
               </div>
             )}
             {isOwnCar && (
-              <div className="backdrop-blur-md bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-6">
-                <p className="text-cyan-400 text-lg font-semibold text-center mb-4">Ovo je vaš oglas</p>
-                {onEdit && (
-                  <button
-                    onClick={() => onEdit(car)}
-                    className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-400 hover:to-cyan-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105"
-                  >
-                    Uredi oglas
-                  </button>
+              <div className="space-y-4">
+                {userProfile?.is_premium && getRemainingPremiumTime() && (
+                  <div className={`backdrop-blur-md rounded-xl p-6 border-2 ${
+                    getRemainingPremiumTime()?.expired
+                      ? 'bg-red-500/10 border-red-500/30'
+                      : 'bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30'
+                  }`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          getRemainingPremiumTime()?.expired
+                            ? 'bg-red-500/20'
+                            : 'bg-gradient-to-br from-yellow-500 to-amber-600'
+                        }`}>
+                          <Crown className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h4 className={`font-bold text-lg ${
+                            getRemainingPremiumTime()?.expired
+                              ? 'text-red-400'
+                              : 'text-yellow-500'
+                          }`}>
+                            Premium Oglas
+                          </h4>
+                          <p className="text-sm text-gray-400">
+                            {getRemainingPremiumTime()?.expired
+                              ? 'Vaš premium je istekao'
+                              : 'Vaš oglas je istaknut'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {!getRemainingPremiumTime()?.expired && (
+                      <div className="backdrop-blur-md bg-white/5 rounded-lg p-4 border border-yellow-500/20">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Clock className="w-5 h-5 text-yellow-400" />
+                          <p className="text-gray-300 font-semibold">Preostalo vrijeme:</p>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-black text-white">
+                            {getRemainingPremiumTime()?.text}
+                          </span>
+                        </div>
+                        {userProfile?.premium_expires_at && (
+                          <p className="text-xs text-gray-500 mt-3">
+                            Ističe: {new Date(userProfile.premium_expires_at).toLocaleDateString('bs-BA', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {getRemainingPremiumTime()?.expired && (
+                      <div className="backdrop-blur-md bg-red-500/10 rounded-lg p-4 border border-red-500/20">
+                        <p className="text-red-300 text-sm text-center">
+                          Vaš oglas više nije istaknut. Produžite premium da bi oglas bio ponovo na vrhu rezultata.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 )}
+
+                <div className="backdrop-blur-md bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-6">
+                  <p className="text-cyan-400 text-lg font-semibold text-center mb-4">Ovo je vaš oglas</p>
+                  {onEdit && (
+                    <button
+                      onClick={() => onEdit(car)}
+                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-400 hover:to-cyan-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105"
+                    >
+                      Uredi oglas
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>
