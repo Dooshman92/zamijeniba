@@ -199,7 +199,7 @@ export function CarDetailModal({ car, onClose, onSwapOffer, onLiveInquiry, onOwn
                     <div className="mt-3 backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
                       <p className="text-xs text-blue-300 flex items-center gap-2">
                         <span className="text-blue-400">ℹ️</span>
-                        Kontakt informacije vlasnika vidljive su kada prihvatite ponudu za zamjenu
+                        Kontakt informacije vlasnika vidljive su kada vlasnik oglasa prihvati ponudu za zamjenu
                       </p>
                     </div>
                   )}
