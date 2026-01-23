@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { X, Send, User, Phone, Mail, Image as ImageIcon } from 'lucide-react';
-import { supabase, Message, UserProfile } from '../lib/supabase';
+import { X, Send, User, Phone, Mail, Image as ImageIcon, ExternalLink, Car as CarIcon } from 'lucide-react';
+import { supabase, Message, UserProfile, Car } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 
 interface DirectChatModalProps {
@@ -14,6 +14,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [otherUserProfile, setOtherUserProfile] = useState<UserProfile | null>(null);
+  const [carInfo, setCarInfo] = useState<{ brand: string; model: string; year: number; image_url: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSwapAccepted, setIsSwapAccepted] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -26,6 +27,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   useEffect(() => {
     loadOtherUserProfile();
     loadMessages();
+    loadCarInfo();
     checkSwapStatus();
     markAsRead();
     const cleanup = subscribeToMessages();
@@ -86,6 +88,31 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
+    }
+  };
+
+  const loadCarInfo = async () => {
+    const { data: conversationData } = await supabase
+      .from('conversations')
+      .select('car_id')
+      .eq('id', conversationId)
+      .maybeSingle();
+
+    if (conversationData?.car_id) {
+      const { data: carData } = await supabase
+        .from('cars')
+        .select('brand, model, year, image_url')
+        .eq('id', conversationData.car_id)
+        .maybeSingle();
+
+      if (carData) {
+        setCarInfo({
+          brand: carData.brand,
+          model: carData.model,
+          year: carData.year,
+          image_url: carData.image_url
+        });
+      }
     }
   };
 
@@ -276,16 +303,24 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
               </div>
 
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <h2 className="text-lg font-bold text-white">
                   {otherUserProfile.nickname || 'Korisnik'}
                 </h2>
+                {carInfo && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <CarIcon className="w-3 h-3 text-cyan-400 flex-shrink-0" />
+                    <span className="text-xs text-cyan-300 truncate">
+                      {carInfo.brand} {carInfo.model} ({carInfo.year})
+                    </span>
+                  </div>
+                )}
                 {isSwapAccepted && (
                   <div className="flex flex-wrap gap-2 mt-1">
                     {otherUserProfile.email && (
                       <div className="flex items-center gap-1 text-xs text-gray-300">
                         <Mail className="w-3 h-3 text-cyan-400" />
-                        <span>{otherUserProfile.email}</span>
+                        <span className="truncate">{otherUserProfile.email}</span>
                       </div>
                     )}
                     {otherUserProfile.phone && (
@@ -299,6 +334,14 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
                   </div>
                 )}
               </div>
+
+              {carInfo && (
+                <img
+                  src={carInfo.image_url}
+                  alt={`${carInfo.brand} ${carInfo.model}`}
+                  className="w-16 h-12 object-cover rounded-lg border border-white/20 flex-shrink-0"
+                />
+              )}
             </div>
           )}
         </div>
