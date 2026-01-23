@@ -19,48 +19,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkBanStatus = async (userId: string) => {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('is_banned, ban_reason, ban_expires_at')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (!error && data?.is_banned) {
-        if (!data.ban_expires_at || new Date(data.ban_expires_at) > new Date()) {
-          await supabase.auth.signOut();
-          alert(`Vaš nalog je banovan. Razlog: ${data.ban_reason || 'Kršenje pravila'}`);
-          return false;
-        }
-      }
-      return true;
-    };
-
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const isAllowed = await checkBanStatus(session.user.id);
-        if (isAllowed) {
-          setUser(session.user);
-        } else {
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const isAllowed = await checkBanStatus(session.user.id);
-        if (isAllowed) {
-          setUser(session.user);
-        } else {
-          setUser(null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      (async () => {
+        if (session?.user) {
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .select('is_banned, ban_reason, ban_expires_at')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (!error && data?.is_banned) {
+            if (!data.ban_expires_at || new Date(data.ban_expires_at) > new Date()) {
+              await supabase.auth.signOut();
+              alert(`Vaš nalog je banovan. Razlog: ${data.ban_reason || 'Kršenje pravila'}`);
+              setUser(null);
+              return;
+            }
+          }
         }
-      } else {
-        setUser(null);
-      }
+        setUser(session?.user ?? null);
+      })();
     });
 
     return () => subscription.unsubscribe();
