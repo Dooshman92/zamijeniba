@@ -597,7 +597,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
   if (embedded) {
     return (
-      <div className="w-full h-full flex flex-col">
+      <>
         {chatContent}
         {selectedCarId && (
           <CarDetailModal
@@ -605,7 +605,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
             onClose={() => setSelectedCarId(null)}
           />
         )}
-      </div>
+      </>
     );
   }
 
