@@ -245,18 +245,14 @@ export function InboxModal({ onClose, initialConversationId, onViewSwapOffer }: 
               {conversations.map((conversation) => (
                 <div
                   key={conversation.id}
-                  className={`relative group w-full px-6 py-4 transition-colors flex items-center gap-4 ${
+                  onClick={() => setSelectedConversation(conversation.id)}
+                  className={`relative group w-full px-6 py-4 transition-colors flex items-center gap-4 cursor-pointer ${
                     conversation.unread_count > 0
                       ? 'bg-blue-50 hover:bg-blue-100'
                       : 'hover:bg-gray-50'
                   }`}
                 >
-                  <button
-                    onClick={() => setSelectedConversation(conversation.id)}
-                    className="absolute inset-0 z-0"
-                  />
-
-                  <div className="flex-shrink-0 relative z-10">
+                  <div className="flex-shrink-0 relative z-10 pointer-events-none">
                     {conversation.other_user_avatar ? (
                       <img
                         src={conversation.other_user_avatar}
@@ -270,7 +266,7 @@ export function InboxModal({ onClose, initialConversationId, onViewSwapOffer }: 
                     )}
                   </div>
 
-                  <div className="flex-1 min-w-0 relative z-10">
+                  <div className="flex-1 min-w-0 relative z-10 pointer-events-none">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className={`font-semibold truncate ${conversation.unread_count > 0 ? 'text-gray-900' : 'text-gray-700'}`}>
                         {conversation.other_user_name}
@@ -294,7 +290,7 @@ export function InboxModal({ onClose, initialConversationId, onViewSwapOffer }: 
 
                   <button
                     onClick={(e) => deleteConversation(conversation.id, e)}
-                    className="relative z-10 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    className="relative z-20 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 pointer-events-auto"
                     title="Obriši konverzaciju"
                   >
                     <Trash2 className="w-5 h-5" />
