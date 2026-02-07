@@ -1264,32 +1264,61 @@ function App() {
 
         <footer className="border-t border-white/10 backdrop-blur-md bg-white/5 py-12 mt-20">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-              <div className="flex flex-col items-center lg:items-start justify-center">
-                <Logo size="md" />
-                <div className="mt-4 text-center lg:text-left">
-                  <p className="text-gray-400 font-medium">autozamjena.ba © 2026</p>
-                  <p className="text-sm text-gray-500 mt-1">Brzo. Sigurno. Jednostavno.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="flex items-center justify-center">
+                <div className="w-full backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Sparkles className="w-5 h-5 text-cyan-400" />
+                    <h3 className="text-lg font-bold text-white">Reklama</h3>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Promovišite svoj biznis
+                  </p>
+                  <div className="mt-3 text-xs text-gray-500">
+                    300x250
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center justify-center">
-                <div className="w-full max-w-lg backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center">
+                <div className="w-full backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Sparkles className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-lg font-bold text-white">Prostor za reklamu</h3>
-                    <Sparkles className="w-5 h-5 text-cyan-400" />
+                    <h3 className="text-lg font-bold text-white">Reklama</h3>
                   </div>
                   <p className="text-sm text-gray-400">
-                    Promovišite svoj biznis ovdje
+                    Promovišite svoj biznis
                   </p>
                   <div className="mt-3 text-xs text-gray-500">
-                    728x90 Banner
+                    300x250
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center lg:justify-end">
+              <div className="flex items-center justify-center">
+                <div className="w-full backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Sparkles className="w-5 h-5 text-cyan-400" />
+                    <h3 className="text-lg font-bold text-white">Reklama</h3>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Promovišite svoj biznis
+                  </p>
+                  <div className="mt-3 text-xs text-gray-500">
+                    300x250
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/10 pt-8">
+              <div className="flex flex-col items-center gap-6">
+                <Logo size="md" />
+                <div className="text-center">
+                  <p className="text-gray-400 font-medium">autozamjena.ba © 2026</p>
+                  <p className="text-sm text-gray-500 mt-1">Brzo. Sigurno. Jednostavno.</p>
+                  <p className="text-gray-400 text-sm mt-2">Najbolja platforma za zamjenu vozila u BiH</p>
+                </div>
                 {user && (
                   <button
                     onClick={() => {
@@ -1312,10 +1341,6 @@ function App() {
                   </button>
                 )}
               </div>
-            </div>
-
-            <div className="border-t border-white/10 pt-6">
-              <p className="text-gray-400 text-center text-sm">Najbolja platforma za zamjenu vozila u BiH</p>
             </div>
           </div>
         </footer>
