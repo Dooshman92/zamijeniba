@@ -148,34 +148,49 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
 
     setLoading(true);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: passwordData.currentPassword
-    });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
 
-    if (signInError) {
-      setPasswordError('Trenutna lozinka nije ispravna');
+      if (!session) {
+        setPasswordError('Sesija nije aktivna');
+        setLoading(false);
+        return;
+      }
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/change-password`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      const result = await response.json();
+
       setLoading(false);
-      return;
-    }
 
-    const { error: updateError } = await supabase.auth.updateUser({
-      password: passwordData.newPassword
-    });
+      if (!response.ok) {
+        setPasswordError(result.error || 'Greška pri promjeni lozinke');
+        return;
+      }
 
-    setLoading(false);
-
-    if (updateError) {
+      setPasswordSuccess('Lozinka uspješno promijenjena');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    } catch (error) {
+      setLoading(false);
       setPasswordError('Greška pri promjeni lozinke');
-      return;
+      console.error('Password change error:', error);
     }
-
-    setPasswordSuccess('Lozinka uspješno promijenjena');
-    setPasswordData({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
