@@ -8,8 +8,9 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDate } from '../lib/dateUtils';
 import { SupportPanel } from './SupportPanel';
+import AdvertisementsPanel from './AdvertisementsPanel';
 
-type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports' | 'support';
+type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports' | 'support' | 'advertisements';
 
 interface UserProfile {
   id: string;
@@ -1676,21 +1677,39 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
             </button>
 
             {userProfile?.is_admin && (
-              <button
-                onClick={() => {
-                  setActiveSection('promo');
-                  setSearchTerm('');
-                  setCurrentPage(1);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeSection === 'promo'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <Ticket className="w-5 h-5" />
-                <span className="font-medium">Promo Kodovi</span>
-              </button>
+              <>
+                <button
+                  onClick={() => {
+                    setActiveSection('promo');
+                    setSearchTerm('');
+                    setCurrentPage(1);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    activeSection === 'promo'
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Ticket className="w-5 h-5" />
+                  <span className="font-medium">Promo Kodovi</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveSection('advertisements');
+                    setSearchTerm('');
+                    setCurrentPage(1);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    activeSection === 'advertisements'
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="font-medium">Reklame</span>
+                </button>
+              </>
             )}
           </div>
         </nav>
@@ -1718,6 +1737,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
           {activeSection === 'reports' && renderReports()}
           {activeSection === 'promo' && renderPromoCodes()}
           {activeSection === 'support' && <SupportPanel onClose={() => {}} />}
+          {activeSection === 'advertisements' && <AdvertisementsPanel onClose={() => {}} />}
         </div>
       </div>
     </div>
