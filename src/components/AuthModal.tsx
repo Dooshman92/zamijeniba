@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../lib/auth';
-import { validateEmail, sanitizeInput, rateLimiter } from '../lib/security';
+import { validateEmail, sanitizeInput, rateLimiter, detectSuspiciousEmail, validatePasswordStrength } from '../lib/security';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -26,6 +26,9 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
   const [recaptchaToken, setRecaptchaToken] = useState('');
   const recaptchaRef = useRef<HTMLDivElement>(null);
   const recaptchaWidgetId = useRef<number | null>(null);
+  const formOpenedAt = useRef<number>(Date.now());
+  const [honeypot, setHoneypot] = useState('');
+  const [honeypot2, setHoneypot2] = useState('');
   const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
 
   useEffect(() => {
@@ -68,6 +71,17 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
     setError('');
     setSuccess('');
 
+    if (honeypot || honeypot2) {
+      setError('Greška pri obradi. Pokušajte ponovo.');
+      return;
+    }
+
+    const timeSinceFormOpened = Date.now() - formOpenedAt.current;
+    if (mode === 'register' && timeSinceFormOpened < 3000) {
+      setError('Molimo popunite formu pažljivo.');
+      return;
+    }
+
     const sanitizedEmail = sanitizeInput(email);
 
     if (!validateEmail(sanitizedEmail)) {
@@ -78,6 +92,24 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
     if (password.length < 6) {
       setError('Lozinka mora imati najmanje 6 karaktera');
       return;
+    }
+
+    if (password.length < 8 && mode === 'register') {
+      setError('Za registraciju, lozinka mora imati najmanje 8 karaktera');
+      return;
+    }
+
+    if (mode === 'register') {
+      const passwordValidation = validatePasswordStrength(password);
+      if (!passwordValidation.valid) {
+        setError(`Lozinka nije dovoljno jaka. ${passwordValidation.feedback[0]}`);
+        return;
+      }
+
+      if (detectSuspiciousEmail(sanitizedEmail)) {
+        setError('Email adresa izgleda sumnjivo. Molimo koristite validnu email adresu.');
+        return;
+      }
     }
 
     const rateLimitKey = `auth_${mode}_${sanitizedEmail}`;
@@ -105,8 +137,8 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
 
     if (mode === 'register') {
       const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-      if (siteKey && siteKey !== 'your_recaptcha_site_key_here' && !recaptchaToken) {
-        setError('Molimo potvrdite da niste robot');
+      if (!recaptchaToken && siteKey && siteKey !== 'your_recaptcha_site_key_here') {
+        setError('Molimo potvrdite da niste robot (reCAPTCHA)');
         return;
       }
     }
@@ -122,7 +154,7 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
       setLoading(false);
     } else {
       if (mode === 'register') {
-        setSuccess('Registracija uspješna! Provjerite email za potvrdu naloga.');
+        setSuccess('Registracija uspješna! 📧 Provjerite svoj email i kliknite na link za potvrdu naloga prije prijave.');
         setLoading(false);
       } else {
         onClose();
@@ -159,6 +191,25 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }} aria-hidden="true">
+            <input
+              type="text"
+              name="website"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+            <input
+              type="email"
+              name="confirm_email"
+              value={honeypot2}
+              onChange={(e) => setHoneypot2(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
+
           {error && (
             <div className="p-3 rounded-lg text-sm bg-red-100 text-red-800">
               {error}
@@ -206,15 +257,29 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
                 />
               </div>
               {mode === 'register' && (
-                <p className="mt-1 text-xs text-gray-500">Minimalno 6 karaktera</p>
+                <p className="mt-1 text-xs text-gray-500">Minimalno 8 karaktera, preporuka: kombinacija slova, brojeva i simbola</p>
               )}
             </div>
           )}
 
-          {mode === 'register' && import.meta.env.VITE_RECAPTCHA_SITE_KEY !== 'your_recaptcha_site_key_here' && (
-            <div className="flex justify-center">
-              <div ref={recaptchaRef}></div>
-            </div>
+          {mode === 'register' && (
+            <>
+              {import.meta.env.VITE_RECAPTCHA_SITE_KEY !== 'your_recaptcha_site_key_here' ? (
+                <div className="flex flex-col items-center gap-2">
+                  <div ref={recaptchaRef}></div>
+                  <p className="text-xs text-gray-500 text-center">
+                    Potvrdite da niste robot za zaštitu od automatskih registracija
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs text-yellow-800">
+                  ⚠️ reCAPTCHA nije konfigurisan. Za produkciju, dodajte VITE_RECAPTCHA_SITE_KEY u .env
+                </div>
+              )}
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
+                📧 Nakon registracije, poslat ćemo vam email sa linkom za potvrdu. Morate potvrditi email prije prijave.
+              </div>
+            </>
           )}
 
           <button

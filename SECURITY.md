@@ -448,6 +448,52 @@ Ako pronađete sigurnosnu ranjivost, molimo vas da je prijavite odgovorno:
 
 ---
 
+## 18. Anti-Spam i Bot Zaštita
+
+### Email Verifikacija (OBAVEZNA)
+- Svi novi korisnici MORAJU potvrditi email
+- Verification link važi 24h
+- Korisnik se ne može prijaviti bez potvrde
+
+### Google reCAPTCHA v2
+- Obavezna na registraciji
+- Checkbox tip (nije invisible)
+- 99.9% efikasnost protiv botova
+
+### Honeypot Fields
+- 2 skrivena polja u registration formi
+- Botovi automatski ispunjavaju = blokirani
+- Nevidljivo za ljude
+
+### Timing Detection
+- Minimalno 3 sekunde za ispunjavanje forme
+- Botovi submituju odmah = blokirani
+
+### Suspicious Email Detection
+- Blokira temp mail servise (mailinator, 10minutemail)
+- Blokira sumnjive email patterne
+- Whitelist za corporate domene
+
+### Password Strength Enforcement
+- Minimalno 8 karaktera
+- Mora sadržati: velika/mala slova, brojevi, simboli
+- Blokira common passwords (password123, qwerty)
+- Real-time feedback za jačinu lozinke
+
+### Browser Fingerprinting
+- Jedinstveni ID za svaki browser
+- Detekcija multiple registracija sa istog uređaja
+- Anti-account farming
+
+### Spam Detection Logging
+- Sve sumnjive aktivnosti se loguju
+- Admin panel sa statistikom
+- Automatsko čišćenje starih logova (30 dana)
+
+Za detalje pogledajte: [ANTI_SPAM_PROTECTION.md](./ANTI_SPAM_PROTECTION.md)
+
+---
+
 ## Zaključak
 
 Ova platforma implementira **defense-in-depth** pristup sigurnosti sa multiple slojeva zaštite:
@@ -455,13 +501,14 @@ Ova platforma implementira **defense-in-depth** pristup sigurnosti sa multiple s
 1. ✅ Network Level (HTTPS, CSP, CORS)
 2. ✅ Application Level (Input validation, rate limiting)
 3. ✅ Database Level (RLS, audit logs)
-4. ✅ Authentication Level (Bcrypt, JWT)
-5. ✅ Monitoring Level (Audit logs, alerting)
+4. ✅ Authentication Level (Bcrypt, JWT, Email Verification)
+5. ✅ Anti-Spam Level (reCAPTCHA, Honeypot, Timing, Fingerprinting)
+6. ✅ Monitoring Level (Audit logs, spam detection, alerting)
 
 Sigurnost je kontinuirani proces, ne destinacija. Redovno ažuriraj dependencies, prati nove sigurnosne prijetnje i održavaj audit logove.
 
 ---
 
-**Verzija**: 1.0
+**Verzija**: 2.0
 **Datum**: 2026-02-07
 **Autor**: zamijeniauto.ba Security Team

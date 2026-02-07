@@ -18,8 +18,21 @@ Ova aplikacija implementira **enterprise-level** sigurnost sa multiple slojeva z
 - **Audit Logging**: Sve sigurnosno relevantne akcije se loguju
 - **Password Security**: Bcrypt hashing sa cost factor 10
 - **File Upload Validation**: Striktna validacija tipova i veličina fajlova
+- **Email Verification**: Obavezna potvrda emaila za sve nove korisnike
+- **reCAPTCHA v2**: Anti-bot zaštita na registraciji
+- **Honeypot Fields**: Skrivena polja za detekciju botova
+- **Timing Detection**: Detekcija prebrze forme submission
+- **Suspicious Email Detection**: Blokiranje temp mail servisa
+- **Password Strength Validation**: Enforced jaka lozinka politika
+- **Browser Fingerprinting**: Anti-account farming zaštita
+- **Spam Detection Logging**: Kompletno praćenje spam pokušaja
 
-Za detalje pogledajte [SECURITY.md](./SECURITY.md)
+Za detalje pogledajte:
+- [SECURITY.md](./SECURITY.md) - Kompletna sigurnosna dokumentacija
+- [ANTI_SPAM_PROTECTION.md](./ANTI_SPAM_PROTECTION.md) - Anti-spam i bot zaštita (10 layers)
+- [SUPABASE_EMAIL_SETUP.md](./SUPABASE_EMAIL_SETUP.md) - Email verification setup guide
+- [DEPLOYMENT_SECURITY.md](./DEPLOYMENT_SECURITY.md) - Production deployment checklist
+- [SECURITY_QUICK_CHECK.md](./SECURITY_QUICK_CHECK.md) - 5-minutna brza provjera
 
 ## Tech Stack
 

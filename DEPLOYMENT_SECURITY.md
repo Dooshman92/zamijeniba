@@ -79,17 +79,92 @@ Ažurirajte `netlify.toml` ili `vercel.json`:
     Content-Security-Policy = "default-src 'self'; script-src 'self' https://www.google.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co"
 ```
 
-### 5. Google reCAPTCHA Setup
+### 5. Email Verification Setup (KRITIČNO!)
+
+**OBAVEZNO za produkciju!**
+
+```bash
+1. Otvori Supabase Dashboard
+2. Idi na Authentication > Settings
+3. Enable Email Confirmations: ✅ ON
+4. Confirm Email Template:
+   - Subject: "Potvrdite vaš nalog na zamijeniauto.ba"
+   - Dodaj logo i branding
+5. Site URL: https://zamijeniauto.ba
+6. Redirect URLs:
+   - https://zamijeniauto.ba/**
+   - https://zamijeniauto.ba/auth/confirm
+7. SMTP Settings (optional ali preporučeno):
+   - Koristi custom SMTP za bolji deliverability
+   - Setup SPF, DKIM, DMARC records
+```
+
+**Testing Email Verification:**
+```bash
+1. Registruj test korisnika
+2. Provjeri da email stiže (inbox i spam)
+3. Klikni verification link
+4. Provjeri da se korisnik može prijaviti
+```
+
+### 6. Google reCAPTCHA Setup (OBAVEZNO!)
+
+**reCAPTCHA v2 Checkbox**
 
 ```bash
 1. Idi na https://www.google.com/recaptcha/admin
-2. Registruj novi site (v2 Checkbox)
-3. Dodaj production domain
-4. Kopiraj Site Key u .env:
-   VITE_RECAPTCHA_SITE_KEY=your_site_key
+2. Registruj novi site:
+   - Tip: reCAPTCHA v2
+   - Checkbox (ne Invisible)
+3. Dodaj domene:
+   - localhost (za development)
+   - zamijeniauto.ba (produkcija)
+4. Kopiraj Site Key i dodaj u .env:
+   VITE_RECAPTCHA_SITE_KEY=6LcXXXXXXXXXXXXXXXXXXXXX
+5. Secret Key ostaje na Google serveru (ne dodavaj u frontend!)
 ```
 
-### 6. Supabase Edge Functions Deploy
+**Testing reCAPTCHA:**
+```bash
+1. Otvori registration formu
+2. Provjeri da se reCAPTCHA checkbox prikazuje
+3. Pokušaj registraciju bez checkboxa (trebalo bi da blokira)
+4. Označi checkbox i submit (trebalo bi da prođe)
+```
+
+### 7. Anti-Spam Features Test
+
+**Pre-production testing:**
+
+```bash
+# Test 1: Honeypot detection
+- Pokušaj registraciju sa popunjenim honeypot fieldsom
+- Expected: "Greška pri obradi"
+
+# Test 2: Timing detection
+- Submituj formu u manje od 3 sekunde
+- Expected: "Molimo popunite formu pažljivo"
+
+# Test 3: Suspicious email
+- Pokušaj sa test@mailinator.com
+- Expected: "Email adresa izgleda sumnjivo"
+
+# Test 4: Weak password
+- Pokušaj sa "password123"
+- Expected: "Lozinka nije dovoljno jaka"
+
+# Test 5: Rate limiting
+- 6 pokušaja za 60 sekundi
+- Expected: "Previše pokušaja"
+
+# Test 6: Valid registration
+- Email: test@gmail.com
+- Password: TestPass123!
+- reCAPTCHA: checked
+- Expected: "Registracija uspješna! Provjerite email"
+```
+
+### 8. Supabase Edge Functions Deploy
 
 ```bash
 # Ako koristite Edge Functions, deploy-ujte ih:
@@ -203,13 +278,28 @@ curl -I https://vašadomena.com
 
 Prije nego što označite deployment kao complete:
 
+### Security Basics
 - [ ] .env fajl nije u git repository
 - [ ] Sve environment varijable postavljene
 - [ ] RLS omogućen na svim tabelama
 - [ ] HTTPS forced i radi
 - [ ] CSP headers postavljeni
-- [ ] reCAPTCHA konfigurisano
 - [ ] Storage policies postavljene
+- [ ] Admin pristup zaštićen
+
+### Anti-Spam & Bot Protection
+- [ ] ✅ Email verification omogućena u Supabase
+- [ ] ✅ Email delivery testiran (Gmail, Yahoo, Outlook)
+- [ ] ✅ reCAPTCHA v2 konfigurisano (Site Key u .env)
+- [ ] ✅ reCAPTCHA testiran (checkbox radi)
+- [ ] ✅ Honeypot fields testirani
+- [ ] ✅ Timing detection testiran (<3s blokira)
+- [ ] ✅ Suspicious email detection testiran
+- [ ] ✅ Password strength validation testirana
+- [ ] ✅ Rate limiting testiran (5 pokušaja/min)
+- [ ] ✅ spam_detection_log tabela kreirana
+
+### Infrastructure
 - [ ] Edge Functions deployed (ako postoje)
 - [ ] Cron jobs postavljeni
 - [ ] Monitoring i alerting omogućen
@@ -217,7 +307,6 @@ Prije nego što označite deployment kao complete:
 - [ ] Security scan prošao
 - [ ] Manual security testing prošao
 - [ ] Security headers validovani
-- [ ] Admin pristup zaštićen
 - [ ] Rate limiting testiran
 
 ---

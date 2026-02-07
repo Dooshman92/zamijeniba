@@ -134,3 +134,84 @@ export const secureCompare = (a: string, b: string): boolean => {
 
   return result === 0;
 };
+
+export const generateBrowserFingerprint = async (): Promise<string> => {
+  const components = [
+    navigator.userAgent,
+    navigator.language,
+    new Date().getTimezoneOffset(),
+    screen.width,
+    screen.height,
+    screen.colorDepth,
+    navigator.hardwareConcurrency || 0,
+    navigator.deviceMemory || 0,
+  ];
+
+  const fingerprintString = components.join('|');
+  return await hashString(fingerprintString);
+};
+
+export const detectSuspiciousEmail = (email: string): boolean => {
+  const suspiciousPatterns = [
+    /\+.*\+/,
+    /\.{2,}/,
+    /^[0-9]+@/,
+    /@.*\d{5,}/,
+    /temp.*mail/i,
+    /throwaway/i,
+    /disposable/i,
+    /guerrilla/i,
+    /mailinator/i,
+    /10minutemail/i,
+  ];
+
+  return suspiciousPatterns.some(pattern => pattern.test(email));
+};
+
+export const validatePasswordStrength = (password: string): {
+  valid: boolean;
+  score: number;
+  feedback: string[]
+} => {
+  const feedback: string[] = [];
+  let score = 0;
+
+  if (password.length >= 8) score++;
+  else feedback.push('Lozinka treba imati najmanje 8 karaktera');
+
+  if (password.length >= 12) score++;
+
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+  else feedback.push('Dodajte velika i mala slova');
+
+  if (/\d/.test(password)) score++;
+  else feedback.push('Dodajte brojeve');
+
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+  else feedback.push('Dodajte specijalne karaktere (!@#$%^&*)');
+
+  if (!/(.)\1{2,}/.test(password)) score++;
+  else feedback.push('Izbjegavajte ponavljanje istih karaktera');
+
+  const commonPasswords = ['password', 'password123', '12345678', 'qwerty', 'abc123'];
+  if (!commonPasswords.some(common => password.toLowerCase().includes(common))) score++;
+  else feedback.push('Izbjegavajte očigledne lozinke');
+
+  return {
+    valid: score >= 4,
+    score: Math.min(score, 5),
+    feedback
+  };
+};
+
+export const getClientInfo = () => {
+  return {
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    platform: navigator.platform,
+    screenResolution: `${screen.width}x${screen.height}`,
+    colorDepth: screen.colorDepth,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timezoneOffset: new Date().getTimezoneOffset(),
+  };
+};
