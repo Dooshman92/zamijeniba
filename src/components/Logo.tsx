@@ -33,7 +33,7 @@ export function Logo({ className = '', showText = true, size = 'md', onClick }: 
       {showText && (
         <div className="flex flex-col -space-y-1">
           <span className={`${sizeConfig.text} font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600 tracking-tight leading-none ${onClick ? 'group-hover:from-cyan-600 group-hover:to-blue-600 transition-all' : ''}`}>
-            zamijeniauto
+            zamjenavozila
           </span>
           <span className={`text-xs font-bold text-gray-600 tracking-wider ${onClick ? 'group-hover:text-gray-500 transition-colors' : ''}`}>.ba</span>
         </div>
