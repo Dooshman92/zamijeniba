@@ -14,7 +14,7 @@ interface SupportTicket {
   id: string;
   subject: string;
   message: string;
-  status: 'pending' | 'open' | 'in_progress' | 'resolved' | 'closed';
+  status: 'pending' | 'open' | 'closed';
   priority: 'low' | 'normal' | 'high' | 'urgent';
   created_at: string;
   updated_at: string;
@@ -194,8 +194,6 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
     switch (status) {
       case 'pending': return <Clock className="w-4 h-4 text-orange-400" />;
       case 'open': return <AlertCircle className="w-4 h-4 text-yellow-400" />;
-      case 'in_progress': return <Clock className="w-4 h-4 text-blue-400" />;
-      case 'resolved': return <CheckCircle className="w-4 h-4 text-green-400" />;
       case 'closed': return <CheckCircle className="w-4 h-4 text-gray-400" />;
       default: return null;
     }
@@ -205,8 +203,6 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
     switch (status) {
       case 'pending': return 'Na čekanju';
       case 'open': return 'Otvoreno';
-      case 'in_progress': return 'U obradi';
-      case 'resolved': return 'Riješeno';
       case 'closed': return 'Zatvoreno';
       default: return status;
     }

@@ -20,7 +20,7 @@ interface SupportTicket {
   user_id: string;
   subject: string;
   message: string;
-  status: 'pending' | 'open' | 'in_progress' | 'resolved' | 'closed';
+  status: 'pending' | 'open' | 'closed';
   priority: 'low' | 'normal' | 'high' | 'urgent';
   created_at: string;
   updated_at: string;
@@ -163,7 +163,7 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
     setLoading(true);
     const updates: any = { status };
 
-    if (status === 'resolved' || status === 'closed') {
+    if (status === 'closed') {
       updates.resolved_at = new Date().toISOString();
       updates.resolved_by = user.id;
     }
@@ -256,8 +256,6 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
     switch (status) {
       case 'pending': return <Clock className="w-4 h-4 text-orange-600" />;
       case 'open': return <AlertCircle className="w-4 h-4 text-yellow-600" />;
-      case 'in_progress': return <Clock className="w-4 h-4 text-blue-600" />;
-      case 'resolved': return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'closed': return <CheckCircle className="w-4 h-4 text-gray-500" />;
       default: return null;
     }
@@ -267,8 +265,6 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
     switch (status) {
       case 'pending': return 'Na čekanju';
       case 'open': return 'Otvoreno';
-      case 'in_progress': return 'U obradi';
-      case 'resolved': return 'Riješeno';
       case 'closed': return 'Zatvoreno';
       default: return status;
     }
@@ -288,8 +284,6 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
     return {
       pending: tickets.filter(t => t.status === 'pending').length,
       open: tickets.filter(t => t.status === 'open').length,
-      in_progress: tickets.filter(t => t.status === 'in_progress').length,
-      resolved: tickets.filter(t => t.status === 'resolved').length,
       closed: tickets.filter(t => t.status === 'closed').length,
       total: tickets.length
     };
@@ -300,7 +294,7 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-6 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl p-4 shadow-sm">
           <p className="text-gray-600 text-sm font-semibold mb-1">Ukupno</p>
           <p className="text-3xl font-black text-gray-800">{stats.total}</p>
@@ -312,14 +306,6 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
         <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-xl p-4 shadow-sm">
           <p className="text-yellow-700 text-sm font-semibold mb-1">Otvoreno</p>
           <p className="text-3xl font-black text-yellow-600">{stats.open}</p>
-        </div>
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 shadow-sm">
-          <p className="text-blue-700 text-sm font-semibold mb-1">U obradi</p>
-          <p className="text-3xl font-black text-blue-600">{stats.in_progress}</p>
-        </div>
-        <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-4 shadow-sm">
-          <p className="text-green-700 text-sm font-semibold mb-1">Riješeno</p>
-          <p className="text-3xl font-black text-green-600">{stats.resolved}</p>
         </div>
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-4 shadow-sm">
           <p className="text-gray-700 text-sm font-semibold mb-1">Zatvoreno</p>
@@ -338,8 +324,6 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
             <option value="all">Svi tiketi</option>
             <option value="pending">Na čekanju</option>
             <option value="open">Otvoreni</option>
-            <option value="in_progress">U obradi</option>
-            <option value="resolved">Riješeni</option>
             <option value="closed">Zatvoreni</option>
           </select>
         </div>
@@ -430,28 +414,6 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
                           }`}
                         >
                           Otvoreno
-                        </button>
-                        <button
-                          onClick={() => updateTicketStatus(selectedTicket.id, 'in_progress')}
-                          disabled={loading || selectedTicket.status === 'in_progress'}
-                          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all border-2 ${
-                            selectedTicket.status === 'in_progress'
-                              ? 'bg-blue-100 text-blue-700 border-blue-500 shadow-md'
-                              : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400 hover:bg-blue-50'
-                          }`}
-                        >
-                          U obradi
-                        </button>
-                        <button
-                          onClick={() => updateTicketStatus(selectedTicket.id, 'resolved')}
-                          disabled={loading || selectedTicket.status === 'resolved'}
-                          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all border-2 ${
-                            selectedTicket.status === 'resolved'
-                              ? 'bg-green-100 text-green-700 border-green-500 shadow-md'
-                              : 'bg-white text-gray-600 border-gray-300 hover:border-green-400 hover:bg-green-50'
-                          }`}
-                        >
-                          Riješeno
                         </button>
                         <button
                           onClick={() => updateTicketStatus(selectedTicket.id, 'closed')}
