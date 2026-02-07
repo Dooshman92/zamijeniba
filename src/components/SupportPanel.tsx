@@ -27,12 +27,7 @@ interface SupportTicket {
   locked: boolean;
   locked_at: string | null;
   locked_by: string | null;
-  opened_by: string | null;
-  opened_at: string | null;
   user_profiles: {
-    nickname: string;
-  };
-  opened_by_profile?: {
     nickname: string;
   };
 }
@@ -118,10 +113,7 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
       .from('support_tickets')
       .select(`
         *,
-        user_profiles!support_tickets_user_id_fkey (
-          nickname
-        ),
-        opened_by_profile:user_profiles!opened_by (
+        user_profiles!support_tickets_user_id_fkey_profiles (
           nickname
         )
       `)
@@ -171,11 +163,6 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
     setLoading(true);
     const updates: any = { status };
 
-    if (status === 'open' && selectedTicket?.status === 'pending') {
-      updates.opened_by = user.id;
-      updates.opened_at = new Date().toISOString();
-    }
-
     if (status === 'closed') {
       updates.resolved_at = new Date().toISOString();
       updates.resolved_by = user.id;
@@ -186,30 +173,16 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
       .update(updates)
       .eq('id', ticketId);
 
-    if (!error) {
+    if (!error && status === 'closed') {
       const staffRole = userProfile?.is_admin ? 'Admin' : 'Moderator';
-
-      if (status === 'open' && selectedTicket?.status === 'pending') {
-        await supabase
-          .from('support_messages')
-          .insert([{
-            ticket_id: ticketId,
-            user_id: user.id,
-            message: `${staffRole} ${userProfile?.nickname} je otvorio tiket.`,
-            is_staff_reply: true
-          }]);
-      }
-
-      if (status === 'closed') {
-        await supabase
-          .from('support_messages')
-          .insert([{
-            ticket_id: ticketId,
-            user_id: user.id,
-            message: `${staffRole} je zatvorio tiket.`,
-            is_staff_reply: true
-          }]);
-      }
+      await supabase
+        .from('support_messages')
+        .insert([{
+          ticket_id: ticketId,
+          user_id: user.id,
+          message: `${staffRole} je zatvorio tiket.`,
+          is_staff_reply: true
+        }]);
 
       if (selectedTicket?.id === ticketId) {
         loadMessages(ticketId);
@@ -323,6 +296,15 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
     <div className="space-y-6">
       <div className="grid grid-cols-4 gap-4">
         <div
+          onClick={() => setStatusFilter('all')}
+          className={`bg-gradient-to-br from-gray-50 to-gray-100 border-2 rounded-xl p-4 shadow-sm cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
+            statusFilter === 'all' ? 'border-gray-500 ring-2 ring-gray-400' : 'border-gray-200'
+          }`}
+        >
+          <p className="text-gray-600 text-sm font-semibold mb-1">Ukupno</p>
+          <p className="text-3xl font-black text-gray-800">{stats.total}</p>
+        </div>
+        <div
           onClick={() => setStatusFilter('pending')}
           className={`bg-gradient-to-br from-orange-50 to-orange-100 border-2 rounded-xl p-4 shadow-sm cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
             statusFilter === 'pending' ? 'border-orange-500 ring-2 ring-orange-400' : 'border-orange-300'
@@ -348,15 +330,6 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
         >
           <p className="text-gray-700 text-sm font-semibold mb-1">Zatvoreno</p>
           <p className="text-3xl font-black text-gray-600">{stats.closed}</p>
-        </div>
-        <div
-          onClick={() => setStatusFilter('all')}
-          className={`bg-gradient-to-br from-gray-50 to-gray-100 border-2 rounded-xl p-4 shadow-sm cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
-            statusFilter === 'all' ? 'border-gray-500 ring-2 ring-gray-400' : 'border-gray-200'
-          }`}
-        >
-          <p className="text-gray-600 text-sm font-semibold mb-1">Ukupno</p>
-          <p className="text-3xl font-black text-gray-800">{stats.total}</p>
         </div>
       </div>
 
@@ -435,14 +408,6 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
                         <div className="mt-2 flex items-center gap-2">
                           <User className="w-4 h-4 text-gray-600" />
                           <span className="text-sm text-gray-700 font-semibold">Korisnik: {selectedTicket.user_profiles.nickname}</span>
-                        </div>
-                      )}
-                      {isStaff && selectedTicket.opened_by_profile && selectedTicket.opened_at && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-yellow-600" />
-                          <span className="text-sm text-gray-700 font-semibold">
-                            Otvorio: {selectedTicket.opened_by_profile.nickname} ({formatDateTime(selectedTicket.opened_at)})
-                          </span>
                         </div>
                       )}
                       {selectedTicket.locked && selectedTicket.locked_at && (
