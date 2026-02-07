@@ -213,7 +213,12 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
 
   return (
     <div className="w-full">
-      <div className="p-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Upravljanje Reklamama</h2>
+        <p className="text-gray-600">Ukupno {advertisements.length} reklama</p>
+      </div>
+
+      <div>
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
@@ -225,14 +230,14 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
           )}
 
           {showForm && (
-            <form onSubmit={handleSubmit} className="mb-6 bg-white/5 rounded-xl p-6 border border-white/10">
-              <h3 className="text-xl font-bold text-white mb-4">
+            <form onSubmit={handleSubmit} className="mb-6 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
                 {editingAd ? 'Uredi reklamu' : 'Nova reklama'}
               </h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Naslov *
                   </label>
                   <input
@@ -240,26 +245,26 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                     placeholder="Naziv reklame"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Opis
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={2}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                     placeholder="Kratki opis (opciono)"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Slika za banner
                   </label>
 
@@ -268,12 +273,12 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
                       <img
                         src={formData.image_url}
                         alt="Preview"
-                        className="w-full h-32 object-cover rounded-lg border-2 border-cyan-500/30"
+                        className="w-full h-32 object-cover rounded-lg border-2 border-cyan-500"
                       />
                       <button
                         type="button"
                         onClick={() => setFormData({ ...formData, image_url: '' })}
-                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors shadow-lg"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -285,11 +290,11 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadingImage}
-                      className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="flex-1 bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {uploadingImage ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-700 border-t-transparent"></div>
                           <span>Upload...</span>
                         </>
                       ) : (
@@ -315,27 +320,27 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Link za otvaranje (opciono)
                   </label>
                   <input
                     type="url"
                     value={formData.target_url}
                     onChange={(e) => setFormData({ ...formData, target_url: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                     placeholder="https://example.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Pozicija *
                   </label>
                   <select
                     value={formData.position}
                     onChange={(e) => setFormData({ ...formData, position: parseInt(e.target.value) })}
                     required
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                   >
                     <option value={1}>Lijevo (1)</option>
                     <option value={2}>Sredina (2)</option>
@@ -349,9 +354,9 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
                     id="is_active"
                     checked={formData.is_active}
                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                    className="w-4 h-4 text-cyan-500 bg-white/10 border-white/20 rounded focus:ring-cyan-500"
+                    className="w-4 h-4 text-cyan-500 border-gray-300 rounded focus:ring-cyan-500"
                   />
-                  <label htmlFor="is_active" className="text-sm font-medium text-gray-300">
+                  <label htmlFor="is_active" className="text-sm font-medium text-gray-700">
                     Aktivna reklama
                   </label>
                 </div>
@@ -360,14 +365,14 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
               <div className="flex gap-3 mt-6">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all duration-300"
+                  className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all duration-300 shadow-sm"
                 >
                   {editingAd ? 'Spremi promjene' : 'Dodaj reklamu'}
                 </button>
                 <button
                   type="button"
                   onClick={cancelForm}
-                  className="flex-1 bg-white/10 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/20 transition-all duration-300"
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all duration-300 border border-gray-300"
                 >
                   Odustani
                 </button>
@@ -378,20 +383,20 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto"></div>
-              <p className="text-gray-400 mt-4">Učitavanje...</p>
+              <p className="text-gray-600 mt-4">Učitavanje...</p>
             </div>
           ) : advertisements.length === 0 ? (
-            <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
-              <ImageIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-400">Nema reklama</p>
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-200 shadow-sm">
+              <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">Nema reklama</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6">
               {advertisements.map((ad) => (
                 <div
                   key={ad.id}
-                  className={`bg-white/5 rounded-xl overflow-hidden border ${
-                    ad.is_active ? 'border-cyan-500/30' : 'border-white/10'
+                  className={`bg-white rounded-xl overflow-hidden border shadow-sm ${
+                    ad.is_active ? 'border-cyan-500' : 'border-gray-200'
                   }`}
                 >
                   {ad.image_url && (
@@ -402,14 +407,14 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
                         className="w-full h-48 object-cover"
                       />
                       <div className="absolute top-4 right-4 flex gap-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md ${
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-lg ${
                           ad.is_active
-                            ? 'bg-green-500/80 text-white'
-                            : 'bg-gray-500/80 text-white'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-500 text-white'
                         }`}>
                           {ad.is_active ? 'Aktivna' : 'Neaktivna'}
                         </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md bg-blue-500/80 text-white">
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md bg-blue-500 text-white shadow-lg">
                           Pozicija {ad.position}
                         </span>
                       </div>
@@ -418,13 +423,13 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
 
                   <div className="p-6">
                     <div className="mb-4">
-                      <h3 className="text-lg font-bold text-white mb-2">{ad.title}</h3>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{ad.title}</h3>
                       {ad.description && (
-                        <p className="text-sm text-gray-400">{ad.description}</p>
+                        <p className="text-sm text-gray-600">{ad.description}</p>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
+                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                       {ad.target_url && (
                         <div className="flex items-center gap-1">
                           <ExternalLink className="w-4 h-4" />
@@ -437,24 +442,24 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <button
                         onClick={() => toggleActive(ad)}
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors flex items-center gap-2"
+                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2 border border-gray-300"
                       >
                         {ad.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         {ad.is_active ? 'Deaktiviraj' : 'Aktiviraj'}
                       </button>
                       <button
                         onClick={() => handleEdit(ad)}
-                        className="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors flex items-center gap-2"
+                        className="px-4 py-2 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 rounded-lg transition-colors flex items-center gap-2 border border-cyan-200"
                       >
                         <Edit2 className="w-4 h-4" />
                         Uredi
                       </button>
                       <button
                         onClick={() => handleDelete(ad.id)}
-                        className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors flex items-center gap-2"
+                        className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors flex items-center gap-2 border border-red-200"
                       >
                         <Trash2 className="w-4 h-4" />
                         Obriši
