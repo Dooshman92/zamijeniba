@@ -143,9 +143,6 @@ export function AboutModal({ onClose }: AboutModalProps) {
               </ul>
             </div>
 
-    
-            </div>
-
             <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl p-6 text-center">
               <p className="text-gray-300 text-lg mb-4">
                 Pridružite se stotinama zadovoljnih korisnika koji su već pronašli savršenu zamjenu!
