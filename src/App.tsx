@@ -452,46 +452,157 @@ function App() {
             <div className="flex justify-between items-center h-20">
               <Logo size="md" onClick={handleLogoClick} />
 
-              <div className="flex items-center gap-3 ml-auto">
+              <div className="flex items-center gap-3">
                 {user ? (
-                  <button
-                    onClick={() => {
-                      if (userProfile) {
-                        setSelectedUserProfile(userProfile);
-                        setShowUserProfile(true);
-                      }
-                    }}
-                    className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 p-1.5 rounded-xl transition-all duration-300 hover:scale-105"
-                    title="Moj Profil"
-                  >
-                    {userProfile?.avatar_url ? (
-                      <img
-                        src={userProfile.avatar_url}
-                        alt="Avatar"
-                        className="w-10 h-10 rounded-lg object-cover border-2 border-cyan-400"
-                      />
-                    ) : (
-                      <div className={`w-10 h-10 rounded-lg ${
-                        userProfile?.gender === 'female'
-                          ? 'bg-gradient-to-br from-pink-500 to-pink-600'
-                          : userProfile?.gender === 'male'
-                          ? 'bg-gradient-to-br from-blue-500 to-blue-600'
-                          : 'bg-gradient-to-br from-cyan-500 to-blue-600'
-                      } flex items-center justify-center`}>
-                        {userProfile?.gender === 'female' ? (
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
-                          </svg>
-                        ) : userProfile?.gender === 'male' ? (
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
-                          </svg>
-                        ) : (
-                          <User className="w-6 h-6 text-white" />
+                  <>
+                    <div className="hidden sm:flex items-center gap-3 backdrop-blur-md bg-white/10 border border-white/20 px-4 py-2 rounded-xl">
+                      {userProfile?.avatar_url ? (
+                        <img
+                          src={userProfile.avatar_url}
+                          alt="Avatar"
+                          className="w-8 h-8 rounded-full object-cover border-2 border-cyan-400"
+                        />
+                      ) : (
+                        <div className={`w-8 h-8 rounded-full ${
+                          userProfile?.gender === 'female'
+                            ? 'bg-gradient-to-br from-pink-500 to-pink-600'
+                            : userProfile?.gender === 'male'
+                            ? 'bg-gradient-to-br from-blue-500 to-blue-600'
+                            : 'bg-gradient-to-br from-cyan-500 to-blue-600'
+                        } flex items-center justify-center`}>
+                          {userProfile?.gender === 'female' ? (
+                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
+                            </svg>
+                          ) : userProfile?.gender === 'male' ? (
+                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
+                            </svg>
+                          ) : (
+                            <User className="w-5 h-5 text-white" />
+                          )}
+                        </div>
+                      )}
+                      <div className="flex flex-col">
+                        {userProfile?.nickname && (
+                          <span className="text-sm font-bold text-white">@{userProfile.nickname}</span>
+                        )}
+                        <span className="text-xs text-gray-400">{user.email}</span>
+                        {premiumEnabled && !userProfile?.is_premium && creditsEnabled && (
+                          <button
+                            onClick={() => setShowBuyCredits(true)}
+                            className="text-xs text-green-400 font-semibold flex items-center gap-1 mt-0.5 hover:text-green-300 transition-colors"
+                            title="Kupi kredite"
+                          >
+                            <Coins className="w-3 h-3" />
+                            {userProfile?.credits || 0} kredita
+                          </button>
                         )}
                       </div>
+                      {premiumEnabled && userProfile?.is_premium && (
+                        <PremiumBadge size="sm" onClick={() => setShowPremiumModal(true)} />
+                      )}
+                    </div>
+                    {premiumEnabled && !userProfile?.is_premium && (
+                      <>
+                        <button
+                          onClick={() => setShowPromoCode(true)}
+                          className="flex items-center gap-2 backdrop-blur-md bg-gradient-to-r from-green-600/80 to-emerald-600/80 hover:from-green-600 hover:to-emerald-600 border border-green-500/50 text-white px-3 py-2 rounded-xl transition-all duration-300 hover:scale-105 font-bold text-sm"
+                          title="Iskoristi Promo Kod"
+                        >
+                          <Gift className="w-5 h-5" />
+                          <span>Promo</span>
+                        </button>
+                        <button
+                          onClick={() => setShowPremiumModal(true)}
+                          className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/30 font-semibold text-sm"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          Premium
+                        </button>
+                      </>
                     )}
-                  </button>
+                    {(userProfile?.is_admin || userProfile?.is_moderator) && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setAdminPanelSection(undefined);
+                            setShowAdminPanel(true);
+                          }}
+                          className={`backdrop-blur-md ${
+                            userProfile?.is_admin
+                              ? 'bg-red-600/80 hover:bg-red-600 border-red-500/50'
+                              : 'bg-blue-600/80 hover:bg-blue-600 border-blue-500/50'
+                          } border text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105`}
+                          title={userProfile?.is_admin ? 'Admin Panel' : 'Moderator Panel'}
+                        >
+                          {userProfile?.is_admin ? <Shield className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAdminPanelSection('support');
+                            setShowAdminPanel(true);
+                          }}
+                          className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                          title="Podrška korisnicima"
+                        >
+                          <Headset className="w-5 h-5" />
+                          {supportUnreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                              {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
+                            </span>
+                          )}
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => setShowMyAds(true)}
+                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      title="Moji Oglasi"
+                    >
+                      <FileText className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setShowInbox(true)}
+                      className="relative backdrop-blur-md bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      title="Ponude za zamjenu"
+                    >
+                      <ArrowRightLeft className="w-5 h-5" />
+                      {offersUnreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                          {offersUnreadCount > 9 ? '9+' : offersUnreadCount}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setShowProfileEdit(true)}
+                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      title="Uredi profil"
+                    >
+                      <Settings className="w-5 h-5" />
+                    </button>
+                    {!userProfile?.is_admin && !userProfile?.is_moderator && (
+                      <button
+                        onClick={() => setShowSupport(true)}
+                        className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                        title="Podrška korisnicima"
+                      >
+                        <Headset className="w-5 h-5" />
+                        {supportUnreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                            {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
+                          </span>
+                        )}
+                      </button>
+                    )}
+                    <button
+                      onClick={signOut}
+                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      title="Odjavi se"
+                    >
+                      <LogOut className="w-5 h-5" />
+                    </button>
+                  </>
                 ) : (
                   <button
                     onClick={() => setShowAuthModal(true)}
