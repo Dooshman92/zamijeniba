@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../lib/auth';
+import { validateEmail, sanitizeInput, rateLimiter } from '../lib/security';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -67,9 +68,27 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
     setError('');
     setSuccess('');
 
+    const sanitizedEmail = sanitizeInput(email);
+
+    if (!validateEmail(sanitizedEmail)) {
+      setError('Unesite ispravnu email adresu');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Lozinka mora imati najmanje 6 karaktera');
+      return;
+    }
+
+    const rateLimitKey = `auth_${mode}_${sanitizedEmail}`;
+    if (!rateLimiter(rateLimitKey, 5, 60000)) {
+      setError('Previše pokušaja. Pokušajte ponovo za 1 minut.');
+      return;
+    }
+
     if (mode === 'forgot-password') {
       setLoading(true);
-      const { error } = await resetPassword(email);
+      const { error } = await resetPassword(sanitizedEmail);
       setLoading(false);
 
       if (error) {
@@ -95,8 +114,8 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
     setLoading(true);
 
     const { error } = mode === 'login'
-      ? await signIn(email, password)
-      : await signUp(email, password);
+      ? await signIn(sanitizedEmail, password)
+      : await signUp(sanitizedEmail, password);
 
     if (error) {
       setError(error.message);
