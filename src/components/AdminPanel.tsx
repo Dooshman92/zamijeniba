@@ -41,6 +41,8 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const [updating, setUpdating] = useState<string | null>(null);
   const [premiumEnabled, setPremiumEnabled] = useState(true);
   const [updatingPremiumSystem, setUpdatingPremiumSystem] = useState(false);
+  const [creditsEnabled, setCreditsEnabled] = useState(true);
+  const [updatingCreditsSystem, setUpdatingCreditsSystem] = useState(false);
   const [showPromoCodes, setShowPromoCodes] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newCodeCredits, setNewCodeCredits] = useState(10);
@@ -56,6 +58,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   useEffect(() => {
     loadUsers();
     loadSiteSettings();
+    loadSystemSettings();
     loadPromoCodes();
 
     const interval = setInterval(() => {
@@ -87,6 +90,18 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
 
     if (!error && data) {
       setPremiumEnabled(data.value);
+    }
+  };
+
+  const loadSystemSettings = async () => {
+    const { data, error } = await supabase
+      .from('system_settings')
+      .select('credits_enabled')
+      .eq('id', '00000000-0000-0000-0000-000000000000')
+      .maybeSingle();
+
+    if (!error && data) {
+      setCreditsEnabled(data.credits_enabled);
     }
   };
 
@@ -243,6 +258,27 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
     }
 
     setUpdatingPremiumSystem(false);
+  };
+
+  const toggleCreditsSystem = async () => {
+    setUpdatingCreditsSystem(true);
+
+    const newValue = !creditsEnabled;
+
+    const { error } = await supabase
+      .from('system_settings')
+      .update({
+        credits_enabled: newValue
+      })
+      .eq('id', '00000000-0000-0000-0000-000000000000');
+
+    if (!error) {
+      setCreditsEnabled(newValue);
+    } else {
+      alert('Greška pri ažuriranju sistema kredita');
+    }
+
+    setUpdatingCreditsSystem(false);
   };
 
   const togglePremium = async (userId: string, currentStatus: boolean) => {
@@ -703,6 +739,44 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                   <>
                     <Power className="w-5 h-5" />
                     {premiumEnabled ? 'Isključi Premium' : 'Uključi Premium'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className={`p-4 rounded-xl border-2 ${
+            creditsEnabled
+              ? 'bg-gradient-to-r from-blue-900/30 to-blue-800/30 border-blue-500/50'
+              : 'bg-gradient-to-r from-red-900/30 to-red-800/30 border-red-500/50'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Gift className={`w-6 h-6 ${creditsEnabled ? 'text-blue-400' : 'text-red-400'}`} />
+                <div>
+                  <h3 className="text-lg font-bold text-white">Sistem Kredita</h3>
+                  <p className="text-sm text-gray-300">
+                    {creditsEnabled
+                      ? 'Sistem kupovine kredita je aktivan - korisnici mogu kupiti kredite'
+                      : 'Sistem kupovine kredita je isključen - opcija kupovine je skrivena'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={toggleCreditsSystem}
+                disabled={updatingCreditsSystem}
+                className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 ${
+                  creditsEnabled
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                } ${updatingCreditsSystem ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-xl'}`}
+              >
+                {updatingCreditsSystem ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <>
+                    <Power className="w-5 h-5" />
+                    {creditsEnabled ? 'Isključi Kredite' : 'Uključi Kredite'}
                   </>
                 )}
               </button>

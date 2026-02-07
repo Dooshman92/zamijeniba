@@ -53,6 +53,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<'cars' | 'offers'>('cars');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [creditsEnabled, setCreditsEnabled] = useState(true);
   const currentYear = new Date().getFullYear();
   const [filters, setFilters] = useState<FilterOptions>({
     location: '',
@@ -101,9 +102,22 @@ function App() {
     }
   };
 
+  const loadSystemSettings = async () => {
+    const { data, error } = await supabase
+      .from('system_settings')
+      .select('credits_enabled')
+      .eq('id', '00000000-0000-0000-0000-000000000000')
+      .maybeSingle();
+
+    if (!error && data) {
+      setCreditsEnabled(data.credits_enabled);
+    }
+  };
+
   useEffect(() => {
     initializeStorage();
     loadCars();
+    loadSystemSettings();
   }, []);
 
   useEffect(() => {
@@ -412,7 +426,7 @@ function App() {
                           <span className="text-sm font-bold text-white">@{userProfile.nickname}</span>
                         )}
                         <span className="text-xs text-gray-400">{user.email}</span>
-                        {FEATURES.PREMIUM_ENABLED && !userProfile?.is_premium && (
+                        {FEATURES.PREMIUM_ENABLED && !userProfile?.is_premium && creditsEnabled && (
                           <button
                             onClick={() => setShowBuyCredits(true)}
                             className="text-xs text-green-400 font-semibold flex items-center gap-1 mt-0.5 hover:text-green-300 transition-colors"
@@ -529,14 +543,16 @@ function App() {
                   <span className="relative z-10 text-lg">Postani Premium</span>
                 </button>
 
-                <button
-                  onClick={() => user ? setShowBuyCredits(true) : setShowAuthModal(true)}
-                  className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                  <Coins className="w-6 h-6 relative z-10" />
-                  <span className="relative z-10 text-lg">Kupi Kredite</span>
-                </button>
+                {creditsEnabled && (
+                  <button
+                    onClick={() => user ? setShowBuyCredits(true) : setShowAuthModal(true)}
+                    className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                    <Coins className="w-6 h-6 relative z-10" />
+                    <span className="relative z-10 text-lg">Kupi Kredite</span>
+                  </button>
+                )}
 
                 <button
                   onClick={() => user ? setShowPromoCode(true) : setShowAuthModal(true)}
