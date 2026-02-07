@@ -86,7 +86,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
         </button>
 
         {showFilters && (
-          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 backdrop-blur-md bg-gray-900/95 border border-white/10 rounded-2xl shadow-2xl z-50 w-[900px] max-w-[95vw]">
+          <div className="absolute left-0 top-full mt-2 backdrop-blur-md bg-gray-900/95 border border-white/10 rounded-2xl shadow-2xl z-50 w-[900px] max-w-[95vw]">
             <div className="bg-gray-900/95 backdrop-blur-md p-6 pb-4 border-b border-white/10 flex items-center justify-between">
               <h3 className="text-xl font-bold text-white">Napredni filteri</h3>
               <div className="flex gap-2">
