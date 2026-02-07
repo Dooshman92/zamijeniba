@@ -1189,7 +1189,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Razlika u cijeni (koliko ste spremni doplatiti €)
+                      Razlika u cijeni (koliko ste spremni doplatiti KM)
                     </label>
                     <input
                       type="number"
