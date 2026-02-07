@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { X, Send, Plus, MessageCircle, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, UserProfile } from '../lib/supabase';
 import { formatDateTime } from '../lib/dateUtils';
 
 interface SupportModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
+  userProfile: UserProfile;
 }
 
 interface SupportTicket {
@@ -28,7 +29,7 @@ interface SupportMessage {
   created_at: string;
 }
 
-export function SupportModal({ isOpen, onClose, userId }: SupportModalProps) {
+export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportModalProps) {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
@@ -198,13 +199,19 @@ export function SupportModal({ isOpen, onClose, userId }: SupportModalProps) {
         <div className="flex h-[calc(90vh-120px)]">
           <div className="w-1/3 border-r border-white/10 overflow-y-auto">
             <div className="p-4">
-              <button
-                onClick={() => setShowNewTicketForm(true)}
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Novi tiket
-              </button>
+              {!userProfile.is_admin && !userProfile.is_moderator ? (
+                <button
+                  onClick={() => setShowNewTicketForm(true)}
+                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  Novi tiket
+                </button>
+              ) : (
+                <div className="w-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 font-semibold py-3 px-4 rounded-xl text-center text-sm">
+                  Admini i moderatori ne mogu kreirati tikete
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 p-4">
