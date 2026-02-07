@@ -24,6 +24,25 @@ const getVehicleTypeLabel = (type: VehicleType): string => {
   return labels[type] || 'Vozilo';
 };
 
+const formatSwapPreference = (car: Car): string | null => {
+  if (!car.swap_preference || !car.swap_preference.preferred_vehicle_type) {
+    return null;
+  }
+
+  const pref = car.swap_preference;
+  const vehicleType = getVehicleTypeLabel(pref.preferred_vehicle_type as VehicleType);
+
+  if (pref.preferred_brand === 'Razno' || !pref.preferred_brand) {
+    return vehicleType;
+  }
+
+  if (pref.preferred_model === 'Razno' || !pref.preferred_model) {
+    return `${vehicleType} ${pref.preferred_brand}`;
+  }
+
+  return `${vehicleType} ${pref.preferred_brand} ${pref.preferred_model}`;
+};
+
 const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUser = false, currentUserId, onOwnerClick, onCardClick, layout = 'grid' }: CarCardProps) => {
   const isOwnCar = currentUserId && car.user_id === currentUserId;
   const ownerDisplayName = car.owner_nickname
@@ -135,6 +154,18 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
               )}
             </div>
 
+            {formatSwapPreference(car) && (
+              <div className="backdrop-blur-md bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 rounded-xl p-3">
+                <div className="flex items-center gap-2">
+                  <ArrowRightLeft className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs text-orange-300/80">Preferiram zamjenu za</p>
+                    <p className="text-sm font-bold text-orange-300">{formatSwapPreference(car)}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {!isOwnCar && (
               <div className="flex gap-3">
                 {showSwapButton && (
@@ -244,6 +275,18 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
             </div>
           </div>
         </div>
+
+        {formatSwapPreference(car) && (
+          <div className="backdrop-blur-md bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 rounded p-1.5 mb-1.5">
+            <div className="flex items-center gap-1">
+              <ArrowRightLeft className="w-2.5 h-2.5 text-orange-400 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[8px] text-orange-300/80">Preferiram zamjenu za</p>
+                <p className="text-[9px] font-bold text-orange-300 truncate">{formatSwapPreference(car)}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {!isOwnCar && (
           <div className="space-y-1.5">

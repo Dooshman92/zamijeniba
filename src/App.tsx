@@ -266,12 +266,22 @@ function App() {
 
       const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
+      const actualCarIds = data.map(car => car.id).filter(Boolean);
+      const { data: preferences } = await supabase
+        .from('car_preferences')
+        .select('*')
+        .in('car_id', actualCarIds);
+
+      const preferenceMap = new Map(preferences?.map(p => [p.car_id, p]) || []);
+
       const carsWithOwnerInfo = data.map(car => {
         const profile = profileMap.get(car.user_id);
+        const preference = preferenceMap.get(car.id);
         return {
           ...car,
           owner_is_premium: profile?.is_premium || false,
           owner_nickname: profile?.nickname || null,
+          swap_preference: preference || undefined,
         };
       });
 

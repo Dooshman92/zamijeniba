@@ -82,6 +82,7 @@ export interface Car {
   rear_parking_sensors?: boolean;
   front_parking_sensors?: boolean;
   created_at: string;
+  swap_preference?: CarPreference;
 }
 
 export interface CarImage {
@@ -96,10 +97,11 @@ export interface CarImage {
 export interface CarPreference {
   id: string;
   car_id: string;
-  preferred_brands: string[];
+  preferred_vehicle_type?: string;
+  preferred_brand?: string;
+  preferred_model?: string;
   min_year: number;
   max_year: number;
-  preferred_fuel_types: string[];
   max_mileage: number;
   price_difference: number;
   created_at: string;

@@ -71,9 +71,16 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
       .maybeSingle();
 
     if (data) {
+      const { data: preference } = await supabase
+        .from('car_preferences')
+        .select('*')
+        .eq('car_id', id)
+        .maybeSingle();
+
       const carData: Car = {
         ...data,
-        owner_nickname: data.owner_nickname?.nickname || null
+        owner_nickname: data.owner_nickname?.nickname || null,
+        swap_preference: preference || undefined
       };
       setCar(carData);
       fetchCarImages(id);
@@ -578,6 +585,76 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                 </div>
               </div>
             </div>
+
+            {car.swap_preference && car.swap_preference.preferred_vehicle_type && (
+              <div className="backdrop-blur-md bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-2xl p-6 mb-6">
+                <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                  <ArrowRightLeft className="w-5 h-5 text-orange-400" />
+                  Preferencije za zamjenu
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-400 mb-1">Preferiram zamjenu za</p>
+                      <p className="text-lg font-bold text-orange-300">
+                        {(() => {
+                          const pref = car.swap_preference;
+                          const vehicleLabels = {
+                            'automobil': 'Automobil',
+                            'motocikl': 'Motocikl',
+                            'quad': 'Quad/ATV',
+                            'motorne_sanke': 'Motorne sanke',
+                            'jetski': 'Jet Ski'
+                          };
+                          const vehicleType = vehicleLabels[pref.preferred_vehicle_type as keyof typeof vehicleLabels] || pref.preferred_vehicle_type;
+
+                          if (pref.preferred_brand === 'Razno' || !pref.preferred_brand) {
+                            return vehicleType;
+                          }
+
+                          if (pref.preferred_model === 'Razno' || !pref.preferred_model) {
+                            return `${vehicleType} ${pref.preferred_brand}`;
+                          }
+
+                          return `${vehicleType} ${pref.preferred_brand} ${pref.preferred_model}`;
+                        })()}
+                      </p>
+                    </div>
+                  </div>
+
+                  {(car.swap_preference.min_year || car.swap_preference.max_year) && (
+                    <div className="grid grid-cols-2 gap-3">
+                      {car.swap_preference.min_year && (
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">Min. godina</p>
+                          <p className="text-sm font-bold text-white">{car.swap_preference.min_year}</p>
+                        </div>
+                      )}
+                      {car.swap_preference.max_year && (
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">Max. godina</p>
+                          <p className="text-sm font-bold text-white">{car.swap_preference.max_year}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {car.swap_preference.max_mileage > 0 && (
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Max. kilometraža</p>
+                      <p className="text-sm font-bold text-white">{car.swap_preference.max_mileage.toLocaleString()} km</p>
+                    </div>
+                  )}
+
+                  {car.swap_preference.price_difference > 0 && (
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Spreman/a doplatiti</p>
+                      <p className="text-sm font-bold text-green-400">{car.swap_preference.price_difference.toLocaleString()} KM</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {!isOwnCar && (
               <div className="sticky bottom-0 backdrop-blur-md bg-gray-900/90 border-t border-white/10 p-6 -mx-6 -mb-6">

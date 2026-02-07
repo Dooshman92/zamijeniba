@@ -141,10 +141,11 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
   };
 
   const [preferences, setPreferences] = useState({
-    preferred_brands: [] as string[],
+    preferred_vehicle_type: '',
+    preferred_brand: '',
+    preferred_model: '',
     min_year: 2000,
     max_year: new Date().getFullYear(),
-    preferred_fuel_types: [] as string[],
     max_mileage: 200000,
     price_difference: 0,
   });
@@ -829,23 +830,68 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
           {!editMode && currentStep === 4 && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Preferencije za zamjenu</h3>
+
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Preferirane marke</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Tip vozila</label>
                 <select
-                  multiple
-                  value={preferences.preferred_brands}
+                  value={preferences.preferred_vehicle_type}
                   onChange={(e) => setPreferences({
                     ...preferences,
-                    preferred_brands: Array.from(e.target.selectedOptions, option => option.value)
+                    preferred_vehicle_type: e.target.value,
+                    preferred_brand: '',
+                    preferred_model: ''
                   })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 h-32"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  {carBrands.map((brand) => (
-                    <option key={brand} value={brand}>{brand}</option>
-                  ))}
+                  <option value="">Odaberite tip vozila</option>
+                  <option value="automobil">Automobil</option>
+                  <option value="motocikl">Motocikl</option>
+                  <option value="quad">Quad</option>
+                  <option value="motorne_sanke">Motorne sanke</option>
+                  <option value="jetski">Jetski</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Držite Ctrl/Cmd za više izbora</p>
               </div>
+
+              {preferences.preferred_vehicle_type && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Marka</label>
+                  <select
+                    value={preferences.preferred_brand}
+                    onChange={(e) => setPreferences({
+                      ...preferences,
+                      preferred_brand: e.target.value,
+                      preferred_model: ''
+                    })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Odaberite marku</option>
+                    <option value="Razno">Razno (bilo koja marka)</option>
+                    {getBrandsByVehicleType(preferences.preferred_vehicle_type).map((brand) => (
+                      <option key={brand} value={brand}>{brand}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {preferences.preferred_vehicle_type && preferences.preferred_brand && preferences.preferred_brand !== 'Razno' && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Model</label>
+                  <select
+                    value={preferences.preferred_model}
+                    onChange={(e) => setPreferences({
+                      ...preferences,
+                      preferred_model: e.target.value
+                    })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Odaberite model</option>
+                    <option value="Razno">Razno (bilo koji model)</option>
+                    {getModelsByVehicleType(preferences.preferred_vehicle_type, preferences.preferred_brand).map((model) => (
+                      <option key={model} value={model}>{model}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
