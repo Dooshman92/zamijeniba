@@ -23,6 +23,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set());
   const { user } = useAuth();
 
   const baseImageLimit = (!premiumEnabled || userProfile?.is_premium) ? 15 : 5;
@@ -185,6 +186,24 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
+  const getInputClassName = (fieldName: string) => {
+    const baseClass = "w-full px-4 py-2 border rounded-lg focus:ring-2";
+    const hasError = validationErrors.has(fieldName);
+    if (hasError) {
+      return `${baseClass} border-red-500 focus:ring-red-500 focus:border-red-500`;
+    }
+    return `${baseClass} border-gray-300 focus:ring-blue-500`;
+  };
+
+  const getTextareaClassName = (fieldName: string) => {
+    const baseClass = "w-full px-4 py-2 border rounded-lg focus:ring-2 min-h-32";
+    const hasError = validationErrors.has(fieldName);
+    if (hasError) {
+      return `${baseClass} border-red-500 focus:ring-red-500 focus:border-red-500`;
+    }
+    return `${baseClass} border-gray-300 focus:ring-blue-500`;
+  };
+
   const handleSubmit = async () => {
     if (!user) {
       alert('Morate biti prijavljeni');
@@ -201,12 +220,73 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       return;
     }
 
-    if (!formData.brand || !formData.model || !formData.year || !formData.mileage ||
-        !formData.price || !formData.fuel_type || !formData.color || !formData.transmission ||
-        !formData.kilowatts || !formData.engine_size || !formData.location || !formData.description) {
-      alert('Molimo popunite sva obavezna polja');
+    const errors = new Set<string>();
+    const missingFields: string[] = [];
+
+    if (!formData.brand) {
+      errors.add('brand');
+      missingFields.push('Marka');
+    }
+    if (!formData.model) {
+      errors.add('model');
+      missingFields.push('Model');
+    }
+    if (!formData.year) {
+      errors.add('year');
+      missingFields.push('Godina');
+    }
+    if (!formData.mileage && formData.mileage !== 0) {
+      errors.add('mileage');
+      missingFields.push('Kilometraža');
+    }
+    if (!formData.price && formData.price !== 0) {
+      errors.add('price');
+      missingFields.push('Cijena');
+    }
+    if (!formData.fuel_type) {
+      errors.add('fuel_type');
+      missingFields.push('Gorivo');
+    }
+    if (!formData.color) {
+      errors.add('color');
+      missingFields.push('Boja');
+    }
+    if (!formData.transmission) {
+      errors.add('transmission');
+      missingFields.push('Mjenjač');
+    }
+    if (!formData.location) {
+      errors.add('location');
+      missingFields.push('Lokacija');
+    }
+    if (!formData.description) {
+      errors.add('description');
+      missingFields.push('Opis');
+    }
+
+    if (formData.vehicle_type === 'automobil') {
+      if (!formData.kilowatts && formData.kilowatts !== 0) {
+        errors.add('kilowatts');
+        missingFields.push('Snaga (kW)');
+      }
+      if (!formData.engine_size) {
+        errors.add('engine_size');
+        missingFields.push('Zapremina motora');
+      }
+    } else if (formData.vehicle_type === 'motocikl' || formData.vehicle_type === 'quad') {
+      if (!formData.engine_displacement && formData.engine_displacement !== 0) {
+        errors.add('engine_displacement');
+        missingFields.push('Zapremina motora (ccm)');
+      }
+    }
+
+    if (errors.size > 0) {
+      setValidationErrors(errors);
+      alert(`Molimo popunite sva obavezna polja:\n\n${missingFields.join('\n')}`);
       return;
     }
+
+    setValidationErrors(new Set());
 
     setLoading(true);
 
@@ -427,12 +507,15 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Marka *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Marka *
+                    {validationErrors.has('brand') && <span className="text-red-500 ml-1">●</span>}
+                  </label>
                   <select
                     required
                     value={formData.brand}
                     onChange={(e) => setFormData({ ...formData, brand: e.target.value, model: '' })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={getInputClassName('brand')}
                   >
                     <option value="">Odaberi</option>
                     {getBrandsByVehicleType(formData.vehicle_type).map((brand) => (
@@ -442,12 +525,15 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Model *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Model *
+                    {validationErrors.has('model') && <span className="text-red-500 ml-1">●</span>}
+                  </label>
                   <select
                     required
                     value={formData.model}
                     onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={getInputClassName('model')}
                     disabled={!formData.brand}
                   >
                     <option value="">Odaberi</option>
@@ -458,7 +544,10 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Godina *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Godina *
+                    {validationErrors.has('year') && <span className="text-red-500 ml-1">●</span>}
+                  </label>
                   <select
                     required
                     value={formData.year || ''}
@@ -466,7 +555,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                       const value = e.target.value === '' ? '' : parseInt(e.target.value);
                       setFormData({ ...formData, year: value });
                     }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={getInputClassName('year')}
                   >
                     <option value="">Odaberi</option>
                     {yearOptions.map((year) => (
@@ -476,7 +565,10 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Kilometraža *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Kilometraža *
+                    {validationErrors.has('mileage') && <span className="text-red-500 ml-1">●</span>}
+                  </label>
                   <input
                     type="number"
                     required
@@ -485,12 +577,15 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                       const value = e.target.value === '' ? '' : parseInt(e.target.value);
                       setFormData({ ...formData, mileage: value });
                     }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={getInputClassName('mileage')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Cijena (KM) *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Cijena (KM) *
+                    {validationErrors.has('price') && <span className="text-red-500 ml-1">●</span>}
+                  </label>
                   <input
                     type="number"
                     required
@@ -500,17 +595,20 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                       setFormData({ ...formData, price: value });
                     }}
                     placeholder="npr. 15000"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={getInputClassName('price')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Lokacija *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Lokacija *
+                    {validationErrors.has('location') && <span className="text-red-500 ml-1">●</span>}
+                  </label>
                   <select
                     required
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={getInputClassName('location')}
                   >
                     <option value="">Odaberi</option>
                     {bosnianCities.map((city) => (
@@ -520,12 +618,15 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Gorivo *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Gorivo *
+                    {validationErrors.has('fuel_type') && <span className="text-red-500 ml-1">●</span>}
+                  </label>
                   <select
                     required
                     value={formData.fuel_type}
                     onChange={(e) => setFormData({ ...formData, fuel_type: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={getInputClassName('fuel_type')}
                   >
                     <option value="">Odaberi</option>
                     {getFuelTypesByVehicleType(formData.vehicle_type).map((fuel) => (
@@ -535,12 +636,15 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Mjenjač *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Mjenjač *
+                    {validationErrors.has('transmission') && <span className="text-red-500 ml-1">●</span>}
+                  </label>
                   <select
                     required
                     value={formData.transmission}
                     onChange={(e) => setFormData({ ...formData, transmission: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={getInputClassName('transmission')}
                   >
                     <option value="">Odaberi</option>
                     {getTransmissionTypesByVehicleType(formData.vehicle_type).map((trans) => (
@@ -566,12 +670,15 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 )}
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Boja *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Boja *
+                    {validationErrors.has('color') && <span className="text-red-500 ml-1">●</span>}
+                  </label>
                   <select
                     required
                     value={formData.color}
                     onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={getInputClassName('color')}
                   >
                     <option value="">Odaberi</option>
                     {carColors.map((color) => (
@@ -580,23 +687,31 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Snaga motora (kW)</label>
-                  <input
-                    type="number"
-                    value={formData.kilowatts || ''}
-                    onChange={(e) => handleKilowattsChange(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="npr. 110"
-                  />
-                  {typeof formData.kilowatts === 'number' && formData.kilowatts > 0 && (
-                    <p className="text-xs text-gray-600 mt-1">≈ {formData.horse_power} KS</p>
-                  )}
-                </div>
+                {formData.vehicle_type === 'automobil' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Snaga motora (kW) *
+                      {validationErrors.has('kilowatts') && <span className="text-red-500 ml-1">●</span>}
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.kilowatts || ''}
+                      onChange={(e) => handleKilowattsChange(e.target.value)}
+                      className={getInputClassName('kilowatts')}
+                      placeholder="npr. 110"
+                    />
+                    {typeof formData.kilowatts === 'number' && formData.kilowatts > 0 && (
+                      <p className="text-xs text-gray-600 mt-1">≈ {formData.horse_power} KS</p>
+                    )}
+                  </div>
+                )}
 
                 {(formData.vehicle_type === 'motocikl' || formData.vehicle_type === 'quad') && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Zapremina motora (cm³)</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Zapremina motora (cm³) *
+                      {validationErrors.has('engine_displacement') && <span className="text-red-500 ml-1">●</span>}
+                    </label>
                     <input
                       type="number"
                       placeholder="npr. 600"
@@ -605,20 +720,23 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                         const value = e.target.value === '' ? '' : parseInt(e.target.value);
                         setFormData({ ...formData, engine_displacement: value });
                       }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className={getInputClassName('engine_displacement')}
                     />
                   </div>
                 )}
 
                 {formData.vehicle_type === 'automobil' && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Zapremina motora</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Zapremina motora *
+                      {validationErrors.has('engine_size') && <span className="text-red-500 ml-1">●</span>}
+                    </label>
                     <input
                       type="text"
                       placeholder="npr. 2.0L"
                       value={formData.engine_size}
                       onChange={(e) => setFormData({ ...formData, engine_size: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className={getInputClassName('engine_size')}
                     />
                   </div>
                 )}
@@ -690,13 +808,16 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Opis *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Opis *
+                  {validationErrors.has('description') && <span className="text-red-500 ml-1">●</span>}
+                </label>
                 <textarea
                   required
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className={getTextareaClassName('description')}
                   placeholder="Detaljan opis vozila..."
                 />
               </div>
