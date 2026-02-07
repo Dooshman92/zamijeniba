@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { X, Car as CarIcon, User, MessageCircle, MapPin, Star, MessageSquare, Shield, Smile, ThumbsUp, CheckCircle, Heart, Phone } from 'lucide-react';
 import { Car, supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -37,6 +37,7 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
   const [reviews, setReviews] = useState<UserReview[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
   const { user: currentUser } = useAuth();
+  const reviewsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchUserProfile();
@@ -180,6 +181,10 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
     fetchReviews();
   };
 
+
+  const scrollToReviews = () => {
+    reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const handleSendMessage = async () => {
     if (!currentUser || !userProfile) return;
@@ -339,10 +344,14 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                   <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <h3 className="text-2xl font-bold text-white">{displayName}</h3>
                     {averageRatings && (
-                      <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/30 rounded-full px-3 py-1">
+                      <button
+                        onClick={scrollToReviews}
+                        className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/30 rounded-full px-3 py-1 hover:from-amber-500/30 hover:to-yellow-500/30 hover:border-amber-400/50 transition-all duration-300 hover:scale-105 cursor-pointer"
+                      >
                         {renderStars(averageRatings.overall, 'sm')}
                         <span className="text-amber-400 font-bold text-sm">{averageRatings.overall.toFixed(1)}</span>
-                      </div>
+                        <span className="text-amber-400/70 text-xs">• Dojmovi ({reviews.length})</span>
+                      </button>
                     )}
                   </div>
                   {userProfile?.location && (
@@ -417,7 +426,7 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
               )}
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6" ref={reviewsRef}>
               <div className="flex items-center gap-2 mb-3">
                 <Star className="w-4 h-4 text-amber-400" />
                 <h3 className="text-lg font-bold text-white">
