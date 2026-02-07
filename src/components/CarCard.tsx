@@ -1,6 +1,6 @@
-import { memo } from 'react';
-import { Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, MapPin, Car as CarIcon } from 'lucide-react';
-import { Car, VehicleType } from '../lib/supabase';
+import { memo, useState, useEffect } from 'react';
+import { Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, MapPin, Car as CarIcon, Phone } from 'lucide-react';
+import { Car, VehicleType, supabase, UserProfile } from '../lib/supabase';
 
 interface CarCardProps {
   car: Car;
@@ -54,6 +54,45 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
     ? `@${car.owner_nickname}`
     : car.user_email?.split('@')[0];
 
+  const [ownerProfile, setOwnerProfile] = useState<UserProfile | null>(null);
+  const [phoneRevealed, setPhoneRevealed] = useState(false);
+
+  useEffect(() => {
+    if (car.user_id) {
+      loadOwnerProfile();
+      if (currentUserId && currentUserId !== car.user_id) {
+        checkPhoneRevealed();
+      }
+    }
+  }, [car.user_id, currentUserId]);
+
+  const loadOwnerProfile = async () => {
+    if (!car.user_id) return;
+
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', car.user_id)
+      .maybeSingle();
+
+    if (data) {
+      setOwnerProfile(data);
+    }
+  };
+
+  const checkPhoneRevealed = async () => {
+    if (!currentUserId || !car.user_id || currentUserId === car.user_id) return;
+
+    const { data } = await supabase
+      .from('phone_reveals')
+      .select('id')
+      .eq('revealer_id', currentUserId)
+      .eq('owner_id', car.user_id)
+      .maybeSingle();
+
+    setPhoneRevealed(!!data);
+  };
+
   if (layout === 'list') {
     return (
       <div
@@ -92,6 +131,18 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
                     {ownerDisplayName}
                   </span>
                 </div>
+                {!isOwnCar && ownerProfile?.phone && ownerProfile?.show_phone_number && phoneRevealed && (
+                  <div className="flex items-center gap-2 backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded-lg px-2 py-1 mb-2">
+                    <Phone className="w-3 h-3 text-green-400" />
+                    <a
+                      href={`tel:${ownerProfile.phone}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-xs text-green-400 hover:text-green-300 font-semibold transition-colors"
+                    >
+                      {ownerProfile.phone}
+                    </a>
+                  </div>
+                )}
               </div>
               <div className="backdrop-blur-md bg-green-500/90 px-4 py-2 rounded-xl shadow-lg">
                 <p className="text-2xl font-black text-white">
@@ -253,6 +304,19 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
             {ownerDisplayName}
           </span>
         </div>
+
+        {!isOwnCar && ownerProfile?.phone && ownerProfile?.show_phone_number && phoneRevealed && (
+          <div className="flex items-center gap-1 backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded px-1.5 py-1 mb-2">
+            <Phone className="w-2.5 h-2.5 text-green-400 flex-shrink-0" />
+            <a
+              href={`tel:${ownerProfile.phone}`}
+              onClick={(e) => e.stopPropagation()}
+              className="text-[9px] text-green-400 hover:text-green-300 font-semibold transition-colors truncate"
+            >
+              {ownerProfile.phone}
+            </a>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-1.5 mb-2">
           <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded p-1.5 hover:border-cyan-500/30 transition-colors">

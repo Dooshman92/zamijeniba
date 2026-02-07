@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, Clock, Zap, AlertTriangle } from 'lucide-react';
+import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, Clock, Zap, AlertTriangle, Phone } from 'lucide-react';
 import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
@@ -23,6 +23,8 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
   const [loading, setLoading] = useState(true);
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [ownerProfile, setOwnerProfile] = useState<UserProfile | null>(null);
+  const [phoneRevealed, setPhoneRevealed] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportDescription, setReportDescription] = useState('');
@@ -43,7 +45,40 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
     if (user && car && car.user_id === user.id) {
       loadUserProfile();
     }
+    if (car && car.user_id) {
+      loadOwnerProfile();
+      if (user && user.id !== car.user_id) {
+        checkPhoneRevealed();
+      }
+    }
   }, [user, car]);
+
+  const loadOwnerProfile = async () => {
+    if (!car || !car.user_id) return;
+
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', car.user_id)
+      .maybeSingle();
+
+    if (data) {
+      setOwnerProfile(data);
+    }
+  };
+
+  const checkPhoneRevealed = async () => {
+    if (!user || !car || !car.user_id || user.id === car.user_id) return;
+
+    const { data } = await supabase
+      .from('phone_reveals')
+      .select('id')
+      .eq('revealer_id', user.id)
+      .eq('owner_id', car.user_id)
+      .maybeSingle();
+
+    setPhoneRevealed(!!data);
+  };
 
   const loadUserProfile = async () => {
     if (!user) return;
@@ -385,12 +420,36 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                       {ownerDisplayName}
                     </button>
                   </div>
-                  {!isOwnCar && (
+                  {!isOwnCar && ownerProfile?.phone && ownerProfile?.show_phone_number && phoneRevealed && (
+                    <div className="mt-3 backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-green-400" />
+                        <span className="text-xs text-gray-400">Telefon:</span>
+                        <a
+                          href={`tel:${ownerProfile.phone}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-sm text-green-400 hover:text-green-300 font-semibold transition-colors hover:underline"
+                        >
+                          {ownerProfile.phone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {!isOwnCar && (!ownerProfile?.phone || !ownerProfile?.show_phone_number || !phoneRevealed) && (
                     <div className="mt-3 backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
                       <p className="text-xs text-blue-300 flex items-center gap-2">
                         <span className="text-blue-400">ℹ️</span>
                         Kontakt informacije vlasnika vidljive su kada vlasnik oglasa prihvati ponudu za zamjenu
                       </p>
+                    </div>
+                  )}
+                  {isOwnCar && userProfile?.phone && userProfile?.show_phone_number && (
+                    <div className="mt-3 backdrop-blur-md bg-gray-500/10 border border-gray-500/30 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-gray-400" />
+                        <span className="text-xs text-gray-400">Vaš telefon:</span>
+                        <span className="text-sm text-gray-300 font-semibold">{userProfile.phone}</span>
+                      </div>
                     </div>
                   )}
                 </div>
