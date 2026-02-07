@@ -86,8 +86,8 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
         </button>
 
         {showFilters && (
-          <div className="absolute right-0 top-full mt-2 backdrop-blur-md bg-gray-900/95 border border-white/10 rounded-2xl shadow-2xl z-50 w-80 max-h-[calc(100vh-12rem)] overflow-y-auto">
-            <div className="sticky top-0 bg-gray-900/95 backdrop-blur-md p-6 pb-4 border-b border-white/10 flex items-center justify-between">
+          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 backdrop-blur-md bg-gray-900/95 border border-white/10 rounded-2xl shadow-2xl z-50 w-[900px] max-w-[95vw]">
+            <div className="bg-gray-900/95 backdrop-blur-md p-6 pb-4 border-b border-white/10 flex items-center justify-between">
               <h3 className="text-xl font-bold text-white">Napredni filteri</h3>
               <div className="flex gap-2">
                 {hasActiveFilters && (
@@ -107,7 +107,8 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
               </div>
             </div>
 
-          <div className="p-6 pt-0 space-y-4">
+          <div className="p-6 pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Tip vozila
@@ -267,7 +268,9 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
               </select>
             </div>
 
-            <div className="pt-4 border-t border-white/10">
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
               <label className="flex items-center gap-3 cursor-pointer bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 hover:bg-orange-500/20 transition-colors">
                 <input
                   type="checkbox"
@@ -277,22 +280,20 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                 />
                 <span className="text-sm font-semibold text-white">Samo oštećena vozila</span>
               </label>
-            </div>
-          </div>
 
-          <div className="sticky bottom-0 bg-gray-900/95 backdrop-blur-md p-6 pt-4 border-t border-white/10">
-            <button
-              onClick={() => {
-                setShowFilters(false);
-                const resultsElement = document.getElementById('results-section');
-                if (resultsElement) {
-                  resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }}
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-all"
-            >
-              Primijeni filtere
-            </button>
+              <button
+                onClick={() => {
+                  setShowFilters(false);
+                  const resultsElement = document.getElementById('results-section');
+                  if (resultsElement) {
+                    resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-all"
+              >
+                Primijeni filtere
+              </button>
+            </div>
           </div>
         </div>
         )}
