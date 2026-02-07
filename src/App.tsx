@@ -587,7 +587,7 @@ function App() {
                         className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                         title="Podrška korisnicima"
                       >
-                        <MessageCircle className="w-5 h-5" />
+                        <Headset className="w-5 h-5" />
                         {supportUnreadCount > 0 && (
                           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
                             {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
