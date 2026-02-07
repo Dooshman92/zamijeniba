@@ -31,7 +31,7 @@ export interface Car {
   interior_condition: number;
   horse_power: number;
   engine_size: string;
-  doors: number;
+  doors: string;
   seats: number;
   location: string;
   status: 'active' | 'inactive' | 'hidden';

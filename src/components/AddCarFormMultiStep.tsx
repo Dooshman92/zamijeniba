@@ -85,7 +85,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
     engine_displacement: carToEdit?.engine_displacement || '' as any,
     hull_material: carToEdit?.hull_material || '',
     track_length: carToEdit?.track_length || '' as any,
-    doors: carToEdit?.doors || 4,
+    doors: carToEdit?.doors || '4/5',
     seats: carToEdit?.seats || 5,
     location: carToEdit?.location || '',
     description: carToEdit?.description || '',
@@ -657,8 +657,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                     <select
                       value={formData.doors}
                       onChange={(e) => {
-                        const value = parseInt(e.target.value);
-                        setFormData({ ...formData, doors: value });
+                        setFormData({ ...formData, doors: e.target.value });
                       }}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     >

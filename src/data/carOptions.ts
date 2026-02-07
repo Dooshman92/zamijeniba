@@ -297,10 +297,10 @@ export function getTransmissionTypesByVehicleType(vehicleType: string): string[]
   }
 }
 
-export function getDoorOptionsByVehicleType(vehicleType: string): number[] {
+export function getDoorOptionsByVehicleType(vehicleType: string): string[] {
   switch (vehicleType) {
     case 'automobil':
-      return [2, 3, 4, 5];
+      return ['2/3', '4/5'];
     default:
       return [];
   }
