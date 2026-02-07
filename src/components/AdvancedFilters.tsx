@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Filter, X, ChevronDown } from 'lucide-react';
+import { Filter, X } from 'lucide-react';
 import { vehicleTypes, carBrands, fuelTypes, transmissionTypes } from '../data/carOptions';
 import { bosnianCities } from '../data/cities';
 
@@ -45,233 +45,209 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
     filters.onlyDamaged ||
     filters.vehicleType;
 
-  const handleFilterChange = (key: keyof FilterOptions, value: string | number) => {
+  const handleFilterChange = (key: keyof FilterOptions, value: string | number | boolean) => {
     onFiltersChange({
       ...filters,
       [key]: value,
     });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      setShowFilters(false);
-      scrollToResults();
-    }
+  const applyFilters = () => {
+    setShowFilters(false);
+    scrollToResults();
   };
 
   return (
     <>
+      <button
+        onClick={() => setShowFilters(!showFilters)}
+        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+          hasActiveFilters
+            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+            : 'backdrop-blur-md bg-white/10 border border-white/20 text-white hover:bg-white/20'
+        }`}
+      >
+        <Filter className="w-5 h-5" />
+        <span>Filteri</span>
+        {hasActiveFilters && (
+          <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">Aktivni</span>
+        )}
+      </button>
+
       {showFilters && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-          onClick={() => setShowFilters(false)}
-        />
-      )}
+        <>
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            onClick={() => setShowFilters(false)}
+          />
 
-      <div className="relative">
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-            hasActiveFilters
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
-              : 'backdrop-blur-md bg-white/10 border border-white/20 text-white hover:bg-white/20'
-          }`}
-        >
-          <Filter className="w-5 h-5" />
-          <span>Filteri</span>
-          {hasActiveFilters && (
-            <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">Aktivni</span>
-          )}
-          <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-        </button>
+          <div className="fixed right-0 top-0 h-full w-full max-w-lg bg-gray-900 shadow-2xl z-50 overflow-y-auto">
+            <div className="sticky top-0 bg-gray-900 border-b border-white/10 p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">Napredni filteri</h2>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="text-gray-400 hover:text-white transition-colors p-2"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-        {showFilters && (
-          <div className="absolute left-0 top-full mt-2 backdrop-blur-md bg-gray-900/95 border border-white/10 rounded-2xl shadow-2xl z-50 w-[1100px] max-w-[calc(100vw-2rem)]">
-            <div className="bg-gray-900/95 backdrop-blur-md p-6 pb-4 border-b border-white/10 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Napredni filteri</h3>
-              <div className="flex gap-3">
-                {hasActiveFilters && (
-                  <button
-                    onClick={onClearFilters}
-                    className="px-4 py-2 text-sm bg-red-500/20 text-red-300 hover:bg-red-500/30 rounded-lg transition-colors font-medium"
-                  >
-                    Očisti sve
-                  </button>
-                )}
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
+            <div className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Tip vozila
+                </label>
+                <select
+                  value={filters.vehicleType || ''}
+                  onChange={(e) => handleFilterChange('vehicleType', e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                 >
-                  <X className="w-5 h-5" />
-                </button>
+                  <option value="">Svi tipovi</option>
+                  {vehicleTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-          <div className="p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Tip vozila
-              </label>
-              <select
-                value={filters.vehicleType || ''}
-                onChange={(e) => handleFilterChange('vehicleType', e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              >
-                <option value="">Svi tipovi</option>
-                {vehicleTypes.map((type) => (
-                  <option key={type.value} value={type.value} className="bg-gray-800">
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Lokacija
+                </label>
+                <select
+                  value={filters.location}
+                  onChange={(e) => handleFilterChange('location', e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                >
+                  <option value="">Sve lokacije</option>
+                  {bosnianCities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Lokacija
-              </label>
-              <select
-                value={filters.location}
-                onChange={(e) => handleFilterChange('location', e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              >
-                <option value="">Sve lokacije</option>
-                {bosnianCities.map((city) => (
-                  <option key={city} value={city} className="bg-gray-800">
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Marka
+                </label>
+                <select
+                  value={filters.brand}
+                  onChange={(e) => handleFilterChange('brand', e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                >
+                  <option value="">Sve marke</option>
+                  {carBrands.map((brand) => (
+                    <option key={brand} value={brand}>
+                      {brand}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Marka
-              </label>
-              <select
-                value={filters.brand}
-                onChange={(e) => handleFilterChange('brand', e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              >
-                <option value="">Sve marke</option>
-                {carBrands.map((brand) => (
-                  <option key={brand} value={brand} className="bg-gray-800">
-                    {brand}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Godište od
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.minYear || ''}
+                    onChange={(e) => handleFilterChange('minYear', parseInt(e.target.value) || 1990)}
+                    placeholder="1990"
+                    min="1990"
+                    max={currentYear}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Godište od
-              </label>
-              <input
-                type="number"
-                value={filters.minYear || ''}
-                onChange={(e) => handleFilterChange('minYear', parseInt(e.target.value) || 1990)}
-                onKeyDown={handleKeyDown}
-                placeholder="1990"
-                min="1990"
-                max={currentYear}
-                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Godište do
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.maxYear === currentYear ? '' : filters.maxYear}
+                    onChange={(e) => handleFilterChange('maxYear', parseInt(e.target.value) || currentYear)}
+                    placeholder={currentYear.toString()}
+                    min="1990"
+                    max={currentYear}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Godište do
-              </label>
-              <input
-                type="number"
-                value={filters.maxYear === currentYear ? '' : filters.maxYear}
-                onChange={(e) => handleFilterChange('maxYear', parseInt(e.target.value) || currentYear)}
-                onKeyDown={handleKeyDown}
-                placeholder={currentYear.toString()}
-                min="1990"
-                max={currentYear}
-                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              />
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Cijena od (KM)
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.minPrice || ''}
+                    onChange={(e) => handleFilterChange('minPrice', parseInt(e.target.value) || 0)}
+                    placeholder="0"
+                    min="0"
+                    step="100"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Cijena od (KM)
-              </label>
-              <input
-                type="number"
-                value={filters.minPrice || ''}
-                onChange={(e) => handleFilterChange('minPrice', parseInt(e.target.value) || 0)}
-                onKeyDown={handleKeyDown}
-                placeholder="0"
-                min="0"
-                step="100"
-                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Cijena do (KM)
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.maxPrice === 1000000 ? '' : filters.maxPrice}
+                    onChange={(e) => handleFilterChange('maxPrice', parseInt(e.target.value) || 1000000)}
+                    placeholder="1000000"
+                    min="0"
+                    step="100"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Cijena do (KM)
-              </label>
-              <input
-                type="number"
-                value={filters.maxPrice === 1000000 ? '' : filters.maxPrice}
-                onChange={(e) => handleFilterChange('maxPrice', parseInt(e.target.value) || 1000000)}
-                onKeyDown={handleKeyDown}
-                placeholder="1000000"
-                min="0"
-                step="100"
-                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Gorivo
+                </label>
+                <select
+                  value={filters.fuelType}
+                  onChange={(e) => handleFilterChange('fuelType', e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                >
+                  <option value="">Svi tipovi</option>
+                  {fuelTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Gorivo
-              </label>
-              <select
-                value={filters.fuelType}
-                onChange={(e) => handleFilterChange('fuelType', e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              >
-                <option value="">Svi tipovi</option>
-                {fuelTypes.map((type) => (
-                  <option key={type} value={type} className="bg-gray-800">
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Mjenjač
+                </label>
+                <select
+                  value={filters.transmission}
+                  onChange={(e) => handleFilterChange('transmission', e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                >
+                  <option value="">Svi tipovi</option>
+                  {transmissionTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Mjenjač
-              </label>
-              <select
-                value={filters.transmission}
-                onChange={(e) => handleFilterChange('transmission', e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              >
-                <option value="">Svi tipovi</option>
-                {transmissionTypes.map((type) => (
-                  <option key={type} value={type} className="bg-gray-800">
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-              <label className="flex items-center gap-3 cursor-pointer bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 hover:bg-orange-500/20 transition-colors">
+              <label className="flex items-center gap-3 cursor-pointer bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 hover:bg-orange-500/20 transition-colors">
                 <input
                   type="checkbox"
                   checked={filters.onlyDamaged}
@@ -280,24 +256,31 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                 />
                 <span className="text-sm font-semibold text-white">Samo oštećena vozila</span>
               </label>
+            </div>
 
+            <div className="sticky bottom-0 bg-gray-900 border-t border-white/10 p-6 space-y-3">
               <button
-                onClick={() => {
-                  setShowFilters(false);
-                  const resultsElement = document.getElementById('results-section');
-                  if (resultsElement) {
-                    resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }}
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-all"
+                onClick={applyFilters}
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg"
               >
                 Primijeni filtere
               </button>
+
+              {hasActiveFilters && (
+                <button
+                  onClick={() => {
+                    onClearFilters();
+                    setShowFilters(false);
+                  }}
+                  className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold py-3 px-6 rounded-xl transition-all"
+                >
+                  Očisti sve filtere
+                </button>
+              )}
             </div>
           </div>
-        </div>
-        )}
-      </div>
+        </>
+      )}
     </>
   );
 }
