@@ -583,10 +583,10 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                              {user.nickname.charAt(0).toUpperCase()}
+                              {user.nickname ? user.nickname.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900">{user.nickname}</p>
+                              <p className="font-medium text-gray-900">{user.nickname || 'Bez nadimka'}</p>
                               <p className="text-sm text-gray-500">ID: {user.id.slice(0, 8)}</p>
                             </div>
                           </div>
@@ -757,11 +757,11 @@ export default function AdminDashboard() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                        {user.nickname.charAt(0).toUpperCase()}
+                        {user.nickname ? user.nickname.charAt(0).toUpperCase() : 'U'}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{user.nickname}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">{user.nickname || 'Bez nadimka'}</h3>
                           <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
                             <Ban className="w-3 h-3" />
                             Banovan
@@ -1187,7 +1187,7 @@ export default function AdminDashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">Admin</p>
-              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              <p className="text-xs text-gray-500 truncate">ID: {user?.id.slice(0, 8)}</p>
             </div>
           </div>
         </div>
