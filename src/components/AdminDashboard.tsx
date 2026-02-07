@@ -11,7 +11,7 @@ import { SupportPanel } from './SupportPanel';
 import AdvertisementsPanel from './AdvertisementsPanel';
 import { NotificationsAdminPanel } from './NotificationsAdminPanel';
 
-type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports' | 'support' | 'advertisements' | 'notifications';
+type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports' | 'support' | 'advertisements' | 'notifications' | 'admins';
 
 interface UserProfile {
   id: string;
@@ -19,6 +19,7 @@ interface UserProfile {
   phone: string;
   is_admin: boolean;
   is_moderator: boolean;
+  is_super_admin: boolean;
   is_premium: boolean;
   is_banned: boolean;
   ban_reason: string | null;
@@ -109,6 +110,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [bannedUsers, setBannedUsers] = useState<UserProfile[]>([]);
+  const [adminUsers, setAdminUsers] = useState<UserProfile[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -153,6 +155,8 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
       loadUsers();
     } else if (activeSection === 'banned') {
       loadBannedUsers();
+    } else if (activeSection === 'admins') {
+      loadAdmins();
     } else if (activeSection === 'cars') {
       loadCars();
     } else if (activeSection === 'promo') {
@@ -299,6 +303,23 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
       setBannedUsers(data || []);
     } catch (error) {
       console.error('Error loading banned users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadAdmins = async () => {
+    setLoading(true);
+    try {
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .or('is_admin.eq.true,is_moderator.eq.true,is_super_admin.eq.true')
+        .order('created_at', { ascending: false });
+
+      setAdminUsers(data || []);
+    } catch (error) {
+      console.error('Error loading admins:', error);
     } finally {
       setLoading(false);
     }
@@ -469,6 +490,52 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
     } catch (error) {
       console.error('Error toggling moderator:', error);
       alert('Greška pri promeni moderatorske uloge');
+    }
+  };
+
+  const promoteToAdmin = async (userId: string) => {
+    if (!confirm('Da li ste sigurni da želite da promovisete ovog korisnika u administratora?')) return;
+
+    try {
+      const { error } = await supabase.rpc('promote_to_admin', {
+        target_user_id: userId
+      });
+
+      if (error) {
+        console.error('Error promoting to admin:', error);
+        alert('Greška pri promoviju u admina: ' + error.message);
+        return;
+      }
+
+      alert('Korisnik je uspešno promovisan u administratora');
+      loadAdmins();
+      if (activeSection === 'users') loadUsers();
+    } catch (error) {
+      console.error('Error promoting to admin:', error);
+      alert('Greška pri promoviju u admina');
+    }
+  };
+
+  const demoteFromAdmin = async (userId: string) => {
+    if (!confirm('Da li ste sigurni da želite da uklonite administratorsku ulogu?')) return;
+
+    try {
+      const { error } = await supabase.rpc('demote_from_admin', {
+        target_user_id: userId
+      });
+
+      if (error) {
+        console.error('Error demoting from admin:', error);
+        alert('Greška pri uklanjanju admin uloge: ' + error.message);
+        return;
+      }
+
+      alert('Administratorska uloga uspešno uklonjena');
+      loadAdmins();
+      if (activeSection === 'users') loadUsers();
+    } catch (error) {
+      console.error('Error demoting from admin:', error);
+      alert('Greška pri uklanjanju admin uloge');
     }
   };
 
@@ -933,8 +1000,17 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-2">
-                            {!user.is_admin && (
+                            {!user.is_admin && !user.is_super_admin && (
                               <>
+                                {userProfile?.is_super_admin && (
+                                  <button
+                                    onClick={() => promoteToAdmin(user.id)}
+                                    className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                                    title="Promovisi u Admina"
+                                  >
+                                    <Shield className="w-4 h-4" />
+                                  </button>
+                                )}
                                 {userProfile?.is_admin && (
                                   <>
                                     <button
@@ -979,6 +1055,11 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                                   </button>
                                 )}
                               </>
+                            )}
+                            {(user.is_admin || user.is_super_admin) && (
+                              <span className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded">
+                                {user.is_super_admin ? 'Super Admin' : 'Administrator'}
+                              </span>
                             )}
                           </div>
                         </td>
@@ -1142,6 +1223,215 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                     className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const renderAdmins = () => {
+    const filteredAdmins = filterData(adminUsers);
+    const paginatedAdmins = paginateData(filteredAdmins);
+    const totalPages = getTotalPages(filteredAdmins);
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Upravljanje Administratorima</h2>
+            <p className="text-gray-600">Ukupno {filteredAdmins.length} admina i moderatora</p>
+          </div>
+          <button
+            onClick={loadAdmins}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Osveži
+          </button>
+        </div>
+
+        {userProfile?.is_super_admin && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-blue-900 mb-1">Super Administrator Privilegije</h3>
+                <p className="text-sm text-blue-700">
+                  Kao super administrator, možete dodavati i uklanjati administratore.
+                  Idite na sekciju "Korisnici" i pronađite korisnika koga želite da promovisete u administratora.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 p-3">
+          <Search className="w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Pretraži administratore..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="flex-1 outline-none text-gray-900"
+          />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm('')} className="text-gray-400 hover:text-gray-600">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+        ) : adminUsers.length === 0 ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <Shield className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nema administratora</h3>
+            <p className="text-gray-600">Trenutno nema korisnika sa admin privilegijama</p>
+          </div>
+        ) : (
+          <>
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Korisnik</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Kontakt</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Uloge</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Datum</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Akcije</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {paginatedAdmins.map((admin) => (
+                      <tr key={admin.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                              admin.is_super_admin
+                                ? 'bg-gradient-to-br from-yellow-500 to-orange-500'
+                                : admin.is_admin
+                                ? 'bg-gradient-to-br from-red-500 to-red-600'
+                                : 'bg-gradient-to-br from-blue-500 to-blue-600'
+                            }`}>
+                              {admin.nickname ? admin.nickname.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{admin.nickname || 'Bez nadimka'}</p>
+                              <p className="text-sm text-gray-500">ID: {admin.id.slice(0, 8)}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-col gap-1">
+                            {admin.phone && (
+                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Phone className="w-4 h-4" />
+                                {admin.phone}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-col gap-1">
+                            {admin.is_super_admin && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-700 rounded text-xs font-medium">
+                                <Crown className="w-3 h-3" />
+                                Super Admin
+                              </span>
+                            )}
+                            {admin.is_admin && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
+                                <Shield className="w-3 h-3" />
+                                Administrator
+                              </span>
+                            )}
+                            {admin.is_moderator && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                                <ShieldCheck className="w-3 h-3" />
+                                Moderator
+                              </span>
+                            )}
+                            {admin.is_premium && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                                <Crown className="w-3 h-3" />
+                                Premium
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {formatDate(admin.created_at)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-2">
+                            {userProfile?.is_super_admin && !admin.is_super_admin && (
+                              <>
+                                {admin.is_admin ? (
+                                  <button
+                                    onClick={() => demoteFromAdmin(admin.id)}
+                                    className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 text-sm font-medium"
+                                    title="Ukloni Admin Status"
+                                  >
+                                    Ukloni Admina
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => promoteToAdmin(admin.id)}
+                                    className="px-3 py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 text-sm font-medium"
+                                    title="Dodaj Admin Status"
+                                  >
+                                    Promovisi u Admina
+                                  </button>
+                                )}
+                              </>
+                            )}
+                            {admin.is_super_admin && (
+                              <span className="px-3 py-2 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-medium">
+                                Super Admin
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4">
+                <p className="text-sm text-gray-600">
+                  Prikazano {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredAdmins.length)} od {filteredAdmins.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <span className="text-sm font-medium text-gray-900">
+                    Strana {currentPage} od {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -1719,6 +2009,24 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
               </>
             )}
 
+            {userProfile?.is_super_admin && (
+              <button
+                onClick={() => {
+                  setActiveSection('admins');
+                  setSearchTerm('');
+                  setCurrentPage(1);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  activeSection === 'admins'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Shield className="w-5 h-5" />
+                <span className="font-medium">Administratori</span>
+              </button>
+            )}
+
             <button
               onClick={() => {
                 setActiveSection('banned');
@@ -1857,6 +2165,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
           {activeSection === 'dashboard' && renderDashboard()}
           {activeSection === 'users' && renderUsers()}
           {activeSection === 'banned' && renderBannedUsers()}
+          {activeSection === 'admins' && renderAdmins()}
           {activeSection === 'cars' && renderCars()}
           {activeSection === 'reports' && renderReports()}
           {activeSection === 'promo' && renderPromoCodes()}

@@ -119,6 +119,7 @@ export interface UserProfile {
   is_premium: boolean;
   is_admin: boolean;
   is_moderator: boolean;
+  is_super_admin: boolean;
   is_banned: boolean;
   ban_reason: string | null;
   banned_at: string | null;
