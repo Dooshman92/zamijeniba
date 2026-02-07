@@ -106,7 +106,7 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
         subject: newTicketSubject,
         message: newTicketMessage,
         priority: newTicketPriority,
-        status: 'open'
+        status: 'pending'
       }])
       .select()
       .single();

@@ -113,7 +113,7 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
       .from('support_tickets')
       .select(`
         *,
-        user_profiles!support_tickets_user_id_fkey (
+        user_profiles!support_tickets_user_id_fkey_profiles (
           nickname
         )
       `)
