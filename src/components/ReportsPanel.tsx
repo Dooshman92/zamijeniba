@@ -30,7 +30,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
   const [reports, setReports] = useState<ReportWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<ReportWithDetails | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'dismissed'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'dismissed'>('pending');
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [processing, setProcessing] = useState(false);
 
@@ -128,7 +128,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
       loadReports();
 
       if (newStatus === 'resolved') {
-        alert('Oglas je obrisan i prijava je rešena');
+        alert('Oglas je obrisan i prijava je riješena');
       }
     } catch (error) {
       console.error('Error updating report:', error);
@@ -156,7 +156,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
       case 'pending':
         return 'Na čekanju';
       case 'resolved':
-        return 'Rešeno';
+        return 'Riješeno';
       case 'dismissed':
         return 'Odbačeno';
       default:
@@ -164,7 +164,9 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
     }
   };
 
-  const filteredReports = reports;
+  const filteredReports = filterStatus === 'all'
+    ? reports
+    : reports.filter(r => r.status === filterStatus);
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -334,7 +336,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
                   className="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <CheckCircle className="w-4 h-4" />
-                  Rešeno
+                  Riješeno
                 </button>
                 <button
                   onClick={() => handleUpdateStatus(selectedReport.id, 'dismissed')}
