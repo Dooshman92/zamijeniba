@@ -55,6 +55,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [creditsEnabled, setCreditsEnabled] = useState(true);
   const [premiumEnabled, setPremiumEnabled] = useState(false);
+  const [visibleCarsCount, setVisibleCarsCount] = useState(30);
   const currentYear = new Date().getFullYear();
   const [filters, setFilters] = useState<FilterOptions>({
     location: '',
@@ -361,6 +362,10 @@ function App() {
       onlyDamaged: false,
     });
   };
+
+  useEffect(() => {
+    setVisibleCarsCount(30);
+  }, [searchQuery, filters]);
 
   const filteredCars = cars.filter(car => {
     if (searchQuery.trim()) {
@@ -767,6 +772,9 @@ function App() {
                         })
                       : filteredCars;
 
+                    const visibleRegularCars = regularCars.slice(0, visibleCarsCount);
+                    const hasMoreCars = regularCars.length > visibleCarsCount;
+
                     return regularCars.length > 0 && (
                       <div>
                         <div className="mb-6">
@@ -777,7 +785,7 @@ function App() {
                           </div>
                         </div>
                         <div className="space-y-4">
-                          {regularCars.map((car) => (
+                          {visibleRegularCars.map((car) => (
                             <CarCard
                               key={car.id}
                               car={car}
@@ -790,6 +798,16 @@ function App() {
                             />
                           ))}
                         </div>
+                        {hasMoreCars && (
+                          <div className="mt-6 text-center">
+                            <button
+                              onClick={() => setVisibleCarsCount(prev => prev + 30)}
+                              className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-xl transition-colors"
+                            >
+                              Učitaj još
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   })()}
@@ -884,6 +902,9 @@ function App() {
                         })
                       : filteredCars;
 
+                    const visibleRegularCars = regularCars.slice(0, visibleCarsCount);
+                    const hasMoreCars = regularCars.length > visibleCarsCount;
+
                     return regularCars.length > 0 && (
                       <div>
                         <div className="mb-8">
@@ -894,7 +915,7 @@ function App() {
                           </div>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                          {regularCars.map((car) => (
+                          {visibleRegularCars.map((car) => (
                             <CarCard
                               key={car.id}
                               car={car}
@@ -906,6 +927,16 @@ function App() {
                             />
                           ))}
                         </div>
+                        {hasMoreCars && (
+                          <div className="mt-8 text-center">
+                            <button
+                              onClick={() => setVisibleCarsCount(prev => prev + 30)}
+                              className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-xl transition-colors"
+                            >
+                              Učitaj još
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   })()}
