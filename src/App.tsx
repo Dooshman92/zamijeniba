@@ -25,6 +25,7 @@ const DirectChatModal = lazy(() => import('./components/DirectChatModal').then(m
 const UserProfileModal = lazy(() => import('./components/UserProfileModal').then(m => ({ default: m.UserProfileModal })));
 const CarDetailModal = lazy(() => import('./components/CarDetailModal').then(m => ({ default: m.CarDetailModal })));
 const SupportModal = lazy(() => import('./components/SupportModal').then(m => ({ default: m.SupportModal })));
+const AboutModal = lazy(() => import('./components/AboutModal').then(m => ({ default: m.AboutModal })));
 
 function App() {
   const [cars, setCars] = useState<Car[]>([]);
@@ -41,6 +42,7 @@ function App() {
   const [showPromoCode, setShowPromoCode] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showDirectChat, setShowDirectChat] = useState(false);
@@ -1301,6 +1303,12 @@ function App() {
               userProfile={userProfile}
             />
           )}
+
+          {showAbout && (
+            <AboutModal
+              onClose={() => setShowAbout(false)}
+            />
+          )}
         </Suspense>
 
         <footer className="border-t border-white/10 backdrop-blur-md bg-white/5 py-12 mt-20">
@@ -1353,34 +1361,48 @@ function App() {
             </div>
 
             <div className="border-t border-white/10 pt-8">
-              <div className="flex flex-col items-center gap-6">
-                <Logo size="md" />
-                <div className="text-center">
-                  <p className="text-gray-400 font-medium">autozamjena.ba © 2026</p>
-                  <p className="text-sm text-gray-500 mt-1">Brzo. Sigurno. Jednostavno.</p>
-                  <p className="text-gray-400 text-sm mt-2">Najbolja platforma za zamjenu vozila u BiH</p>
-                </div>
-                {user && (
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
                   <button
-                    onClick={() => {
-                      if (userProfile?.is_admin || userProfile?.is_moderator) {
-                        setAdminPanelSection('support');
-                        setShowAdminPanel(true);
-                      } else {
-                        setShowSupport(true);
-                      }
-                    }}
-                    className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg"
+                    onClick={() => setShowAbout(true)}
+                    className="text-gray-400 hover:text-cyan-400 transition-colors font-medium"
                   >
-                    <Headset className="w-5 h-5" />
-                    <span className="font-semibold">Podrška korisnicima</span>
-                    {supportUnreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                        {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
-                      </span>
-                    )}
+                    O nama
                   </button>
-                )}
+                </div>
+
+                <div className="flex flex-col items-center gap-6">
+                  <Logo size="md" />
+                  <div className="text-center">
+                    <p className="text-gray-400 font-medium">autozamjena.ba © 2026</p>
+                    <p className="text-sm text-gray-500 mt-1">Brzo. Sigurno. Jednostavno.</p>
+                    <p className="text-gray-400 text-sm mt-2">Najbolja platforma za zamjenu vozila u BiH</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  {user && (
+                    <button
+                      onClick={() => {
+                        if (userProfile?.is_admin || userProfile?.is_moderator) {
+                          setAdminPanelSection('support');
+                          setShowAdminPanel(true);
+                        } else {
+                          setShowSupport(true);
+                        }
+                      }}
+                      className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg"
+                    >
+                      <Headset className="w-5 h-5" />
+                      <span className="font-semibold">Podrška korisnicima</span>
+                      {supportUnreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                          {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
