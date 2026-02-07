@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserX, Car, Ticket, TrendingUp, MessageSquare,
   RefreshCw, Shield, Crown, Package, Search, Filter,
-  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus
+  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus, ShieldCheck
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -15,6 +15,7 @@ interface UserProfile {
   nickname: string;
   phone: string;
   is_admin: boolean;
+  is_moderator: boolean;
   is_premium: boolean;
   is_banned: boolean;
   ban_reason: string | null;
@@ -70,6 +71,7 @@ interface DashboardStats {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -80,6 +82,19 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  useEffect(() => {
+    const loadCurrentUserProfile = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (data) setUserProfile(data);
+    };
+    loadCurrentUserProfile();
+  }, [user]);
 
   useEffect(() => {
     if (activeSection === 'dashboard') {
@@ -313,6 +328,26 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error toggling premium:', error);
       alert('Greška pri promeni premium statusa');
+    }
+  };
+
+  const toggleModerator = async (userId: string, currentStatus: boolean) => {
+    if (!confirm(`Da li ste sigurni da želite da ${currentStatus ? 'uklonite' : 'dodate'} moderatorsku ulogu?`)) return;
+
+    try {
+      await supabase
+        .from('user_profiles')
+        .update({
+          is_moderator: !currentStatus
+        })
+        .eq('id', userId);
+
+      alert(currentStatus ? 'Moderatorska uloga uklonjena' : 'Moderatorska uloga dodeljena');
+      loadUsers();
+      if (activeSection === 'banned') loadBannedUsers();
+    } catch (error) {
+      console.error('Error toggling moderator:', error);
+      alert('Greška pri promeni moderatorske uloge');
     }
   };
 
@@ -609,6 +644,12 @@ export default function AdminDashboard() {
                                 Admin
                               </span>
                             )}
+                            {user.is_moderator && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                                <ShieldCheck className="w-3 h-3" />
+                                Moderator
+                              </span>
+                            )}
                             {user.is_premium && (
                               <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
                                 <Crown className="w-3 h-3" />
@@ -633,6 +674,17 @@ export default function AdminDashboard() {
                           <div className="flex items-center justify-end gap-2">
                             {!user.is_admin && (
                               <>
+                                <button
+                                  onClick={() => toggleModerator(user.id, user.is_moderator)}
+                                  className={`p-2 rounded-lg ${
+                                    user.is_moderator
+                                      ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                  }`}
+                                  title={user.is_moderator ? 'Ukloni Moderatora' : 'Dodaj Moderatora'}
+                                >
+                                  <ShieldCheck className="w-4 h-4" />
+                                </button>
                                 <button
                                   onClick={() => togglePremium(user.id, user.is_premium)}
                                   className={`p-2 rounded-lg ${
@@ -1086,12 +1138,24 @@ export default function AdminDashboard() {
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-              <Shield className="w-6 h-6 text-white" />
+            <div className={`w-10 h-10 bg-gradient-to-br ${
+              userProfile?.is_admin
+                ? 'from-red-500 to-red-600'
+                : 'from-blue-500 to-blue-600'
+            } rounded-lg flex items-center justify-center`}>
+              {userProfile?.is_admin ? (
+                <Shield className="w-6 h-6 text-white" />
+              ) : (
+                <ShieldCheck className="w-6 h-6 text-white" />
+              )}
             </div>
             <div>
-              <h1 className="font-bold text-gray-900">Admin Panel</h1>
-              <p className="text-xs text-gray-500">Upravljanje platformom</p>
+              <h1 className="font-bold text-gray-900">
+                {userProfile?.is_admin ? 'Admin Panel' : 'Moderator Panel'}
+              </h1>
+              <p className="text-xs text-gray-500">
+                {userProfile?.is_admin ? 'Upravljanje platformom' : 'Moderacija sadržaja'}
+              </p>
             </div>
           </div>
         </div>

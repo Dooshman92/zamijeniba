@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, MessageCircle, Gift, ArrowRightLeft, Coins, Zap } from 'lucide-react';
+import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap } from 'lucide-react';
 import { Car, supabase, UserProfile } from './lib/supabase';
 import { useAuth } from './lib/auth';
 import { initializeStorage } from './lib/storage';
@@ -443,13 +443,17 @@ function App() {
                         </button>
                       </>
                     )}
-                    {userProfile?.is_admin && (
+                    {(userProfile?.is_admin || userProfile?.is_moderator) && (
                       <button
                         onClick={() => setShowAdminPanel(true)}
-                        className="backdrop-blur-md bg-red-600/80 hover:bg-red-600 border border-red-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
-                        title="Admin Panel"
+                        className={`backdrop-blur-md ${
+                          userProfile?.is_admin
+                            ? 'bg-red-600/80 hover:bg-red-600 border-red-500/50'
+                            : 'bg-blue-600/80 hover:bg-blue-600 border-blue-500/50'
+                        } border text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105`}
+                        title={userProfile?.is_admin ? 'Admin Panel' : 'Moderator Panel'}
                       >
-                        <Shield className="w-5 h-5" />
+                        {userProfile?.is_admin ? <Shield className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
                       </button>
                     )}
                     <button
@@ -938,14 +942,14 @@ function App() {
           />
         )}
 
-        {showAdminPanel && userProfile?.is_admin && (
+        {showAdminPanel && (userProfile?.is_admin || userProfile?.is_moderator) && (
           <div className="fixed inset-0 z-50 bg-gray-50">
             <div className="absolute top-4 right-4 z-50">
               <button
                 onClick={() => setShowAdminPanel(false)}
                 className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-lg"
               >
-                <span className="text-gray-700">Zatvori Admin Panel</span>
+                <span className="text-gray-700">Zatvori {userProfile?.is_admin ? 'Admin' : 'Moderator'} Panel</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
