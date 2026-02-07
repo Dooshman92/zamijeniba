@@ -1158,12 +1158,9 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
       { value: 'all', label: 'Svi Tipovi', icon: Car },
       { value: 'automobil', label: 'Automobil', icon: Car },
       { value: 'motocikl', label: 'Motocikl', icon: Car },
-      { value: 'kamion', label: 'Kamion', icon: Car },
-      { value: 'kombi', label: 'Kombi', icon: Car },
-      { value: 'autobus', label: 'Autobus', icon: Car },
-      { value: 'prikolica', label: 'Prikolica', icon: Car },
-      { value: 'opoloprivredna_masina', label: 'Polj. Mašina', icon: Car },
-      { value: 'gradjevinska_masina', label: 'Građ. Mašina', icon: Car }
+      { value: 'quad', label: 'Quad/ATV', icon: Car },
+      { value: 'motorne_sanke', label: 'Motorne sanke', icon: Car },
+      { value: 'jetski', label: 'Jet Ski', icon: Car }
     ];
 
     let vehicleFilteredCars = cars;
@@ -1252,12 +1249,9 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                         const types: Record<string, string> = {
                           'automobil': 'Automobil',
                           'motocikl': 'Motocikl',
-                          'kamion': 'Kamion',
-                          'kombi': 'Kombi',
-                          'autobus': 'Autobus',
-                          'prikolica': 'Prikolica',
-                          'opoloprivredna_masina': 'Polj. Mašina',
-                          'gradjevinska_masina': 'Građ. Mašina'
+                          'quad': 'Quad/ATV',
+                          'motorne_sanke': 'Motorne sanke',
+                          'jetski': 'Jet Ski'
                         };
                         return types[type] || type;
                       };
