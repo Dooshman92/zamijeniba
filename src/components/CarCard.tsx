@@ -1,7 +1,5 @@
 import { Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, MapPin } from 'lucide-react';
 import { Car } from '../lib/supabase';
-import { PremiumBadge } from './PremiumBadge';
-import { FeaturedBadge } from './FeaturedBadge';
 
 interface CarCardProps {
   car: Car;
@@ -20,19 +18,12 @@ export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser
     ? `@${car.owner_nickname}`
     : car.user_email?.split('@')[0];
 
-  const now = new Date();
-  const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
-
   if (layout === 'list') {
     return (
       <div
         onClick={() => onCardClick && onCardClick(car)}
-        className={`group backdrop-blur-md rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl ${
+        className={`group backdrop-blur-md rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl bg-white/5 border border-white/10 hover:border-cyan-500/50 hover:shadow-cyan-500/20 ${
           onCardClick ? 'cursor-pointer' : ''
-        } ${
-          car.owner_is_premium
-            ? 'bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-2 border-yellow-500/50 hover:border-yellow-400/70 shadow-lg shadow-yellow-500/20'
-            : 'bg-white/5 border border-white/10 hover:border-cyan-500/50 hover:shadow-cyan-500/20'
         }`}
       >
         <div className="flex flex-col md:flex-row">
@@ -43,20 +34,12 @@ export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser
               alt={`${car.brand} ${car.model}`}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
-            <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
-              {isFeatured && (
-                <FeaturedBadge size="md" />
-              )}
-              {car.owner_is_premium && (
-                <PremiumBadge size="md" />
-              )}
-            </div>
           </div>
 
           <div className="flex-1 p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className={`text-3xl font-black text-white mb-2 ${car.owner_is_premium ? 'bg-gradient-to-r from-yellow-400 to-amber-300 bg-clip-text text-transparent' : ''}`}>
+                <h3 className="text-3xl font-black text-white mb-2">
                   {car.brand} {car.model}
                 </h3>
                 <div className="flex items-center gap-2 mb-3">
@@ -165,12 +148,8 @@ export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser
   return (
     <div
       onClick={() => onCardClick && onCardClick(car)}
-      className={`group backdrop-blur-md rounded-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 ${
+      className={`group backdrop-blur-md rounded-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 bg-white/5 border border-white/10 hover:border-cyan-500/50 hover:shadow-cyan-500/20 ${
         onCardClick ? 'cursor-pointer' : ''
-      } ${
-        car.owner_is_premium
-          ? 'bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-500/50 hover:border-yellow-400/70 shadow-lg shadow-yellow-500/20'
-          : 'bg-white/5 border border-white/10 hover:border-cyan-500/50 hover:shadow-cyan-500/20'
       }`}
     >
       <div className="relative h-32 overflow-hidden">
@@ -183,21 +162,13 @@ export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser
         <div className="absolute top-2 right-2 backdrop-blur-md bg-cyan-500/90 px-2 py-0.5 rounded text-[10px] font-bold text-white shadow z-20">
           {car.year}
         </div>
-        <div className="absolute top-2 left-2 z-20 flex flex-col gap-1.5 scale-75">
-          {isFeatured && (
-            <FeaturedBadge size="sm" />
-          )}
-          {car.owner_is_premium && (
-            <PremiumBadge size="sm" />
-          )}
-        </div>
         <div className="absolute bottom-2 left-2 right-2 z-20">
-          <h3 className={`text-base font-black text-white drop-shadow-lg ${car.owner_is_premium ? 'font-extrabold' : ''}`}>
+          <h3 className="text-base font-black text-white drop-shadow-lg">
             {car.brand} {car.model}
           </h3>
           <div className="mt-1 flex items-center gap-1.5 flex-wrap">
             <div className="backdrop-blur-md bg-green-500/90 px-2 py-0.5 rounded shadow">
-              <p className={`text-sm font-black text-white ${car.owner_is_premium ? 'text-yellow-100' : ''}`}>
+              <p className="text-sm font-black text-white">
                 {car.price.toLocaleString()} KM
               </p>
             </div>
