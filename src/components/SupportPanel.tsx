@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Send, AlertCircle, Clock, CheckCircle, Filter, Lock, Unlock } from 'lucide-react';
+import { Send, AlertCircle, Clock, CheckCircle, Filter, Lock, Unlock, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
 
 interface SupportPanelProps {
-  userId: string;
+  onClose: () => void;
+}
+
+interface UserProfile {
+  id: string;
+  nickname: string;
+  is_admin: boolean;
+  is_moderator: boolean;
 }
 
 interface SupportTicket {
@@ -19,6 +27,9 @@ interface SupportTicket {
   locked: boolean;
   locked_at: string | null;
   locked_by: string | null;
+  user_profiles: {
+    nickname: string;
+  };
 }
 
 interface SupportMessage {
@@ -30,7 +41,9 @@ interface SupportMessage {
   created_at: string;
 }
 
-export function SupportPanel({ userId }: SupportPanelProps) {
+export function SupportPanel({ onClose }: SupportPanelProps) {
+  const { user } = useAuth();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<SupportTicket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
@@ -38,28 +51,13 @@ export function SupportPanel({ userId }: SupportPanelProps) {
   const [newMessage, setNewMessage] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('SupportPanel mounted with userId:', userId);
-    loadTickets();
-
-    const channel = supabase
-      .channel('support_tickets_admin')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'support_tickets'
-      }, () => {
-        console.log('Ticket update detected, reloading...');
-        loadTickets();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+    if (user) {
+      loadUserProfile();
+      loadTickets();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (statusFilter === 'all') {
@@ -73,12 +71,12 @@ export function SupportPanel({ userId }: SupportPanelProps) {
     if (selectedTicket) {
       loadMessages(selectedTicket.id);
 
-      if (selectedTicket.status === 'pending') {
+      if (selectedTicket.status === 'pending' && (userProfile?.is_admin || userProfile?.is_moderator)) {
         updateTicketStatus(selectedTicket.id, 'open');
       }
 
       const channel = supabase
-        .channel(`support_messages_admin:${selectedTicket.id}`)
+        .channel(`support_messages:${selectedTicket.id}`)
         .on('postgres_changes', {
           event: '*',
           schema: 'public',
@@ -95,20 +93,34 @@ export function SupportPanel({ userId }: SupportPanelProps) {
     }
   }, [selectedTicket]);
 
+  const loadUserProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('id, nickname, is_admin, is_moderator')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (data) {
+      setUserProfile(data);
+    }
+  };
+
   const loadTickets = async () => {
+    if (!user) return;
+
     const { data, error } = await supabase
       .from('support_tickets')
-      .select('*')
+      .select(`
+        *,
+        user_profiles!support_tickets_user_id_fkey (
+          nickname
+        )
+      `)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading tickets:', error);
-      setLoadError(error.message);
-      setTickets([]);
-    } else if (data) {
-      console.log('Loaded tickets:', data);
+    if (!error && data) {
       setTickets(data);
-      setLoadError(null);
     }
   };
 
@@ -125,16 +137,16 @@ export function SupportPanel({ userId }: SupportPanelProps) {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedTicket) return;
+    if (!newMessage.trim() || !selectedTicket || !user) return;
 
     setLoading(true);
     const { error } = await supabase
       .from('support_messages')
       .insert([{
         ticket_id: selectedTicket.id,
-        user_id: userId,
+        user_id: user.id,
         message: newMessage,
-        is_staff_reply: true
+        is_staff_reply: userProfile?.is_admin || userProfile?.is_moderator || false
       }]);
 
     setLoading(false);
@@ -146,12 +158,14 @@ export function SupportPanel({ userId }: SupportPanelProps) {
   };
 
   const updateTicketStatus = async (ticketId: string, status: string) => {
+    if (!user) return;
+
     setLoading(true);
     const updates: any = { status };
 
     if (status === 'resolved' || status === 'closed') {
       updates.resolved_at = new Date().toISOString();
-      updates.resolved_by = userId;
+      updates.resolved_by = user.id;
     }
 
     const { error } = await supabase
@@ -170,11 +184,13 @@ export function SupportPanel({ userId }: SupportPanelProps) {
   };
 
   const toggleLockTicket = async (ticketId: string, currentlyLocked: boolean) => {
+    if (!user) return;
+
     setLoading(true);
     const updates: any = {
       locked: !currentlyLocked,
       locked_at: !currentlyLocked ? new Date().toISOString() : null,
-      locked_by: !currentlyLocked ? userId : null
+      locked_by: !currentlyLocked ? user.id : null
     };
 
     const { error } = await supabase
@@ -199,11 +215,11 @@ export function SupportPanel({ userId }: SupportPanelProps) {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return <Clock className="w-4 h-4 text-orange-400" />;
-      case 'open': return <AlertCircle className="w-4 h-4 text-yellow-400" />;
-      case 'in_progress': return <Clock className="w-4 h-4 text-blue-400" />;
-      case 'resolved': return <CheckCircle className="w-4 h-4 text-green-400" />;
-      case 'closed': return <CheckCircle className="w-4 h-4 text-gray-400" />;
+      case 'pending': return <Clock className="w-4 h-4 text-orange-600" />;
+      case 'open': return <AlertCircle className="w-4 h-4 text-yellow-600" />;
+      case 'in_progress': return <Clock className="w-4 h-4 text-blue-600" />;
+      case 'resolved': return <CheckCircle className="w-4 h-4 text-green-600" />;
+      case 'closed': return <CheckCircle className="w-4 h-4 text-gray-500" />;
       default: return null;
     }
   };
@@ -221,11 +237,11 @@ export function SupportPanel({ userId }: SupportPanelProps) {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-500/20 text-red-400 border-red-500/50';
-      case 'high': return 'bg-orange-500/20 text-orange-400 border-orange-500/50';
-      case 'normal': return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-      case 'low': return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
+      case 'urgent': return 'bg-red-100 text-red-700 border-red-300';
+      case 'high': return 'bg-orange-100 text-orange-700 border-orange-300';
+      case 'normal': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'low': return 'bg-gray-100 text-gray-700 border-gray-300';
+      default: return 'bg-gray-100 text-gray-700 border-gray-300';
     }
   };
 
@@ -241,43 +257,44 @@ export function SupportPanel({ userId }: SupportPanelProps) {
   };
 
   const stats = getTicketStats();
+  const isStaff = userProfile?.is_admin || userProfile?.is_moderator;
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-6 gap-4">
-        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4">
-          <p className="text-gray-400 text-sm mb-1">Ukupno</p>
-          <p className="text-3xl font-black text-white">{stats.total}</p>
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl p-4 shadow-sm">
+          <p className="text-gray-600 text-sm font-semibold mb-1">Ukupno</p>
+          <p className="text-3xl font-black text-gray-800">{stats.total}</p>
         </div>
-        <div className="backdrop-blur-md bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
-          <p className="text-orange-400 text-sm mb-1">Na čekanju</p>
-          <p className="text-3xl font-black text-orange-400">{stats.pending}</p>
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-300 rounded-xl p-4 shadow-sm">
+          <p className="text-orange-700 text-sm font-semibold mb-1">Na čekanju</p>
+          <p className="text-3xl font-black text-orange-600">{stats.pending}</p>
         </div>
-        <div className="backdrop-blur-md bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
-          <p className="text-yellow-400 text-sm mb-1">Otvoreno</p>
-          <p className="text-3xl font-black text-yellow-400">{stats.open}</p>
+        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-xl p-4 shadow-sm">
+          <p className="text-yellow-700 text-sm font-semibold mb-1">Otvoreno</p>
+          <p className="text-3xl font-black text-yellow-600">{stats.open}</p>
         </div>
-        <div className="backdrop-blur-md bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
-          <p className="text-blue-400 text-sm mb-1">U obradi</p>
-          <p className="text-3xl font-black text-blue-400">{stats.in_progress}</p>
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 shadow-sm">
+          <p className="text-blue-700 text-sm font-semibold mb-1">U obradi</p>
+          <p className="text-3xl font-black text-blue-600">{stats.in_progress}</p>
         </div>
-        <div className="backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded-xl p-4">
-          <p className="text-green-400 text-sm mb-1">Riješeno</p>
-          <p className="text-3xl font-black text-green-400">{stats.resolved}</p>
+        <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-4 shadow-sm">
+          <p className="text-green-700 text-sm font-semibold mb-1">Riješeno</p>
+          <p className="text-3xl font-black text-green-600">{stats.resolved}</p>
         </div>
-        <div className="backdrop-blur-md bg-gray-500/10 border border-gray-500/30 rounded-xl p-4">
-          <p className="text-gray-400 text-sm mb-1">Zatvoreno</p>
-          <p className="text-3xl font-black text-gray-400">{stats.closed}</p>
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-4 shadow-sm">
+          <p className="text-gray-700 text-sm font-semibold mb-1">Zatvoreno</p>
+          <p className="text-3xl font-black text-gray-600">{stats.closed}</p>
         </div>
       </div>
 
-      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-white/10 flex items-center gap-4">
-          <Filter className="w-5 h-5 text-gray-400" />
+      <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden shadow-lg">
+        <div className="p-4 border-b-2 border-gray-200 flex items-center gap-4 bg-gradient-to-r from-gray-50 to-white">
+          <Filter className="w-5 h-5 text-gray-600" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+            className="bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 font-semibold focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
           >
             <option value="all">Svi tiketi</option>
             <option value="pending">Na čekanju</option>
@@ -289,204 +306,217 @@ export function SupportPanel({ userId }: SupportPanelProps) {
         </div>
 
         <div className="flex h-[600px]">
-          <div className="w-1/3 border-r border-white/10 overflow-y-auto">
+          <div className="w-1/3 border-r-2 border-gray-200 overflow-y-auto bg-gray-50">
             <div className="space-y-2 p-4">
               {filteredTickets.map((ticket) => (
                 <div
                   key={ticket.id}
                   onClick={() => setSelectedTicket(ticket)}
-                  className={`p-4 rounded-xl cursor-pointer transition-all ${
+                  className={`p-4 rounded-xl cursor-pointer transition-all border-2 ${
                     selectedTicket?.id === ticket.id
-                      ? 'bg-cyan-500/20 border-2 border-cyan-500/50'
-                      : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                      ? 'bg-blue-50 border-blue-500 shadow-lg'
+                      : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {ticket.locked && <Lock className="w-4 h-4 text-red-400 flex-shrink-0" />}
-                      <h3 className="font-bold text-white text-sm line-clamp-1">{ticket.subject}</h3>
+                      {ticket.locked && <Lock className="w-4 h-4 text-red-600 flex-shrink-0" />}
+                      <h3 className="font-bold text-gray-900 text-sm line-clamp-1">{ticket.subject}</h3>
                     </div>
-                    <div className={`px-2 py-0.5 rounded text-xs border ${getPriorityColor(ticket.priority)} flex-shrink-0 ml-2`}>
+                    <div className={`px-2 py-0.5 rounded-md text-xs font-semibold border ${getPriorityColor(ticket.priority)} flex-shrink-0 ml-2`}>
                       {ticket.priority}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 line-clamp-2 mb-2">{ticket.message}</p>
+                  <p className="text-xs text-gray-600 line-clamp-2 mb-2">{ticket.message}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       {getStatusIcon(ticket.status)}
-                      <span className="text-xs text-gray-400">{getStatusText(ticket.status)}</span>
+                      <span className="text-xs font-semibold text-gray-700">{getStatusText(ticket.status)}</span>
                     </div>
-                    <span className="text-xs text-gray-500">{formatDateTime(ticket.created_at)}</span>
+                    <span className="text-xs text-gray-500 font-medium">{formatDateTime(ticket.created_at)}</span>
                   </div>
+                  {isStaff && ticket.user_profiles && (
+                    <div className="mt-2 flex items-center gap-1 text-xs">
+                      <User className="w-3 h-3 text-gray-500" />
+                      <span className="text-gray-600 font-medium">{ticket.user_profiles.nickname}</span>
+                    </div>
+                  )}
                 </div>
               ))}
 
-              {loadError && (
-                <div className="text-center py-8">
-                  <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
-                  <p className="text-red-400 text-sm font-semibold mb-2">Greška pri učitavanju tiketa</p>
-                  <p className="text-gray-400 text-xs">{loadError}</p>
-                </div>
-              )}
-
-              {!loadError && filteredTickets.length === 0 && (
-                <div className="text-center py-8">
-                  <AlertCircle className="w-12 h-12 text-gray-600 mx-auto mb-2" />
-                  <p className="text-gray-400 text-sm">Nema tiketa</p>
+              {filteredTickets.length === 0 && (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-semibold">Nema tiketa</p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col bg-white">
             {selectedTicket ? (
               <>
-                <div className="p-6 border-b border-white/10">
+                <div className="p-6 border-b-2 border-gray-200 bg-gradient-to-r from-gray-50 to-white">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2">{selectedTicket.subject}</h3>
-                      <p className="text-sm text-gray-400">ID: {selectedTicket.id}</p>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{selectedTicket.subject}</h3>
+                      <p className="text-sm text-gray-500 font-medium">ID: {selectedTicket.id}</p>
+                      {isStaff && selectedTicket.user_profiles && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <User className="w-4 h-4 text-gray-600" />
+                          <span className="text-sm text-gray-700 font-semibold">Korisnik: {selectedTicket.user_profiles.nickname}</span>
+                        </div>
+                      )}
                       {selectedTicket.locked && selectedTicket.locked_at && (
-                        <div className="mt-2 flex items-center gap-2 text-sm">
-                          <Lock className="w-4 h-4 text-red-400" />
-                          <span className="text-red-400 font-semibold">
-                            Zaključano {formatDateTime(selectedTicket.locked_at)}
-                            {selectedTicket.locked_by === selectedTicket.user_id ? ' (od strane korisnika)' : ' (od strane admina)'} -
-                            Automatski će se obrisati za{' '}
-                            {Math.max(0, 3 - Math.floor((Date.now() - new Date(selectedTicket.locked_at).getTime()) / (1000 * 60 * 60 * 24)))} dana
+                        <div className="mt-2 flex items-center gap-2 text-sm bg-red-50 border border-red-200 rounded-lg p-2">
+                          <Lock className="w-4 h-4 text-red-600" />
+                          <span className="text-red-700 font-semibold">
+                            Zaključano - briše se za {Math.max(0, 3 - Math.floor((Date.now() - new Date(selectedTicket.locked_at).getTime()) / (1000 * 60 * 60 * 24)))} dana
                           </span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex gap-2 mb-3">
-                    <button
-                      onClick={() => updateTicketStatus(selectedTicket.id, 'open')}
-                      disabled={loading || selectedTicket.status === 'open'}
-                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                        selectedTicket.status === 'open'
-                          ? 'bg-yellow-500/20 text-yellow-400 border-2 border-yellow-500/50'
-                          : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
-                      }`}
-                    >
-                      Otvoreno
-                    </button>
-                    <button
-                      onClick={() => updateTicketStatus(selectedTicket.id, 'in_progress')}
-                      disabled={loading || selectedTicket.status === 'in_progress'}
-                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                        selectedTicket.status === 'in_progress'
-                          ? 'bg-blue-500/20 text-blue-400 border-2 border-blue-500/50'
-                          : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
-                      }`}
-                    >
-                      U obradi
-                    </button>
-                    <button
-                      onClick={() => updateTicketStatus(selectedTicket.id, 'resolved')}
-                      disabled={loading || selectedTicket.status === 'resolved'}
-                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                        selectedTicket.status === 'resolved'
-                          ? 'bg-green-500/20 text-green-400 border-2 border-green-500/50'
-                          : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
-                      }`}
-                    >
-                      Riješeno
-                    </button>
-                    <button
-                      onClick={() => updateTicketStatus(selectedTicket.id, 'closed')}
-                      disabled={loading || selectedTicket.status === 'closed'}
-                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                        selectedTicket.status === 'closed'
-                          ? 'bg-gray-500/20 text-gray-400 border-2 border-gray-500/50'
-                          : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
-                      }`}
-                    >
-                      Zatvoreno
-                    </button>
-                  </div>
+                  {isStaff && (
+                    <>
+                      <div className="flex gap-2 mb-3 flex-wrap">
+                        <button
+                          onClick={() => updateTicketStatus(selectedTicket.id, 'open')}
+                          disabled={loading || selectedTicket.status === 'open'}
+                          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all border-2 ${
+                            selectedTicket.status === 'open'
+                              ? 'bg-yellow-100 text-yellow-700 border-yellow-500 shadow-md'
+                              : 'bg-white text-gray-600 border-gray-300 hover:border-yellow-400 hover:bg-yellow-50'
+                          }`}
+                        >
+                          Otvoreno
+                        </button>
+                        <button
+                          onClick={() => updateTicketStatus(selectedTicket.id, 'in_progress')}
+                          disabled={loading || selectedTicket.status === 'in_progress'}
+                          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all border-2 ${
+                            selectedTicket.status === 'in_progress'
+                              ? 'bg-blue-100 text-blue-700 border-blue-500 shadow-md'
+                              : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                          }`}
+                        >
+                          U obradi
+                        </button>
+                        <button
+                          onClick={() => updateTicketStatus(selectedTicket.id, 'resolved')}
+                          disabled={loading || selectedTicket.status === 'resolved'}
+                          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all border-2 ${
+                            selectedTicket.status === 'resolved'
+                              ? 'bg-green-100 text-green-700 border-green-500 shadow-md'
+                              : 'bg-white text-gray-600 border-gray-300 hover:border-green-400 hover:bg-green-50'
+                          }`}
+                        >
+                          Riješeno
+                        </button>
+                        <button
+                          onClick={() => updateTicketStatus(selectedTicket.id, 'closed')}
+                          disabled={loading || selectedTicket.status === 'closed'}
+                          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all border-2 ${
+                            selectedTicket.status === 'closed'
+                              ? 'bg-gray-100 text-gray-700 border-gray-500 shadow-md'
+                              : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                          }`}
+                        >
+                          Zatvoreno
+                        </button>
+                      </div>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => toggleLockTicket(selectedTicket.id, selectedTicket.locked)}
-                      disabled={loading}
-                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 ${
-                        selectedTicket.locked
-                          ? 'bg-red-500/20 text-red-400 border-2 border-red-500/50 hover:bg-red-500/30'
-                          : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
-                      }`}
-                    >
-                      {selectedTicket.locked ? (
-                        <>
-                          <Unlock className="w-4 h-4" />
-                          Otključaj tiket
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="w-4 h-4" />
-                          Zaključaj tiket (briše se za 3 dana)
-                        </>
-                      )}
-                    </button>
-                  </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => toggleLockTicket(selectedTicket.id, selectedTicket.locked)}
+                          disabled={loading}
+                          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 border-2 ${
+                            selectedTicket.locked
+                              ? 'bg-red-100 text-red-700 border-red-500 hover:bg-red-200'
+                              : 'bg-white text-gray-600 border-gray-300 hover:border-red-400 hover:bg-red-50'
+                          }`}
+                        >
+                          {selectedTicket.locked ? (
+                            <>
+                              <Unlock className="w-4 h-4" />
+                              Otključaj
+                            </>
+                          ) : (
+                            <>
+                              <Lock className="w-4 h-4" />
+                              Zaključaj (briše se za 3 dana)
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-semibold text-cyan-400">Korisnik</span>
-                      <span className="text-xs text-gray-500">{formatDateTime(selectedTicket.created_at)}</span>
+                      <User className="w-4 h-4 text-blue-700" />
+                      <span className="text-sm font-bold text-blue-700">
+                        {isStaff && selectedTicket.user_profiles ? selectedTicket.user_profiles.nickname : 'Korisnik'}
+                      </span>
+                      <span className="text-xs text-blue-600 font-medium ml-auto">{formatDateTime(selectedTicket.created_at)}</span>
                     </div>
-                    <p className="text-white whitespace-pre-line">{selectedTicket.message}</p>
+                    <p className="text-gray-900 whitespace-pre-line font-medium">{selectedTicket.message}</p>
                   </div>
 
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`rounded-xl p-4 ${
+                      className={`rounded-xl p-4 border-2 shadow-sm ${
                         message.is_staff_reply
-                          ? 'bg-blue-500/10 border border-blue-500/30 mr-4'
-                          : 'bg-white/5 border border-white/10 ml-4'
+                          ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-300 mr-8'
+                          : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300 ml-8'
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-sm font-semibold ${message.is_staff_reply ? 'text-blue-400' : 'text-cyan-400'}`}>
-                          {message.is_staff_reply ? 'Podrška' : 'Korisnik'}
+                        <User className={`w-4 h-4 ${message.is_staff_reply ? 'text-green-700' : 'text-blue-700'}`} />
+                        <span className={`text-sm font-bold ${message.is_staff_reply ? 'text-green-700' : 'text-blue-700'}`}>
+                          {message.is_staff_reply ? 'Podrška' : (isStaff && selectedTicket.user_profiles ? selectedTicket.user_profiles.nickname : 'Korisnik')}
                         </span>
-                        <span className="text-xs text-gray-500">{formatDateTime(message.created_at)}</span>
+                        <span className={`text-xs font-medium ml-auto ${message.is_staff_reply ? 'text-green-600' : 'text-blue-600'}`}>
+                          {formatDateTime(message.created_at)}
+                        </span>
                       </div>
-                      <p className="text-white whitespace-pre-line">{message.message}</p>
+                      <p className="text-gray-900 whitespace-pre-line font-medium">{message.message}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="p-6 border-t border-white/10">
-                  <div className="flex gap-3">
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                      placeholder="Odgovorite korisniku..."
-                      className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50"
-                    />
-                    <button
-                      onClick={sendMessage}
-                      disabled={loading || !newMessage.trim()}
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 flex items-center gap-2"
-                    >
-                      <Send className="w-5 h-5" />
-                      Pošalji
-                    </button>
+                {(!selectedTicket.locked || selectedTicket.locked_by !== selectedTicket.user_id) && (
+                  <div className="p-6 border-t-2 border-gray-200 bg-white">
+                    <div className="flex gap-3">
+                      <input
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                        placeholder={isStaff ? "Odgovorite korisniku..." : "Pošaljite poruku..."}
+                        className="flex-1 bg-gray-50 border-2 border-gray-300 rounded-xl px-4 py-3 text-gray-900 font-medium placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      />
+                      <button
+                        onClick={sendMessage}
+                        disabled={loading || !newMessage.trim()}
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg"
+                      >
+                        <Send className="w-5 h-5" />
+                        Pošalji
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex-1 flex items-center justify-center bg-gray-50">
                 <div className="text-center">
-                  <AlertCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">Odaberite tiket</p>
+                  <AlertCircle className="w-20 h-20 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg font-semibold">Odaberite tiket</p>
                 </div>
               </div>
             )}
