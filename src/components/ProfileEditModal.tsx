@@ -10,6 +10,16 @@ interface ProfileEditModalProps {
   currentProfile: UserProfile | null;
 }
 
+interface PhoneReveal {
+  id: string;
+  revealer_id: string;
+  car_id: string | null;
+  created_at: string;
+  revealer_nickname: string | null;
+  car_brand: string | null;
+  car_model: string | null;
+}
+
 export function ProfileEditModal({ onClose, onSuccess, currentProfile }: ProfileEditModalProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -21,6 +31,8 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(currentProfile?.avatar_url || '');
+  const [phoneReveals, setPhoneReveals] = useState<PhoneReveal[]>([]);
+  const [loadingReveals, setLoadingReveals] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -37,6 +49,44 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
     newPassword: '',
     confirmPassword: ''
   });
+
+  useEffect(() => {
+    if (user) {
+      fetchPhoneReveals();
+    }
+  }, [user]);
+
+  const fetchPhoneReveals = async () => {
+    if (!user) return;
+
+    setLoadingReveals(true);
+    const { data } = await supabase
+      .from('phone_reveals')
+      .select(`
+        id,
+        revealer_id,
+        car_id,
+        created_at,
+        revealer:user_profiles!revealer_id(nickname),
+        car:cars(brand, model)
+      `)
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (data) {
+      const formattedData = data.map((reveal: any) => ({
+        id: reveal.id,
+        revealer_id: reveal.revealer_id,
+        car_id: reveal.car_id,
+        created_at: reveal.created_at,
+        revealer_nickname: reveal.revealer?.nickname || null,
+        car_brand: reveal.car?.brand || null,
+        car_model: reveal.car?.model || null,
+      }));
+      setPhoneReveals(formattedData);
+    }
+    setLoadingReveals(false);
+  };
 
   const checkNicknameAvailability = async (nickname: string) => {
     if (!nickname.trim()) {
@@ -518,6 +568,56 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
               ))}
             </select>
           </div>
+
+          {formData.phone && formData.show_phone_number && (
+            <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Phone className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-sm font-bold text-white">Otkrieni telefoni</h3>
+              </div>
+
+              {loadingReveals ? (
+                <div className="text-center py-4">
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-cyan-500 border-t-transparent"></div>
+                  <p className="text-xs text-gray-400 mt-2">Učitavanje...</p>
+                </div>
+              ) : phoneReveals.length === 0 ? (
+                <div className="text-center py-4">
+                  <Eye className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                  <p className="text-xs text-gray-400">Niko još nije otkrio vaš telefon</p>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {phoneReveals.map((reveal) => (
+                    <div
+                      key={reveal.id}
+                      className="backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <p className="text-sm text-white font-medium">
+                            {reveal.revealer_nickname ? `@${reveal.revealer_nickname}` : 'Korisnik'}
+                          </p>
+                          {reveal.car_brand && reveal.car_model && (
+                            <p className="text-xs text-gray-400">
+                              {reveal.car_brand} {reveal.car_model}
+                            </p>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {new Date(reveal.created_at).toLocaleDateString('sr-Latn-RS', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex gap-2 pt-2">
             <button

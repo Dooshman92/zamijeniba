@@ -522,25 +522,25 @@ function App() {
             <div className="flex justify-between items-center h-20">
               <Logo size="md" onClick={handleLogoClick} />
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 sm:gap-3">
                 {user ? (
                   <>
                     {premiumEnabled && !userProfile?.is_premium && (
                       <>
                         <button
                           onClick={() => setShowPromoCode(true)}
-                          className="flex items-center gap-2 backdrop-blur-md bg-gradient-to-r from-green-600/80 to-emerald-600/80 hover:from-green-600 hover:to-emerald-600 border border-green-500/50 text-white px-3 py-2 rounded-xl transition-all duration-300 hover:scale-105 font-bold text-sm"
+                          className="flex items-center gap-2 backdrop-blur-md bg-gradient-to-r from-green-600/80 to-emerald-600/80 hover:from-green-600 hover:to-emerald-600 border border-green-500/50 text-white px-2 sm:px-3 py-2 rounded-xl transition-all duration-300 hover:scale-105 font-bold text-sm"
                           title="Iskoristi Promo Kod"
                         >
-                          <Gift className="w-5 h-5" />
-                          <span>Promo</span>
+                          <Gift className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span className="hidden sm:inline">Promo</span>
                         </button>
                         <button
                           onClick={() => setShowPremiumModal(true)}
-                          className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/30 font-semibold text-sm"
+                          className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white px-2 sm:px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/30 font-semibold text-sm"
                         >
                           <Sparkles className="w-4 h-4" />
-                          Premium
+                          <span className="hidden sm:inline">Premium</span>
                         </button>
                       </>
                     )}
@@ -555,52 +555,52 @@ function App() {
                             userProfile?.is_admin
                               ? 'bg-red-600/80 hover:bg-red-600 border-red-500/50'
                               : 'bg-blue-600/80 hover:bg-blue-600 border-blue-500/50'
-                          } border text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105`}
+                          } border text-white px-2 sm:px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105`}
                           title={userProfile?.is_admin ? 'Admin Panel' : 'Moderator Panel'}
                         >
-                          {userProfile?.is_admin ? <Shield className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
+                          {userProfile?.is_admin ? <Shield className="w-4 h-4 sm:w-5 sm:h-5" /> : <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />}
                         </button>
                       </>
                     )}
                     <button
                       onClick={() => setShowMyAds(true)}
-                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-2 sm:px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                       title="Moji Oglasi"
                     >
-                      <FileText className="w-5 h-5" />
+                      <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                     <button
                       onClick={() => setShowInbox(true)}
-                      className="relative backdrop-blur-md bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      className="relative backdrop-blur-md bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-500/50 text-white px-2 sm:px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                       title="Ponude za zamjenu"
                     >
-                      <ArrowRightLeft className="w-5 h-5" />
+                      <ArrowRightLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                       {offersUnreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center animate-pulse text-[10px] sm:text-xs">
                           {offersUnreadCount > 9 ? '9+' : offersUnreadCount}
                         </span>
                       )}
                     </button>
                     <button
                       onClick={signOut}
-                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      className="hidden sm:flex backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                       title="Odjavi se"
                     >
                       <LogOut className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => setShowProfileEdit(true)}
-                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white p-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white p-1.5 sm:p-2 rounded-xl transition-all duration-300 hover:scale-105"
                       title="Profil"
                     >
                       {userProfile?.avatar_url ? (
                         <img
                           src={userProfile.avatar_url}
                           alt="Avatar"
-                          className="w-10 h-10 rounded-full object-cover border-2 border-cyan-400"
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-cyan-400"
                         />
                       ) : (
-                        <div className={`w-10 h-10 rounded-full ${
+                        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${
                           userProfile?.gender === 'female'
                             ? 'bg-gradient-to-br from-pink-500 to-pink-600'
                             : userProfile?.gender === 'male'
@@ -608,15 +608,15 @@ function App() {
                             : 'bg-gradient-to-br from-cyan-500 to-blue-600'
                         } flex items-center justify-center`}>
                           {userProfile?.gender === 'female' ? (
-                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
                             </svg>
                           ) : userProfile?.gender === 'male' ? (
-                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
                             </svg>
                           ) : (
-                            <User className="w-6 h-6 text-white" />
+                            <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                           )}
                         </div>
                       )}
@@ -625,10 +625,11 @@ function App() {
                 ) : (
                   <button
                     onClick={() => setShowAuthModal(true)}
-                    className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-6 py-2.5 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 font-medium"
+                    className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 font-medium text-sm sm:text-base"
                   >
-                    <LogIn className="w-5 h-5" />
-                    <span>Prijavi se</span>
+                    <LogIn className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Prijavi se</span>
+                    <span className="inline sm:hidden">Prijava</span>
                   </button>
                 )}
               </div>
