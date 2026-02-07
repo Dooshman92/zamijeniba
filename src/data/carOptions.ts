@@ -101,6 +101,62 @@ export const carBrands = [
   'Ostalo'
 ];
 
+export const motorcycleModels: Record<string, string[]> = {
+  'Honda': ['CBR600RR', 'CBR1000RR', 'CB650R', 'CB500F', 'CB300R', 'CRF450R', 'CRF250R', 'Africa Twin', 'Gold Wing', 'Shadow', 'Rebel', 'Forza', 'PCX', 'SH', 'Ostalo'],
+  'Yamaha': ['YZF-R1', 'YZF-R6', 'YZF-R7', 'MT-07', 'MT-09', 'MT-10', 'Tenere 700', 'Tracer', 'XSR', 'V-Max', 'YZ450F', 'YZ250F', 'NMAX', 'XMAX', 'Ostalo'],
+  'Suzuki': ['GSX-R1000', 'GSX-R750', 'GSX-R600', 'GSX-S1000', 'GSX-S750', 'V-Strom', 'Hayabusa', 'Boulevard', 'RM-Z450', 'RM-Z250', 'Burgman', 'Ostalo'],
+  'Kawasaki': ['Ninja ZX-10R', 'Ninja ZX-6R', 'Ninja 650', 'Ninja 400', 'Z900', 'Z650', 'Z400', 'Versys', 'Vulcan', 'KX450', 'KX250', 'J300', 'Ostalo'],
+  'Harley-Davidson': ['Street Glide', 'Road Glide', 'Electra Glide', 'Fat Boy', 'Softail', 'Sportster', 'Iron 883', 'Street Bob', 'Road King', 'LiveWire', 'Ostalo'],
+  'BMW': ['S1000RR', 'S1000R', 'F850GS', 'F750GS', 'R1250GS', 'R1250RT', 'R nineT', 'G310R', 'G310GS', 'C400X', 'C650GT', 'Ostalo'],
+  'Ducati': ['Panigale V4', 'Panigale V2', 'Streetfighter', 'Monster', 'Multistrada', 'Diavel', 'Scrambler', 'SuperSport', 'Hypermotard', 'Ostalo'],
+  'KTM': ['1290 Super Duke', '890 Duke', '790 Duke', '390 Duke', '250 Duke', '1290 Super Adventure', '890 Adventure', 'RC', 'SX-F', 'EXC', 'Ostalo'],
+  'Aprilia': ['RSV4', 'Tuono V4', 'RS660', 'Tuono 660', 'Shiver', 'Dorsoduro', 'SX', 'RX', 'SR', 'Ostalo'],
+  'Triumph': ['Street Triple', 'Speed Triple', 'Bonneville', 'Scrambler', 'Rocket', 'Tiger', 'Daytona', 'Trident', 'Thruxton', 'Ostalo'],
+  'Royal Enfield': ['Classic', 'Bullet', 'Himalayan', 'Interceptor', 'Continental GT', 'Meteor', 'Hunter', 'Scram', 'Ostalo'],
+  'Husqvarna': ['Vitpilen', 'Svartpilen', 'Norden', 'FC', 'FE', 'TC', 'TE', 'Ostalo'],
+  'Indian': ['Chief', 'Scout', 'Chieftain', 'Roadmaster', 'Springfield', 'FTR', 'Challenger', 'Ostalo'],
+  'Moto Guzzi': ['V7', 'V9', 'V85 TT', 'V100 Mandello', 'Audace', 'California', 'Ostalo'],
+  'MV Agusta': ['F3', 'F4', 'Brutale', 'Dragster', 'Turismo Veloce', 'Superveloce', 'Rush', 'Ostalo'],
+  'Benelli': ['TRK', 'Leoncino', '502C', '302S', 'TNT', 'Imperiale', 'Ostalo'],
+  'Vespa': ['Primavera', 'Sprint', 'GTS', 'GTV', 'Elettrica', 'Ostalo'],
+  'Piaggio': ['Liberty', 'Medley', 'Beverly', 'MP3', 'Ostalo'],
+  'Kymco': ['AK', 'Downtown', 'Xciting', 'People', 'Agility', 'Ostalo'],
+  'SYM': ['Cruisym', 'Joymax', 'Citycom', 'Fiddle', 'Orbit', 'Ostalo'],
+  'Ostalo': ['Ostalo']
+};
+
+export const quadModels: Record<string, string[]> = {
+  'Yamaha': ['Raptor 700', 'Raptor 350', 'YFZ450R', 'Grizzly 700', 'Grizzly 550', 'Kodiak 700', 'Kodiak 450', 'Banshee', 'Ostalo'],
+  'Honda': ['TRX450R', 'TRX400EX', 'TRX250X', 'Rancher 420', 'Foreman 520', 'Rubicon 520', 'Rincon 680', 'Ostalo'],
+  'Can-Am': ['Outlander', 'Renegade', 'Maverick', 'Commander', 'Defender', 'DS 450', 'DS 250', 'Ostalo'],
+  'Polaris': ['Sportsman', 'Scrambler', 'Outlaw', 'Predator', 'Trail Boss', 'Ranger', 'RZR', 'Ostalo'],
+  'Kawasaki': ['KFX700', 'KFX450R', 'KFX400', 'KFX250', 'Brute Force', 'Prairie', 'Bayou', 'Ostalo'],
+  'Suzuki': ['LT-Z400', 'LT-R450', 'QuadSport Z400', 'QuadRacer', 'KingQuad', 'Ozark', 'Ostalo'],
+  'Arctic Cat': ['Wildcat', 'Prowler', 'Alterra', 'DVX', 'Thundercat', 'Ostalo'],
+  'Kymco': ['MXU 700', 'MXU 550', 'MXU 450', 'MXU 300', 'Maxxer', 'Ostalo'],
+  'CF Moto': ['CForce', 'ZForce', 'UForce', 'Ostalo'],
+  'Linhai': ['LH300', 'LH400', 'LH500', 'Ostalo'],
+  'Ostalo': ['Ostalo']
+};
+
+export const snowmobileModels: Record<string, string[]> = {
+  'Ski-Doo': ['MXZ', 'Renegade', 'Summit', 'Expedition', 'Grand Touring', 'Skandic', 'Tundra', 'Freeride', 'Ostalo'],
+  'Polaris': ['Indy', 'RMK', 'Switchback', 'Rush', 'Voyageur', 'Titan', 'Widetrak', 'Ostalo'],
+  'Arctic Cat': ['ZR', 'M', 'Bearcat', 'Pantera', 'Blast', 'Norseman', 'Ostalo'],
+  'Yamaha': ['Sidewinder', 'SR Viper', 'Phazer', 'VK', 'RS Venture', 'Ostalo'],
+  'Lynx': ['Rave', 'Xterrain', 'Commander', '49 Ranger', 'Adventure', 'Ostalo'],
+  'Ostalo': ['Ostalo']
+};
+
+export const jetskiModels: Record<string, string[]> = {
+  'Sea-Doo': ['Spark', 'GTI', 'GTR', 'RXT', 'RXP', 'Wake', 'Fish Pro', 'Explorer', 'Switch', 'Ostalo'],
+  'Yamaha': ['EX', 'VX', 'FX', 'GP', 'SuperJet', 'WaveRunner', 'Ostalo'],
+  'Kawasaki': ['STX', 'Ultra', 'SX-R', 'X-2', 'Ostalo'],
+  'Honda': ['AquaTrax', 'F-12', 'F-15', 'Ostalo'],
+  'Polaris': ['SL', 'SLX', 'Genesis', 'Ostalo'],
+  'Ostalo': ['Ostalo']
+};
+
 export const carModels: Record<string, string[]> = {
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'e-tron', 'RS3', 'RS4', 'RS5', 'RS6', 'RS7', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'SQ5', 'SQ7', 'Ostalo'],
   'BMW': ['Serija 1', 'Serija 2', 'Serija 3', 'Serija 4', 'Serija 5', 'Serija 6', 'Serija 7', 'Serija 8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'i3', 'i4', 'iX', 'M2', 'M3', 'M4', 'M5', 'M6', 'M8', 'X5 M', 'X6 M', 'Ostalo'],
@@ -223,4 +279,29 @@ export function getFuelTypesByVehicleType(vehicleType: string): string[] {
     default:
       return fuelTypes;
   }
+}
+
+export function getModelsByVehicleType(vehicleType: string, brand: string): string[] {
+  let modelsMap: Record<string, string[]>;
+
+  switch (vehicleType) {
+    case 'motocikl':
+      modelsMap = motorcycleModels;
+      break;
+    case 'quad':
+      modelsMap = quadModels;
+      break;
+    case 'motorne_sanke':
+      modelsMap = snowmobileModels;
+      break;
+    case 'jetski':
+      modelsMap = jetskiModels;
+      break;
+    case 'automobil':
+    default:
+      modelsMap = carModels;
+      break;
+  }
+
+  return modelsMap[brand] || ['Ostalo'];
 }

@@ -3,7 +3,7 @@ import { X, ChevronLeft, ChevronRight, Upload, Star, Crown } from 'lucide-react'
 import { supabase, UserProfile, VehicleType } from '../lib/supabase';
 import { uploadMultipleCarImages } from '../lib/storage';
 import { useAuth } from '../lib/auth';
-import { vehicleTypes, carBrands, carModels, carColors, fuelTypes, transmissionTypes, driveTypes, yearOptions, getBrandsByVehicleType, getFuelTypesByVehicleType } from '../data/carOptions';
+import { vehicleTypes, carBrands, carModels, carColors, fuelTypes, transmissionTypes, driveTypes, yearOptions, getBrandsByVehicleType, getFuelTypesByVehicleType, getModelsByVehicleType } from '../data/carOptions';
 import { bosnianCities } from '../data/cities';
 import { calculateCarAdCost, spendCredits, markFirstCarAdUsed } from '../lib/credits';
 import { FEATURES } from '../config/features';
@@ -449,7 +449,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                     disabled={!formData.brand}
                   >
                     <option value="">Odaberi</option>
-                    {formData.brand && carModels[formData.brand]?.map((model) => (
+                    {formData.brand && getModelsByVehicleType(formData.vehicle_type, formData.brand).map((model) => (
                       <option key={model} value={model}>{model}</option>
                     ))}
                   </select>

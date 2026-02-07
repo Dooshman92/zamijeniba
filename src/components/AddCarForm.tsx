@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, VehicleType } from '../lib/supabase';
 import { uploadCarImage } from '../lib/storage';
 import { useAuth } from '../lib/auth';
-import { carBrands, carModels, carColors, fuelTypes, transmissionTypes, yearOptions } from '../data/carOptions';
+import { vehicleTypes, carBrands, carModels, carColors, fuelTypes, transmissionTypes, yearOptions, getBrandsByVehicleType, getFuelTypesByVehicleType, getModelsByVehicleType } from '../data/carOptions';
 
 interface AddCarFormProps {
   onClose: () => void;
@@ -16,6 +16,7 @@ export function AddCarForm({ onClose, onSuccess }: AddCarFormProps) {
   const [imagePreview, setImagePreview] = useState<string>('');
   const { user } = useAuth();
   const [formData, setFormData] = useState({
+    vehicle_type: 'automobil' as VehicleType,
     brand: '',
     model: '',
     year: 0,
@@ -176,7 +177,7 @@ export function AddCarForm({ onClose, onSuccess }: AddCarFormProps) {
                 disabled={!formData.brand}
               >
                 <option value="">Odaberi model</option>
-                {formData.brand && carModels[formData.brand]?.map((model) => (
+                {formData.brand && getModelsByVehicleType(formData.vehicle_type, formData.brand).map((model) => (
                   <option key={model} value={model}>
                     {model}
                   </option>
