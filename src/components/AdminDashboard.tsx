@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserX, Car, Ticket, TrendingUp, MessageSquare,
   RefreshCw, Shield, Crown, Package, Search, Filter,
-  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus, ShieldCheck, AlertTriangle, Trash2, Power
+  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus, ShieldCheck, AlertTriangle, Trash2, Power, Headset
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDate } from '../lib/dateUtils';
+import { SupportPanel } from './SupportPanel';
 
-type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports';
+type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports' | 'support';
 
 interface UserProfile {
   id: string;
@@ -94,10 +95,14 @@ interface Report {
   } | null;
 }
 
-export default function AdminDashboard() {
+interface AdminDashboardProps {
+  initialSection?: AdminSection;
+}
+
+export default function AdminDashboard({ initialSection }: AdminDashboardProps = {}) {
   const { user } = useAuth();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [activeSection, setActiveSection] = useState<AdminSection>('banned');
+  const [activeSection, setActiveSection] = useState<AdminSection>(initialSection || 'banned');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [bannedUsers, setBannedUsers] = useState<UserProfile[]>([]);
@@ -123,10 +128,12 @@ export default function AdminDashboard() {
         .maybeSingle();
       if (data) {
         setUserProfile(data);
-        if (data.is_admin) {
-          setActiveSection('dashboard');
-        } else {
-          setActiveSection('banned');
+        if (!initialSection) {
+          if (data.is_admin) {
+            setActiveSection('dashboard');
+          } else {
+            setActiveSection('banned');
+          }
         }
       }
     };
@@ -1652,6 +1659,22 @@ export default function AdminDashboard() {
               <span className="font-medium">Prijave</span>
             </button>
 
+            <button
+              onClick={() => {
+                setActiveSection('support');
+                setSearchTerm('');
+                setCurrentPage(1);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                activeSection === 'support'
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Headset className="w-5 h-5" />
+              <span className="font-medium">Podrška</span>
+            </button>
+
             {userProfile?.is_admin && (
               <button
                 onClick={() => {
@@ -1694,6 +1717,7 @@ export default function AdminDashboard() {
           {activeSection === 'cars' && renderCars()}
           {activeSection === 'reports' && renderReports()}
           {activeSection === 'promo' && renderPromoCodes()}
+          {activeSection === 'support' && <SupportPanel onClose={() => {}} />}
         </div>
       </div>
     </div>

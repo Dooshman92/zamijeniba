@@ -36,6 +36,7 @@ function App() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showMyAds, setShowMyAds] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [adminPanelSection, setAdminPanelSection] = useState<'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports' | 'support' | undefined>(undefined);
   const [showInbox, setShowInbox] = useState(false);
   const [showPromoCode, setShowPromoCode] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
@@ -374,6 +375,7 @@ function App() {
     setShowPremiumModal(false);
     setShowMyAds(false);
     setShowAdminPanel(false);
+    setAdminPanelSection(undefined);
     setShowInbox(false);
     setShowPromoCode(false);
     setShowBuyCredits(false);
@@ -515,7 +517,10 @@ function App() {
                     {(userProfile?.is_admin || userProfile?.is_moderator) && (
                       <>
                         <button
-                          onClick={() => setShowAdminPanel(true)}
+                          onClick={() => {
+                            setAdminPanelSection(undefined);
+                            setShowAdminPanel(true);
+                          }}
                           className={`backdrop-blur-md ${
                             userProfile?.is_admin
                               ? 'bg-red-600/80 hover:bg-red-600 border-red-500/50'
@@ -526,7 +531,10 @@ function App() {
                           {userProfile?.is_admin ? <Shield className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
                         </button>
                         <button
-                          onClick={() => setShowAdminPanel(true)}
+                          onClick={() => {
+                            setAdminPanelSection('support');
+                            setShowAdminPanel(true);
+                          }}
                           className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                           title="Podrška korisnicima"
                         >
@@ -1075,7 +1083,10 @@ function App() {
           <div className="fixed inset-0 z-50 bg-gray-50">
             <div className="absolute top-4 right-4 z-50">
               <button
-                onClick={() => setShowAdminPanel(false)}
+                onClick={() => {
+                  setShowAdminPanel(false);
+                  setAdminPanelSection(undefined);
+                }}
                 className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-lg"
               >
                 <span className="text-gray-700">Zatvori {userProfile?.is_admin ? 'Admin' : 'Moderator'} Panel</span>
@@ -1084,7 +1095,7 @@ function App() {
                 </svg>
               </button>
             </div>
-            <AdminDashboard />
+            <AdminDashboard initialSection={adminPanelSection} />
           </div>
         )}
 
