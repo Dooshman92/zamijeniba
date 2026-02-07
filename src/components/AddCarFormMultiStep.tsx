@@ -3,7 +3,7 @@ import { X, ChevronLeft, ChevronRight, Upload, Star, Crown } from 'lucide-react'
 import { supabase, UserProfile, VehicleType } from '../lib/supabase';
 import { uploadMultipleCarImages } from '../lib/storage';
 import { useAuth } from '../lib/auth';
-import { vehicleTypes, carBrands, carModels, carColors, fuelTypes, transmissionTypes, driveTypes, yearOptions, getBrandsByVehicleType, getFuelTypesByVehicleType, getModelsByVehicleType, getTransmissionTypesByVehicleType } from '../data/carOptions';
+import { vehicleTypes, carBrands, carModels, carColors, fuelTypes, transmissionTypes, driveTypes, yearOptions, getBrandsByVehicleType, getFuelTypesByVehicleType, getModelsByVehicleType, getTransmissionTypesByVehicleType, getDoorOptionsByVehicleType, getSeatOptionsByVehicleType } from '../data/carOptions';
 import { getEquipmentCategories, getEquipmentByCategory } from '../data/vehicleEquipment';
 import { bosnianCities } from '../data/cities';
 import { calculateCarAdCost, spendCredits, markFirstCarAdUsed } from '../lib/credits';
@@ -654,30 +654,36 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 {formData.vehicle_type === 'automobil' && (
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Broj vrata</label>
-                    <input
-                      type="number"
+                    <select
                       value={formData.doors}
                       onChange={(e) => {
                         const value = parseInt(e.target.value);
-                        setFormData({ ...formData, doors: isNaN(value) ? 4 : value });
+                        setFormData({ ...formData, doors: value });
                       }}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
+                    >
+                      {getDoorOptionsByVehicleType(formData.vehicle_type).map((doors) => (
+                        <option key={doors} value={doors}>{doors}</option>
+                      ))}
+                    </select>
                   </div>
                 )}
 
                 {(formData.vehicle_type === 'automobil' || formData.vehicle_type === 'quad') && (
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Broj sjedišta</label>
-                    <input
-                      type="number"
+                    <select
                       value={formData.seats}
                       onChange={(e) => {
                         const value = parseInt(e.target.value);
-                        setFormData({ ...formData, seats: isNaN(value) ? (formData.vehicle_type === 'quad' ? 1 : 5) : value });
+                        setFormData({ ...formData, seats: value });
                       }}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
+                    >
+                      {getSeatOptionsByVehicleType(formData.vehicle_type).map((seats) => (
+                        <option key={seats} value={seats}>{seats}</option>
+                      ))}
+                    </select>
                   </div>
                 )}
 

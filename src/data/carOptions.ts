@@ -297,6 +297,26 @@ export function getTransmissionTypesByVehicleType(vehicleType: string): string[]
   }
 }
 
+export function getDoorOptionsByVehicleType(vehicleType: string): number[] {
+  switch (vehicleType) {
+    case 'automobil':
+      return [2, 3, 4, 5];
+    default:
+      return [];
+  }
+}
+
+export function getSeatOptionsByVehicleType(vehicleType: string): number[] {
+  switch (vehicleType) {
+    case 'automobil':
+      return [2, 4, 5, 6, 7, 8, 9];
+    case 'quad':
+      return [1, 2];
+    default:
+      return [];
+  }
+}
+
 export function getModelsByVehicleType(vehicleType: string, brand: string): string[] {
   let modelsMap: Record<string, string[]>;
 
