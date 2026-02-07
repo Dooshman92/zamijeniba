@@ -27,6 +27,7 @@ const CarDetailModal = lazy(() => import('./components/CarDetailModal').then(m =
 const SupportModal = lazy(() => import('./components/SupportModal').then(m => ({ default: m.SupportModal })));
 const AboutModal = lazy(() => import('./components/AboutModal').then(m => ({ default: m.AboutModal })));
 const TermsModal = lazy(() => import('./components/TermsModal').then(m => ({ default: m.TermsModal })));
+const UserReviewsInfoModal = lazy(() => import('./components/UserReviewsInfoModal').then(m => ({ default: m.UserReviewsInfoModal })));
 const NotificationsPanel = lazy(() => import('./components/NotificationsPanel').then(m => ({ default: m.NotificationsPanel })));
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
   const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showDirectChat, setShowDirectChat] = useState(false);
@@ -1194,6 +1196,12 @@ function App() {
             />
           )}
 
+          {showReviews && (
+            <UserReviewsInfoModal
+              onClose={() => setShowReviews(false)}
+            />
+          )}
+
           {showNotifications && (
             <NotificationsPanel
               onClose={() => setShowNotifications(false)}
@@ -1264,6 +1272,12 @@ function App() {
                     className="text-gray-400 hover:text-cyan-400 transition-colors font-medium text-left"
                   >
                     Uslovi korištenja
+                  </button>
+                  <button
+                    onClick={() => setShowReviews(true)}
+                    className="text-gray-400 hover:text-cyan-400 transition-colors font-medium text-left"
+                  >
+                    Recenzije korisnika
                   </button>
                 </div>
 
