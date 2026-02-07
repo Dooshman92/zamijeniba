@@ -6,6 +6,7 @@ import { useAuth } from '../lib/auth';
 import { carBrands, carModels, carColors, fuelTypes, transmissionTypes, driveTypes, yearOptions } from '../data/carOptions';
 import { bosnianCities } from '../data/cities';
 import { calculateCarAdCost, spendCredits, markFirstCarAdUsed } from '../lib/credits';
+import { FEATURES } from '../config/features';
 
 interface AddCarFormMultiStepProps {
   onClose: () => void;
@@ -22,8 +23,8 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const { user } = useAuth();
 
-  const baseImageLimit = userProfile?.is_premium ? 15 : 5;
-  const creditBonusImages = !userProfile?.is_premium ? Math.min(userProfile?.credits || 0, 10) : 0;
+  const baseImageLimit = (!FEATURES.PREMIUM_ENABLED || userProfile?.is_premium) ? 15 : 5;
+  const creditBonusImages = (FEATURES.PREMIUM_ENABLED && !userProfile?.is_premium) ? Math.min(userProfile?.credits || 0, 10) : 0;
   const imageLimit = baseImageLimit + creditBonusImages;
 
   useEffect(() => {
@@ -255,16 +256,18 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       return;
     }
 
-    const costInfo = await calculateCarAdCost(user.id);
+    if (FEATURES.PREMIUM_ENABLED) {
+      const costInfo = await calculateCarAdCost(user.id);
 
-    if (!costInfo.isFree) {
-      const currentCredits = userProfile?.credits || 0;
-      if (currentCredits < costInfo.cost) {
-        alert(
-          `Nemate dovoljno kredita za postavljanje oglasa.\n\nPotrebno: ${costInfo.cost} kredita\nImate: ${currentCredits} kredita\n\nNadogradite na Premium za neograničene oglase ili kupite kredite!`
-        );
-        setLoading(false);
-        return;
+      if (!costInfo.isFree) {
+        const currentCredits = userProfile?.credits || 0;
+        if (currentCredits < costInfo.cost) {
+          alert(
+            `Nemate dovoljno kredita za postavljanje oglasa.\n\nPotrebno: ${costInfo.cost} kredita\nImate: ${currentCredits} kredita\n\nNadogradite na Premium za neograničene oglase ili kupite kredite!`
+          );
+          setLoading(false);
+          return;
+        }
       }
     }
 
@@ -326,12 +329,16 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       ...preferences,
     }]);
 
-    if (!costInfo.isFree) {
-      await spendCredits(user.id, costInfo.cost);
-    }
+    if (FEATURES.PREMIUM_ENABLED) {
+      const costInfo = await calculateCarAdCost(user.id);
 
-    if (costInfo.reason === 'Prvi oglas je besplatan') {
-      await markFirstCarAdUsed(user.id);
+      if (!costInfo.isFree) {
+        await spendCredits(user.id, costInfo.cost);
+      }
+
+      if (costInfo.reason === 'Prvi oglas je besplatan') {
+        await markFirstCarAdUsed(user.id);
+      }
     }
 
     onSuccess();

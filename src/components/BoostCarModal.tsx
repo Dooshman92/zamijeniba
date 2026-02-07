@@ -3,6 +3,7 @@ import { X, Zap, TrendingUp } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { CREDIT_COSTS, spendCredits, getUserCredits } from '../lib/credits';
+import { FEATURES } from '../config/features';
 
 interface BoostCarModalProps {
   carId: string;
@@ -48,19 +49,23 @@ export function BoostCarModal({ carId, carTitle, onClose, onSuccess }: BoostCarM
       return;
     }
 
-    if (userCredits < selectedOption.cost) {
-      alert(`Nemate dovoljno kredita. Potrebno: ${selectedOption.cost}, Imate: ${userCredits}`);
-      return;
-    }
+    if (FEATURES.PREMIUM_ENABLED) {
+      if (userCredits < selectedOption.cost) {
+        alert(`Nemate dovoljno kredita. Potrebno: ${selectedOption.cost}, Imate: ${userCredits}`);
+        return;
+      }
 
-    setLoading(true);
+      setLoading(true);
 
-    const result = await spendCredits(user.id, selectedOption.cost);
+      const result = await spendCredits(user.id, selectedOption.cost);
 
-    if (!result.success) {
-      alert(result.error || 'Greška pri trošenju kredita');
-      setLoading(false);
-      return;
+      if (!result.success) {
+        alert(result.error || 'Greška pri trošenju kredita');
+        setLoading(false);
+        return;
+      }
+    } else {
+      setLoading(true);
     }
 
     const featuredUntil = new Date();

@@ -23,6 +23,7 @@ import { UserProfileModal } from './components/UserProfileModal';
 import { CarDetailModal } from './components/CarDetailModal';
 import { AdvancedFilters, FilterOptions } from './components/AdvancedFilters';
 import { SearchWithAutocomplete } from './components/SearchWithAutocomplete';
+import { FEATURES } from './config/features';
 
 function App() {
   const [cars, setCars] = useState<Car[]>([]);
@@ -408,7 +409,7 @@ function App() {
                           <span className="text-sm font-bold text-white">@{userProfile.nickname}</span>
                         )}
                         <span className="text-xs text-gray-400">{user.email}</span>
-                        {!userProfile?.is_premium && (
+                        {FEATURES.PREMIUM_ENABLED && !userProfile?.is_premium && (
                           <button
                             onClick={() => setShowBuyCredits(true)}
                             className="text-xs text-green-400 font-semibold flex items-center gap-1 mt-0.5 hover:text-green-300 transition-colors"
@@ -419,11 +420,11 @@ function App() {
                           </button>
                         )}
                       </div>
-                      {userProfile?.is_premium && (
+                      {FEATURES.PREMIUM_ENABLED && userProfile?.is_premium && (
                         <PremiumBadge size="sm" onClick={() => setShowPremiumModal(true)} />
                       )}
                     </div>
-                    {!userProfile?.is_premium && (
+                    {FEATURES.PREMIUM_ENABLED && !userProfile?.is_premium && (
                       <>
                         <button
                           onClick={() => setShowPromoCode(true)}
@@ -501,34 +502,36 @@ function App() {
 
         <header className="py-20 px-4">
           <div className="max-w-7xl mx-auto text-center">
-            <div className="flex justify-center gap-4 mb-8 flex-wrap">
-              <button
-                onClick={() => user ? setShowPremiumModal(true) : setShowAuthModal(true)}
-                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 transform hover:scale-105"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <Sparkles className="w-6 h-6 relative z-10" />
-                <span className="relative z-10 text-lg">Postani Premium</span>
-              </button>
+            {FEATURES.PREMIUM_ENABLED && (
+              <div className="flex justify-center gap-4 mb-8 flex-wrap">
+                <button
+                  onClick={() => user ? setShowPremiumModal(true) : setShowAuthModal(true)}
+                  className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 transform hover:scale-105"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <Sparkles className="w-6 h-6 relative z-10" />
+                  <span className="relative z-10 text-lg">Postani Premium</span>
+                </button>
 
-              <button
-                onClick={() => user ? setShowBuyCredits(true) : setShowAuthModal(true)}
-                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <Coins className="w-6 h-6 relative z-10" />
-                <span className="relative z-10 text-lg">Kupi Kredite</span>
-              </button>
+                <button
+                  onClick={() => user ? setShowBuyCredits(true) : setShowAuthModal(true)}
+                  className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <Coins className="w-6 h-6 relative z-10" />
+                  <span className="relative z-10 text-lg">Kupi Kredite</span>
+                </button>
 
-              <button
-                onClick={() => user ? setShowPromoCode(true) : setShowAuthModal(true)}
-                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-green-500/50 transition-all duration-300 transform hover:scale-105"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <Gift className="w-6 h-6 relative z-10" />
-                <span className="relative z-10 text-lg">Iskoristi kredit code</span>
-              </button>
-            </div>
+                <button
+                  onClick={() => user ? setShowPromoCode(true) : setShowAuthModal(true)}
+                  className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-green-500/50 transition-all duration-300 transform hover:scale-105"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <Gift className="w-6 h-6 relative z-10" />
+                  <span className="relative z-10 text-lg">Iskoristi kredit code</span>
+                </button>
+              </div>
+            )}
 
             <div className="inline-flex items-center gap-2 backdrop-blur-md bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 px-4 py-2 rounded-full mb-8 animate-pulse">
               <Sparkles className="w-4 h-4 text-cyan-400" />
