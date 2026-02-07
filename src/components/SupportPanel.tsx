@@ -173,6 +173,22 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
       .update(updates)
       .eq('id', ticketId);
 
+    if (!error && status === 'closed') {
+      const staffRole = userProfile?.is_admin ? 'Admin' : 'Moderator';
+      await supabase
+        .from('support_messages')
+        .insert([{
+          ticket_id: ticketId,
+          user_id: user.id,
+          message: `${staffRole} je zatvorio tiket.`,
+          is_staff_reply: true
+        }]);
+
+      if (selectedTicket?.id === ticketId) {
+        loadMessages(ticketId);
+      }
+    }
+
     setLoading(false);
 
     if (!error) {
@@ -198,9 +214,23 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
       .update(updates)
       .eq('id', ticketId);
 
-    setLoading(false);
-
     if (!error) {
+      if (!currentlyLocked) {
+        const staffRole = userProfile?.is_admin ? 'Admin' : 'Moderator';
+        await supabase
+          .from('support_messages')
+          .insert([{
+            ticket_id: ticketId,
+            user_id: user.id,
+            message: `${staffRole} je zaključao tiket. Tiket će biti automatski obrisan za 3 dana.`,
+            is_staff_reply: true
+          }]);
+
+        if (selectedTicket?.id === ticketId) {
+          loadMessages(ticketId);
+        }
+      }
+
       loadTickets();
       if (selectedTicket?.id === ticketId) {
         setSelectedTicket({
@@ -211,6 +241,8 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
         });
       }
     }
+
+    setLoading(false);
   };
 
   const getStatusIcon = (status: string) => {

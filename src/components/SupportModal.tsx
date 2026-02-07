@@ -166,9 +166,17 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
       })
       .eq('id', selectedTicket.id);
 
-    setLoading(false);
-
     if (!error) {
+      await supabase
+        .from('support_messages')
+        .insert([{
+          ticket_id: selectedTicket.id,
+          user_id: userId,
+          message: 'Zatvorili ste tiket. Tiket će biti automatski obrisan za 3 dana.',
+          is_staff_reply: false
+        }]);
+
+      loadMessages(selectedTicket.id);
       loadTickets();
       setSelectedTicket({
         ...selectedTicket,
@@ -178,6 +186,8 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
         locked_by: userId
       });
     }
+
+    setLoading(false);
   };
 
   const getStatusIcon = (status: string) => {
