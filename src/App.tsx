@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap } from 'lucide-react';
+import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap, AlertTriangle } from 'lucide-react';
 import { Car, supabase, UserProfile } from './lib/supabase';
 import { useAuth } from './lib/auth';
 import { initializeStorage } from './lib/storage';
@@ -23,6 +23,7 @@ import { UserProfileModal } from './components/UserProfileModal';
 import { CarDetailModal } from './components/CarDetailModal';
 import { AdvancedFilters, FilterOptions } from './components/AdvancedFilters';
 import { SearchWithAutocomplete } from './components/SearchWithAutocomplete';
+import { ReportsPanel } from './components/ReportsPanel';
 import { FEATURES } from './config/features';
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showMyAds, setShowMyAds] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showReportsPanel, setShowReportsPanel] = useState(false);
   const [showInbox, setShowInbox] = useState(false);
   const [showPromoCode, setShowPromoCode] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
@@ -310,6 +312,7 @@ function App() {
     setShowPremiumModal(false);
     setShowMyAds(false);
     setShowAdminPanel(false);
+    setShowReportsPanel(false);
     setShowInbox(false);
     setShowPromoCode(false);
     setShowBuyCredits(false);
@@ -444,17 +447,26 @@ function App() {
                       </>
                     )}
                     {(userProfile?.is_admin || userProfile?.is_moderator) && (
-                      <button
-                        onClick={() => setShowAdminPanel(true)}
-                        className={`backdrop-blur-md ${
-                          userProfile?.is_admin
-                            ? 'bg-red-600/80 hover:bg-red-600 border-red-500/50'
-                            : 'bg-blue-600/80 hover:bg-blue-600 border-blue-500/50'
-                        } border text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105`}
-                        title={userProfile?.is_admin ? 'Admin Panel' : 'Moderator Panel'}
-                      >
-                        {userProfile?.is_admin ? <Shield className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
-                      </button>
+                      <>
+                        <button
+                          onClick={() => setShowAdminPanel(true)}
+                          className={`backdrop-blur-md ${
+                            userProfile?.is_admin
+                              ? 'bg-red-600/80 hover:bg-red-600 border-red-500/50'
+                              : 'bg-blue-600/80 hover:bg-blue-600 border-blue-500/50'
+                          } border text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105`}
+                          title={userProfile?.is_admin ? 'Admin Panel' : 'Moderator Panel'}
+                        >
+                          {userProfile?.is_admin ? <Shield className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
+                        </button>
+                        <button
+                          onClick={() => setShowReportsPanel(true)}
+                          className="backdrop-blur-md bg-orange-600/80 hover:bg-orange-600 border border-orange-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                          title="Prijavljeni oglasi"
+                        >
+                          <AlertTriangle className="w-5 h-5" />
+                        </button>
+                      </>
                     )}
                     <button
                       onClick={() => setShowMyAds(true)}
@@ -957,6 +969,10 @@ function App() {
             </div>
             <AdminDashboard />
           </div>
+        )}
+
+        {showReportsPanel && (userProfile?.is_admin || userProfile?.is_moderator) && (
+          <ReportsPanel onClose={() => setShowReportsPanel(false)} />
         )}
 
         {showInbox && user && (
