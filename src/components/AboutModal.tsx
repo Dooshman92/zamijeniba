@@ -143,6 +143,45 @@ export function AboutModal({ onClose }: AboutModalProps) {
               </ul>
             </div>
 
+            <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 border border-gray-600/30 rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Shield className="w-7 h-7 text-gray-400" />
+                <h3 className="text-xl font-bold text-white">Uslovi korištenja</h3>
+              </div>
+              <div className="space-y-4 text-gray-300 text-sm leading-relaxed">
+                <p>
+                  <strong className="text-gray-200">1. Priroda platforme:</strong> zamjenavozila.ba nije prodavac, kupac niti trgovac vozila koja su prikazana na ovoj platformi, niti pružalac usluga koje su oglašene. Naša platforma djeluje isključivo kao posrednik za oglašavanje i povezivanje korisnika koji žele razmijeniti svoja vozila.
+                </p>
+                <p>
+                  <strong className="text-gray-200">2. Odgovornost korisnika:</strong> Vi, kao oglašivač i vlasnik sadržaja, potpuno ste odgovorni za tačnost, potpunost i zakonitost informacija koje objavljujete na svom profilu, u oglasima i u komunikaciji sa drugim korisnicima. Dužni ste pravilno i istinito predstaviti svoje vozilo, tehničko stanje, pravni status, te svoj položaj prema drugim korisnicima platforme.
+                </p>
+                <p>
+                  <strong className="text-gray-200">3. Izjave oglašivača:</strong> Objavljivanjem sadržaja na ovoj platformi dajete izričitu izjavu da posjedujete sva potrebna prava, dozvole i ovlaštenja za raspolaganje vozilom koje oglašavate, te da su sve informacije istinite i ažurne. Snosite punu odgovornost za sadržaj takve izjave prema svim stranama, uključujući druge korisnike platforme i nadležne organe.
+                </p>
+                <p>
+                  <strong className="text-gray-200">4. Ograničenje odgovornosti platforme:</strong> zamjenavozila.ba ne garantuje istinitost, tačnost, potpunost ili pouzdanost bilo kojeg oglasa, opisa vozila ili komunikacije između korisnika. Nismo odgovorni za štetu, gubitke ili nesuglasice koji mogu nastati usled korištenja platforme, neistinitih informacija, skrivenih mana vozila ili neispunjenja dogovora između korisnika.
+                </p>
+                <p>
+                  <strong className="text-gray-200">5. Poštovanje prava i zakona:</strong> Dužni ste koristiti platformu u skladu sa važećim zakonima Bosne i Hercegovine. Zabranjeno je objavljivanje lažnih informacija, krađa identiteta, prevare, uznemiravanja drugih korisnika, kao i bilo koji drugi oblik zloupotrebe platforme koji može naštetiti trećim licima ili ugledu platforme.
+                </p>
+                <p>
+                  <strong className="text-gray-200">6. Prijave i žalbe:</strong> Poštujemo pravo svakog korisnika na prigovor. Međutim, svaka prijava ili žalba mora biti zasnovana na dokazima i legitimnim razlozima. Lažne prijave ili pokušaji ocrnjivanja drugih korisnika bez osnove predstavljaju kršenje ovih uslova i mogu rezultirati trajnom zabranom korištenja platforme, te pravnim posledicama u skladu sa zakonima o kleveti i uznemiravanju.
+                </p>
+                <p>
+                  <strong className="text-gray-200">7. Pravo platforme:</strong> Zadržavamo pravo da uklonimo bilo koji sadržaj, suspendujemo ili trajno ukinemo nalog bilo kojeg korisnika koji krši ove uslove, javni red i mir, ili djeluje na štetu drugih korisnika, bez prethodne najave ili obrazloženja.
+                </p>
+                <p>
+                  <strong className="text-gray-200">8. Slobodno tržište:</strong> Svi korisnici imaju jednako pravo korištenja sadržaja i usluga platforme zamjenavozila.ba. Poštujte načela slobodnog tržišta, fer konkurencije i poslovne etike u svim interakcijama.
+                </p>
+                <p className="pt-4 border-t border-gray-700">
+                  <strong className="text-gray-200">Prihvatanje uslova:</strong> Korištenjem platforme zamjenavozila.ba potvrđujete da ste pročitali, razumjeli i u potpunosti prihvatili ove Uslove korištenja. Ako se ne slažete sa bilo kojim dijelom ovih uslova, molimo da ne koristite našu platformu.
+                </p>
+                <p className="text-xs text-gray-400 italic">
+                  Napomena: Ovi uslovi korištenja mogu biti izmjenjeni ili dopunjeni. Za prijedloge, pitanja ili prijavljivanje problema, kontaktirajte našu podršku.
+                </p>
+              </div>
+            </div>
+
             <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl p-6 text-center">
               <p className="text-gray-300 text-lg mb-4">
                 Pridružite se hiljadama zadovoljnih korisnika koji su već pronašli savršenu zamjenu!
