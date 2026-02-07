@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { X, Plus, Edit2, Trash2, Image as ImageIcon, ExternalLink, Eye, EyeOff, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Plus, Edit2, Trash2, Image as ImageIcon, ExternalLink, Eye, EyeOff, TrendingUp, Upload } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../lib/auth';
 
 interface Advertisement {
   id: string;
@@ -20,10 +21,13 @@ interface AdvertisementsPanelProps {
 }
 
 export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProps) {
+  const { user } = useAuth();
   const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -50,6 +54,53 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
       console.error('Error loading advertisements:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !user) return;
+
+    const file = e.target.files[0];
+
+    if (!file.type.startsWith('image/')) {
+      alert('Molimo odaberite sliku');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Slika je prevelika. Maksimalna veličina je 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('advertisement-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        alert('Greška pri upload-u slike');
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('advertisement-images')
+        .getPublicUrl(fileName);
+
+      setFormData({ ...formData, image_url: publicUrl });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Greška pri upload-u slike');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -209,15 +260,58 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    URL slike
+                    Slika za banner
                   </label>
+
+                  {formData.image_url && (
+                    <div className="mb-4 relative">
+                      <img
+                        src={formData.image_url}
+                        alt="Preview"
+                        className="w-full h-32 object-cover rounded-lg border-2 border-cyan-500/30"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, image_url: '' })}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {uploadingImage ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                          <span>Upload...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          <span>Upload sliku</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
                   <input
-                    type="url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500"
-                    placeholder="https://example.com/image.jpg"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
                   />
+
+                  <p className="text-xs text-gray-500 mt-2">
+                    Max 5MB · JPG, PNG, GIF, WEBP · Preporučena dimenzija: 1200x300px
+                  </p>
                 </div>
 
                 <div>
@@ -292,80 +386,79 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
               <p className="text-gray-400">Nema reklama</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-6">
               {advertisements.map((ad) => (
                 <div
                   key={ad.id}
-                  className={`bg-white/5 rounded-xl p-6 border ${
+                  className={`bg-white/5 rounded-xl overflow-hidden border ${
                     ad.is_active ? 'border-cyan-500/30' : 'border-white/10'
                   }`}
                 >
-                  <div className="flex gap-4">
-                    {ad.image_url && (
+                  {ad.image_url && (
+                    <div className="relative">
                       <img
                         src={ad.image_url}
                         alt={ad.title}
-                        className="w-32 h-32 object-cover rounded-lg"
+                        className="w-full h-48 object-cover"
                       />
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-bold text-white">{ad.title}</h3>
-                          {ad.description && (
-                            <p className="text-sm text-gray-400 mt-1">{ad.description}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            ad.is_active
-                              ? 'bg-green-500/20 text-green-400'
-                              : 'bg-gray-500/20 text-gray-400'
-                          }`}>
-                            {ad.is_active ? 'Aktivna' : 'Neaktivna'}
-                          </span>
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400">
-                            Pozicija {ad.position}
-                          </span>
-                        </div>
+                      <div className="absolute top-4 right-4 flex gap-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md ${
+                          ad.is_active
+                            ? 'bg-green-500/80 text-white'
+                            : 'bg-gray-500/80 text-white'
+                        }`}>
+                          {ad.is_active ? 'Aktivna' : 'Neaktivna'}
+                        </span>
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md bg-blue-500/80 text-white">
+                          Pozicija {ad.position}
+                        </span>
                       </div>
+                    </div>
+                  )}
 
-                      <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">
-                        {ad.target_url && (
-                          <div className="flex items-center gap-1">
-                            <ExternalLink className="w-4 h-4" />
-                            <span className="truncate max-w-xs">{ad.target_url}</span>
-                          </div>
-                        )}
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <h3 className="text-lg font-bold text-white mb-2">{ad.title}</h3>
+                      {ad.description && (
+                        <p className="text-sm text-gray-400">{ad.description}</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
+                      {ad.target_url && (
                         <div className="flex items-center gap-1">
-                          <TrendingUp className="w-4 h-4" />
-                          <span>{ad.clicks_count} klikova</span>
+                          <ExternalLink className="w-4 h-4" />
+                          <span className="truncate max-w-xs">{ad.target_url}</span>
                         </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="w-4 h-4" />
+                        <span>{ad.clicks_count} klikova</span>
                       </div>
+                    </div>
 
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => toggleActive(ad)}
-                          className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors flex items-center gap-2"
-                        >
-                          {ad.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          {ad.is_active ? 'Deaktiviraj' : 'Aktiviraj'}
-                        </button>
-                        <button
-                          onClick={() => handleEdit(ad)}
-                          className="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors flex items-center gap-2"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                          Uredi
-                        </button>
-                        <button
-                          onClick={() => handleDelete(ad.id)}
-                          className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors flex items-center gap-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Obriši
-                        </button>
-                      </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => toggleActive(ad)}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors flex items-center gap-2"
+                      >
+                        {ad.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {ad.is_active ? 'Deaktiviraj' : 'Aktiviraj'}
+                      </button>
+                      <button
+                        onClick={() => handleEdit(ad)}
+                        className="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors flex items-center gap-2"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        Uredi
+                      </button>
+                      <button
+                        onClick={() => handleDelete(ad.id)}
+                        className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors flex items-center gap-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Obriši
+                      </button>
                     </div>
                   </div>
                 </div>
