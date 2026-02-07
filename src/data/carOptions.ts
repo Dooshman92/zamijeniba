@@ -270,7 +270,7 @@ export function getFuelTypesByVehicleType(vehicleType: string): string[] {
   switch (vehicleType) {
     case 'motocikl':
     case 'quad':
-      return ['Benzin', 'Električni', 'Dizel'];
+      return ['Benzin', 'Električni'];
     case 'motorne_sanke':
       return ['Benzin', 'Električni'];
     case 'jetski':
@@ -278,6 +278,22 @@ export function getFuelTypesByVehicleType(vehicleType: string): string[] {
     case 'automobil':
     default:
       return fuelTypes;
+  }
+}
+
+export function getTransmissionTypesByVehicleType(vehicleType: string): string[] {
+  switch (vehicleType) {
+    case 'motocikl':
+      return ['Manuelni', 'Poluautomatski'];
+    case 'quad':
+      return ['Manuelni', 'Automatski', 'CVT'];
+    case 'motorne_sanke':
+      return ['CVT'];
+    case 'jetski':
+      return ['Direktni pogon'];
+    case 'automobil':
+    default:
+      return transmissionTypes;
   }
 }
 

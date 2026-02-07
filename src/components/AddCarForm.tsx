@@ -3,7 +3,7 @@ import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { supabase, VehicleType } from '../lib/supabase';
 import { uploadCarImage } from '../lib/storage';
 import { useAuth } from '../lib/auth';
-import { vehicleTypes, carBrands, carModels, carColors, fuelTypes, transmissionTypes, yearOptions, getBrandsByVehicleType, getFuelTypesByVehicleType, getModelsByVehicleType } from '../data/carOptions';
+import { vehicleTypes, carBrands, carModels, carColors, fuelTypes, transmissionTypes, yearOptions, getBrandsByVehicleType, getFuelTypesByVehicleType, getModelsByVehicleType, getTransmissionTypesByVehicleType } from '../data/carOptions';
 
 interface AddCarFormProps {
   onClose: () => void;
@@ -280,7 +280,7 @@ export function AddCarForm({ onClose, onSuccess }: AddCarFormProps) {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Odaberi mjenjač</option>
-                {transmissionTypes.map((transmission) => (
+                {getTransmissionTypesByVehicleType(formData.vehicle_type).map((transmission) => (
                   <option key={transmission} value={transmission}>
                     {transmission}
                   </option>
