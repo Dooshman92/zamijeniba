@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, MapPin, Car as CarIcon } from 'lucide-react';
 import { Car, VehicleType } from '../lib/supabase';
 
@@ -23,7 +24,7 @@ const getVehicleTypeLabel = (type: VehicleType): string => {
   return labels[type] || 'Vozilo';
 };
 
-export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser = false, currentUserId, onOwnerClick, onCardClick, layout = 'grid' }: CarCardProps) {
+const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUser = false, currentUserId, onOwnerClick, onCardClick, layout = 'grid' }: CarCardProps) => {
   const isOwnCar = currentUserId && car.user_id === currentUserId;
   const ownerDisplayName = car.owner_nickname
     ? `@${car.owner_nickname}`
@@ -43,6 +44,7 @@ export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser
             <img
               src={car.image_url}
               alt={`${car.brand} ${car.model}`}
+              loading="lazy"
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
           </div>
@@ -175,6 +177,7 @@ export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser
         <img
           src={car.image_url}
           alt={`${car.brand} ${car.model}`}
+          loading="lazy"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         <div className="absolute top-2 right-2 backdrop-blur-md bg-cyan-500/90 px-2 py-0.5 rounded text-[10px] font-bold text-white shadow z-20">
@@ -269,4 +272,6 @@ export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser
       </div>
     </div>
   );
-}
+};
+
+export const CarCard = memo(CarCardComponent);

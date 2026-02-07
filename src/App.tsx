@@ -1,30 +1,30 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap, Headset } from 'lucide-react';
 import { Car, supabase, UserProfile } from './lib/supabase';
 import { useAuth } from './lib/auth';
 import { initializeStorage } from './lib/storage';
 import { getOrCreateConversation } from './lib/messaging';
 import { CarCard } from './components/CarCard';
-import { AddCarFormMultiStep } from './components/AddCarFormMultiStep';
-import { SwapOfferModal } from './components/SwapOfferModal';
-import { SwapOffersPanel } from './components/SwapOffersPanel';
-import { AuthModal } from './components/AuthModal';
-import { PremiumBadge } from './components/PremiumBadge';
-import { ProfileEditModal } from './components/ProfileEditModal';
-import { PremiumModal } from './components/PremiumModal';
-import { MyAdsModal } from './components/MyAdsModal';
-import AdminDashboard from './components/AdminDashboard';
-import { MessagingCenterModal } from './components/MessagingCenterModal';
-import { PromoCodeModal } from './components/PromoCodeModal';
-import { BuyCreditsModal } from './components/BuyCreditsModal';
-import { DirectChatModal } from './components/DirectChatModal';
 import { Logo } from './components/Logo';
-import { UserProfileModal } from './components/UserProfileModal';
-import { CarDetailModal } from './components/CarDetailModal';
 import { AdvancedFilters, FilterOptions } from './components/AdvancedFilters';
 import { SearchWithAutocomplete } from './components/SearchWithAutocomplete';
-import { SupportModal } from './components/SupportModal';
 import { FEATURES } from './config/features';
+
+const AddCarFormMultiStep = lazy(() => import('./components/AddCarFormMultiStep').then(m => ({ default: m.AddCarFormMultiStep })));
+const SwapOfferModal = lazy(() => import('./components/SwapOfferModal').then(m => ({ default: m.SwapOfferModal })));
+const SwapOffersPanel = lazy(() => import('./components/SwapOffersPanel').then(m => ({ default: m.SwapOffersPanel })));
+const AuthModal = lazy(() => import('./components/AuthModal').then(m => ({ default: m.AuthModal })));
+const ProfileEditModal = lazy(() => import('./components/ProfileEditModal').then(m => ({ default: m.ProfileEditModal })));
+const PremiumModal = lazy(() => import('./components/PremiumModal').then(m => ({ default: m.PremiumModal })));
+const MyAdsModal = lazy(() => import('./components/MyAdsModal').then(m => ({ default: m.MyAdsModal })));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const MessagingCenterModal = lazy(() => import('./components/MessagingCenterModal').then(m => ({ default: m.MessagingCenterModal })));
+const PromoCodeModal = lazy(() => import('./components/PromoCodeModal').then(m => ({ default: m.PromoCodeModal })));
+const BuyCreditsModal = lazy(() => import('./components/BuyCreditsModal').then(m => ({ default: m.BuyCreditsModal })));
+const DirectChatModal = lazy(() => import('./components/DirectChatModal').then(m => ({ default: m.DirectChatModal })));
+const UserProfileModal = lazy(() => import('./components/UserProfileModal').then(m => ({ default: m.UserProfileModal })));
+const CarDetailModal = lazy(() => import('./components/CarDetailModal').then(m => ({ default: m.CarDetailModal })));
+const SupportModal = lazy(() => import('./components/SupportModal').then(m => ({ default: m.SupportModal })));
 
 function App() {
   const [cars, setCars] = useState<Car[]>([]);
@@ -965,195 +965,199 @@ function App() {
               )}
             </>
           ) : (
-            <SwapOffersPanel
-              onAcceptOffer={(conversationId, otherUserId) => {
-                setDirectChatConversationId(conversationId);
-                setDirectChatOtherUserId(otherUserId);
-                setShowDirectChat(true);
+            <Suspense fallback={<div className="text-center py-32"><div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-cyan-500/30 border-t-cyan-500"></div></div>}>
+              <SwapOffersPanel
+                onAcceptOffer={(conversationId, otherUserId) => {
+                  setDirectChatConversationId(conversationId);
+                  setDirectChatOtherUserId(otherUserId);
+                  setShowDirectChat(true);
+                }}
+                onSwapOffer={(car) => {
+                  setSelectedCarForSwap(car);
+                }}
+                onOwnerClick={handleOwnerClick}
+                onSendMessage={handleSendMessage}
+                isPremiumUser={userProfile?.is_premium || false}
+              />
+            </Suspense>
+          )}
+        </div>
+
+        <Suspense fallback={<div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-500/30 border-t-cyan-500"></div></div>}>
+          {showAddForm && (
+            <AddCarFormMultiStep
+              onClose={() => {
+                setShowAddForm(false);
+                setEditingCar(null);
+              }}
+              onSuccess={() => {
+                loadCars();
+                setEditingCar(null);
+              }}
+              editMode={!!editingCar}
+              carToEdit={editingCar || undefined}
+              premiumEnabled={premiumEnabled}
+            />
+          )}
+
+          {selectedCarForSwap && (
+            <SwapOfferModal
+              targetCar={selectedCarForSwap}
+              onClose={() => setSelectedCarForSwap(null)}
+              onSuccess={() => {
+                loadCars();
+                setActiveTab('offers');
+              }}
+              premiumEnabled={premiumEnabled}
+            />
+          )}
+
+          {showAuthModal && (
+            <AuthModal
+              onClose={() => setShowAuthModal(false)}
+            />
+          )}
+
+          {showProfileEdit && (
+            <ProfileEditModal
+              onClose={() => setShowProfileEdit(false)}
+              onSuccess={fetchUserProfile}
+              currentProfile={userProfile}
+            />
+          )}
+
+          {showPremiumModal && (
+            <PremiumModal
+              onClose={() => setShowPremiumModal(false)}
+              onSuccess={fetchUserProfile}
+            />
+          )}
+
+          {showMyAds && user && (
+            <MyAdsModal
+              onClose={() => {
+                setShowMyAds(false);
+                loadCars();
+              }}
+              userId={user.id}
+              onCarUpdated={loadCars}
+              premiumEnabled={premiumEnabled}
+            />
+          )}
+
+          {showAdminPanel && (userProfile?.is_admin || userProfile?.is_moderator) && (
+            <div className="fixed inset-0 z-50 bg-gray-50">
+              <div className="absolute top-4 right-4 z-50">
+                <button
+                  onClick={() => {
+                    setShowAdminPanel(false);
+                    setAdminPanelSection(undefined);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-lg"
+                >
+                  <span className="text-gray-700">Zatvori {userProfile?.is_admin ? 'Admin' : 'Moderator'} Panel</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <AdminDashboard initialSection={adminPanelSection} />
+            </div>
+          )}
+
+          {showInbox && user && (
+            <MessagingCenterModal
+              onClose={() => {
+                setShowInbox(false);
+                fetchUnreadCount();
+              }}
+              onViewSwapOffer={(offerId) => {
+                setShowInbox(false);
+                setActiveTab('offers');
+                setTimeout(() => {
+                  document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
               }}
               onSwapOffer={(car) => {
+                setShowInbox(false);
                 setSelectedCarForSwap(car);
               }}
-              onOwnerClick={handleOwnerClick}
+              onOwnerClick={(userId) => {
+                setShowInbox(false);
+                handleOwnerClick(userId);
+              }}
               onSendMessage={handleSendMessage}
               isPremiumUser={userProfile?.is_premium || false}
             />
           )}
-        </div>
 
-        {showAddForm && (
-          <AddCarFormMultiStep
-            onClose={() => {
-              setShowAddForm(false);
-              setEditingCar(null);
-            }}
-            onSuccess={() => {
-              loadCars();
-              setEditingCar(null);
-            }}
-            editMode={!!editingCar}
-            carToEdit={editingCar || undefined}
-            premiumEnabled={premiumEnabled}
-          />
-        )}
+          {showDirectChat && directChatConversationId && directChatOtherUserId && (
+            <DirectChatModal
+              conversationId={directChatConversationId}
+              otherUserId={directChatOtherUserId}
+              onClose={() => {
+                setShowDirectChat(false);
+                setDirectChatConversationId(null);
+                setDirectChatOtherUserId(null);
+              }}
+            />
+          )}
 
-        {selectedCarForSwap && (
-          <SwapOfferModal
-            targetCar={selectedCarForSwap}
-            onClose={() => setSelectedCarForSwap(null)}
-            onSuccess={() => {
-              loadCars();
-              setActiveTab('offers');
-            }}
-            premiumEnabled={premiumEnabled}
-          />
-        )}
+          {showPromoCode && (
+            <PromoCodeModal
+              onClose={() => setShowPromoCode(false)}
+              onSuccess={fetchUserProfile}
+            />
+          )}
 
-        {showAuthModal && (
-          <AuthModal
-            onClose={() => setShowAuthModal(false)}
-          />
-        )}
+          {showBuyCredits && (
+            <BuyCreditsModal
+              onClose={() => setShowBuyCredits(false)}
+              onSuccess={fetchUserProfile}
+            />
+          )}
 
-        {showProfileEdit && (
-          <ProfileEditModal
-            onClose={() => setShowProfileEdit(false)}
-            onSuccess={fetchUserProfile}
-            currentProfile={userProfile}
-          />
-        )}
+          {showUserProfile && selectedUserId && (
+            <UserProfileModal
+              userId={selectedUserId}
+              onClose={() => {
+                setShowUserProfile(false);
+                setSelectedUserId(null);
+              }}
+              onStartConversation={handleStartConversation}
+            />
+          )}
 
-        {showPremiumModal && (
-          <PremiumModal
-            onClose={() => setShowPremiumModal(false)}
-            onSuccess={fetchUserProfile}
-          />
-        )}
+          {showCarDetail && selectedCarForDetail && (
+            <CarDetailModal
+              car={selectedCarForDetail}
+              onClose={() => {
+                setShowCarDetail(false);
+                setSelectedCarForDetail(null);
+              }}
+              onSwapOffer={(car) => {
+                setShowCarDetail(false);
+                setSelectedCarForSwap(car);
+              }}
+              onOwnerClick={(userId) => {
+                setShowCarDetail(false);
+                handleOwnerClick(userId);
+              }}
+              onSendMessage={handleSendMessage}
+              onEdit={handleEditCar}
+              isPremiumUser={userProfile?.is_premium || false}
+            />
+          )}
 
-        {showMyAds && user && (
-          <MyAdsModal
-            onClose={() => {
-              setShowMyAds(false);
-              loadCars();
-            }}
-            userId={user.id}
-            onCarUpdated={loadCars}
-            premiumEnabled={premiumEnabled}
-          />
-        )}
-
-        {showAdminPanel && (userProfile?.is_admin || userProfile?.is_moderator) && (
-          <div className="fixed inset-0 z-50 bg-gray-50">
-            <div className="absolute top-4 right-4 z-50">
-              <button
-                onClick={() => {
-                  setShowAdminPanel(false);
-                  setAdminPanelSection(undefined);
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-lg"
-              >
-                <span className="text-gray-700">Zatvori {userProfile?.is_admin ? 'Admin' : 'Moderator'} Panel</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <AdminDashboard initialSection={adminPanelSection} />
-          </div>
-        )}
-
-        {showInbox && user && (
-          <MessagingCenterModal
-            onClose={() => {
-              setShowInbox(false);
-              fetchUnreadCount();
-            }}
-            onViewSwapOffer={(offerId) => {
-              setShowInbox(false);
-              setActiveTab('offers');
-              setTimeout(() => {
-                document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
-              }, 100);
-            }}
-            onSwapOffer={(car) => {
-              setShowInbox(false);
-              setSelectedCarForSwap(car);
-            }}
-            onOwnerClick={(userId) => {
-              setShowInbox(false);
-              handleOwnerClick(userId);
-            }}
-            onSendMessage={handleSendMessage}
-            isPremiumUser={userProfile?.is_premium || false}
-          />
-        )}
-
-        {showDirectChat && directChatConversationId && directChatOtherUserId && (
-          <DirectChatModal
-            conversationId={directChatConversationId}
-            otherUserId={directChatOtherUserId}
-            onClose={() => {
-              setShowDirectChat(false);
-              setDirectChatConversationId(null);
-              setDirectChatOtherUserId(null);
-            }}
-          />
-        )}
-
-        {showPromoCode && (
-          <PromoCodeModal
-            onClose={() => setShowPromoCode(false)}
-            onSuccess={fetchUserProfile}
-          />
-        )}
-
-        {showBuyCredits && (
-          <BuyCreditsModal
-            onClose={() => setShowBuyCredits(false)}
-            onSuccess={fetchUserProfile}
-          />
-        )}
-
-        {showUserProfile && selectedUserId && (
-          <UserProfileModal
-            userId={selectedUserId}
-            onClose={() => {
-              setShowUserProfile(false);
-              setSelectedUserId(null);
-            }}
-            onStartConversation={handleStartConversation}
-          />
-        )}
-
-        {showCarDetail && selectedCarForDetail && (
-          <CarDetailModal
-            car={selectedCarForDetail}
-            onClose={() => {
-              setShowCarDetail(false);
-              setSelectedCarForDetail(null);
-            }}
-            onSwapOffer={(car) => {
-              setShowCarDetail(false);
-              setSelectedCarForSwap(car);
-            }}
-            onOwnerClick={(userId) => {
-              setShowCarDetail(false);
-              handleOwnerClick(userId);
-            }}
-            onSendMessage={handleSendMessage}
-            onEdit={handleEditCar}
-            isPremiumUser={userProfile?.is_premium || false}
-          />
-        )}
-
-        {showSupport && user && userProfile && (
-          <SupportModal
-            isOpen={showSupport}
-            onClose={() => setShowSupport(false)}
-            userId={user.id}
-            userProfile={userProfile}
-          />
-        )}
+          {showSupport && user && userProfile && (
+            <SupportModal
+              isOpen={showSupport}
+              onClose={() => setShowSupport(false)}
+              userId={user.id}
+              userProfile={userProfile}
+            />
+          )}
+        </Suspense>
 
         <footer className="border-t border-white/10 backdrop-blur-md bg-white/5 py-12 mt-20">
           <div className="max-w-7xl mx-auto px-4">
