@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { X, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { validateEmail, sanitizeInput, rateLimiter, detectSuspiciousEmail, validatePasswordStrength } from '../lib/security';
@@ -10,12 +10,6 @@ interface AuthModalProps {
 
 type ViewMode = 'login' | 'register' | 'forgot-password';
 
-declare global {
-  interface Window {
-    grecaptcha: any;
-  }
-}
-
 export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
   const [mode, setMode] = useState<ViewMode>(initialMode);
   const [email, setEmail] = useState('');
@@ -23,48 +17,10 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [recaptchaToken, setRecaptchaToken] = useState('');
-  const recaptchaRef = useRef<HTMLDivElement>(null);
-  const recaptchaWidgetId = useRef<number | null>(null);
   const formOpenedAt = useRef<number>(Date.now());
   const [honeypot, setHoneypot] = useState('');
   const [honeypot2, setHoneypot2] = useState('');
   const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
-
-  useEffect(() => {
-    if (mode === 'register' && recaptchaRef.current && window.grecaptcha) {
-      const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-
-      if (siteKey && siteKey !== 'your_recaptcha_site_key_here') {
-        const renderRecaptcha = () => {
-          if (recaptchaWidgetId.current === null) {
-            recaptchaWidgetId.current = window.grecaptcha.render(recaptchaRef.current, {
-              sitekey: siteKey,
-              callback: (token: string) => setRecaptchaToken(token),
-              'expired-callback': () => setRecaptchaToken('')
-            });
-          }
-        };
-
-        if (window.grecaptcha.ready) {
-          window.grecaptcha.ready(renderRecaptcha);
-        } else {
-          setTimeout(renderRecaptcha, 100);
-        }
-      }
-    }
-
-    return () => {
-      if (recaptchaWidgetId.current !== null && window.grecaptcha) {
-        try {
-          window.grecaptcha.reset(recaptchaWidgetId.current);
-        } catch (e) {
-          // Ignore error
-        }
-        recaptchaWidgetId.current = null;
-      }
-    };
-  }, [mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,14 +89,6 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
         }, 3000);
       }
       return;
-    }
-
-    if (mode === 'register') {
-      const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-      if (!recaptchaToken && siteKey && siteKey !== 'your_recaptcha_site_key_here') {
-        setError('Molimo potvrdite da niste robot (reCAPTCHA)');
-        return;
-      }
     }
 
     setLoading(true);
@@ -263,23 +211,9 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
           )}
 
           {mode === 'register' && (
-            <>
-              {import.meta.env.VITE_RECAPTCHA_SITE_KEY !== 'your_recaptcha_site_key_here' ? (
-                <div className="flex flex-col items-center gap-2">
-                  <div ref={recaptchaRef}></div>
-                  <p className="text-xs text-gray-500 text-center">
-                    Potvrdite da niste robot za zaštitu od automatskih registracija
-                  </p>
-                </div>
-              ) : (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs text-yellow-800">
-                  ⚠️ reCAPTCHA nije konfigurisan. Za produkciju, dodajte VITE_RECAPTCHA_SITE_KEY u .env
-                </div>
-              )}
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
-                📧 Nakon registracije, poslat ćemo vam email sa linkom za potvrdu. Morate potvrditi email prije prijave.
-              </div>
-            </>
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
+              Nakon registracije, poslat cemo vam email sa linkom za potvrdu. Morate potvrditi email prije prijave.
+            </div>
           )}
 
           <button
