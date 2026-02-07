@@ -209,6 +209,12 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
       locked_by: !currentlyLocked ? user.id : null
     };
 
+    if (!currentlyLocked) {
+      updates.status = 'closed';
+      updates.resolved_at = new Date().toISOString();
+      updates.resolved_by = user.id;
+    }
+
     const { error } = await supabase
       .from('support_tickets')
       .update(updates)
@@ -237,7 +243,8 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
           ...selectedTicket,
           locked: !currentlyLocked,
           locked_at: updates.locked_at,
-          locked_by: updates.locked_by
+          locked_by: updates.locked_by,
+          status: updates.status || selectedTicket.status
         });
       }
     }
