@@ -454,6 +454,82 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
         </div>
 
         <div className="px-6 py-4 border-b border-gray-700 space-y-4">
+          <div className={`p-4 rounded-xl border-2 ${
+            premiumEnabled
+              ? 'bg-gradient-to-r from-yellow-900/30 to-yellow-800/30 border-yellow-500/50'
+              : 'bg-gradient-to-r from-green-900/30 to-green-800/30 border-green-500/50'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Power className={`w-6 h-6 ${premiumEnabled ? 'text-yellow-400' : 'text-green-400'}`} />
+                <div>
+                  <h3 className="text-lg font-bold text-white">Premium Sistem</h3>
+                  <p className="text-sm text-gray-300">
+                    {premiumEnabled
+                      ? 'Premium funkcije su aktivne - korisnici moraju platiti'
+                      : 'Premium funkcije su besplatne za sve korisnike'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={togglePremiumSystem}
+                disabled={updatingPremiumSystem}
+                className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 ${
+                  premiumEnabled
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                } ${updatingPremiumSystem ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-xl'}`}
+              >
+                {updatingPremiumSystem ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <>
+                    <Power className="w-5 h-5" />
+                    {premiumEnabled ? 'Isključi Premium' : 'Uključi Premium'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className={`p-4 rounded-xl border-2 ${
+            creditsEnabled
+              ? 'bg-gradient-to-r from-blue-900/30 to-blue-800/30 border-blue-500/50'
+              : 'bg-gradient-to-r from-red-900/30 to-red-800/30 border-red-500/50'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Gift className={`w-6 h-6 ${creditsEnabled ? 'text-blue-400' : 'text-red-400'}`} />
+                <div>
+                  <h3 className="text-lg font-bold text-white">Sistem Kredita</h3>
+                  <p className="text-sm text-gray-300">
+                    {creditsEnabled
+                      ? 'Sistem kupovine kredita je aktivan - korisnici mogu kupiti kredite'
+                      : 'Sistem kupovine kredita je isključen - opcija kupovine je skrivena'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={toggleCreditsSystem}
+                disabled={updatingCreditsSystem}
+                className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 ${
+                  creditsEnabled
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                } ${updatingCreditsSystem ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-xl'}`}
+              >
+                {updatingCreditsSystem ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <>
+                    <Power className="w-5 h-5" />
+                    {creditsEnabled ? 'Isključi Kredite' : 'Uključi Kredite'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between p-4 rounded-xl border-2 bg-gradient-to-r from-purple-900/30 to-purple-800/30 border-purple-500/50">
             <div className="flex items-center gap-3">
               <Gift className="w-6 h-6 text-purple-400" />
@@ -706,82 +782,6 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
               )}
             </div>
           )}
-
-          <div className={`p-4 rounded-xl border-2 ${
-            premiumEnabled
-              ? 'bg-gradient-to-r from-yellow-900/30 to-yellow-800/30 border-yellow-500/50'
-              : 'bg-gradient-to-r from-green-900/30 to-green-800/30 border-green-500/50'
-          }`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Power className={`w-6 h-6 ${premiumEnabled ? 'text-yellow-400' : 'text-green-400'}`} />
-                <div>
-                  <h3 className="text-lg font-bold text-white">Premium Sistem</h3>
-                  <p className="text-sm text-gray-300">
-                    {premiumEnabled
-                      ? 'Premium funkcije su aktivne - korisnici moraju platiti'
-                      : 'Premium funkcije su besplatne za sve korisnike'}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={togglePremiumSystem}
-                disabled={updatingPremiumSystem}
-                className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 ${
-                  premiumEnabled
-                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'bg-green-600 hover:bg-green-700 text-white'
-                } ${updatingPremiumSystem ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-xl'}`}
-              >
-                {updatingPremiumSystem ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                ) : (
-                  <>
-                    <Power className="w-5 h-5" />
-                    {premiumEnabled ? 'Isključi Premium' : 'Uključi Premium'}
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div className={`p-4 rounded-xl border-2 ${
-            creditsEnabled
-              ? 'bg-gradient-to-r from-blue-900/30 to-blue-800/30 border-blue-500/50'
-              : 'bg-gradient-to-r from-red-900/30 to-red-800/30 border-red-500/50'
-          }`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Gift className={`w-6 h-6 ${creditsEnabled ? 'text-blue-400' : 'text-red-400'}`} />
-                <div>
-                  <h3 className="text-lg font-bold text-white">Sistem Kredita</h3>
-                  <p className="text-sm text-gray-300">
-                    {creditsEnabled
-                      ? 'Sistem kupovine kredita je aktivan - korisnici mogu kupiti kredite'
-                      : 'Sistem kupovine kredita je isključen - opcija kupovine je skrivena'}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={toggleCreditsSystem}
-                disabled={updatingCreditsSystem}
-                className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 ${
-                  creditsEnabled
-                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'bg-green-600 hover:bg-green-700 text-white'
-                } ${updatingCreditsSystem ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-xl'}`}
-              >
-                {updatingCreditsSystem ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                ) : (
-                  <>
-                    <Power className="w-5 h-5" />
-                    {creditsEnabled ? 'Isključi Kredite' : 'Uključi Kredite'}
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
 
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
