@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Shield, Crown, User, Search, CheckCircle, XCircle, Power, Gift, Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Users, Ban, UserX, Clock, MessageCircle } from 'lucide-react';
+import { X, Shield, Crown, User, Search, CheckCircle, XCircle, Power, Gift, Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Users, Ban, UserX, Clock, Headset } from 'lucide-react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDate, formatDateTimeShort } from '../lib/dateUtils';
@@ -476,7 +476,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                   : 'text-gray-400 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <MessageCircle className="w-5 h-5" />
+              <Headset className="w-5 h-5" />
               Podrška
             </button>
             <button

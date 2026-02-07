@@ -38,8 +38,10 @@ export function SupportPanel({ userId }: SupportPanelProps) {
   const [newMessage, setNewMessage] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('SupportPanel mounted with userId:', userId);
     loadTickets();
 
     const channel = supabase
@@ -49,6 +51,7 @@ export function SupportPanel({ userId }: SupportPanelProps) {
         schema: 'public',
         table: 'support_tickets'
       }, () => {
+        console.log('Ticket update detected, reloading...');
         loadTickets();
       })
       .subscribe();
@@ -98,8 +101,14 @@ export function SupportPanel({ userId }: SupportPanelProps) {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      console.error('Error loading tickets:', error);
+      setLoadError(error.message);
+      setTickets([]);
+    } else if (data) {
+      console.log('Loaded tickets:', data);
       setTickets(data);
+      setLoadError(null);
     }
   };
 
@@ -312,7 +321,15 @@ export function SupportPanel({ userId }: SupportPanelProps) {
                 </div>
               ))}
 
-              {filteredTickets.length === 0 && (
+              {loadError && (
+                <div className="text-center py-8">
+                  <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
+                  <p className="text-red-400 text-sm font-semibold mb-2">Greška pri učitavanju tiketa</p>
+                  <p className="text-gray-400 text-xs">{loadError}</p>
+                </div>
+              )}
+
+              {!loadError && filteredTickets.length === 0 && (
                 <div className="text-center py-8">
                   <AlertCircle className="w-12 h-12 text-gray-600 mx-auto mb-2" />
                   <p className="text-gray-400 text-sm">Nema tiketa</p>
