@@ -35,6 +35,7 @@ interface Car {
   status: string;
   price: number;
   location: string;
+  vehicle_type: string;
   created_at: string;
   user_profiles: {
     nickname: string;
@@ -118,6 +119,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
   const [updatingPremiumSystem, setUpdatingPremiumSystem] = useState(false);
   const [creditsEnabled, setCreditsEnabled] = useState(true);
   const [updatingCreditsSystem, setUpdatingCreditsSystem] = useState(false);
+  const [selectedVehicleType, setSelectedVehicleType] = useState<string>('all');
 
   useEffect(() => {
     const loadCurrentUserProfile = async () => {
@@ -1152,7 +1154,24 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
   };
 
   const renderCars = () => {
-    const filteredCars = filterData(cars);
+    const vehicleTypes = [
+      { value: 'all', label: 'Svi Tipovi', icon: Car },
+      { value: 'automobil', label: 'Automobil', icon: Car },
+      { value: 'motocikl', label: 'Motocikl', icon: Car },
+      { value: 'kamion', label: 'Kamion', icon: Car },
+      { value: 'kombi', label: 'Kombi', icon: Car },
+      { value: 'autobus', label: 'Autobus', icon: Car },
+      { value: 'prikolica', label: 'Prikolica', icon: Car },
+      { value: 'opoloprivredna_masina', label: 'Polj. Mašina', icon: Car },
+      { value: 'gradjevinska_masina', label: 'Građ. Mašina', icon: Car }
+    ];
+
+    let vehicleFilteredCars = cars;
+    if (selectedVehicleType !== 'all') {
+      vehicleFilteredCars = cars.filter(car => car.vehicle_type === selectedVehicleType);
+    }
+
+    const filteredCars = filterData(vehicleFilteredCars);
     const paginatedCars = paginateData(filteredCars);
     const totalPages = getTotalPages(filteredCars);
 
@@ -1170,6 +1189,26 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
             <RefreshCw className="w-4 h-4" />
             Osveži
           </button>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
+          {vehicleTypes.map((type) => (
+            <button
+              key={type.value}
+              onClick={() => {
+                setSelectedVehicleType(type.value);
+                setCurrentPage(1);
+              }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
+                selectedVehicleType === type.value
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                  : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <type.icon className="w-4 h-4" />
+              <span className="text-sm font-medium">{type.label}</span>
+            </button>
+          ))}
         </div>
 
         <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 p-3">
@@ -1198,6 +1237,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Vozilo</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tip</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Vlasnik</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Lokacija</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Cena</th>
@@ -1207,51 +1247,72 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {paginatedCars.map((car) => (
-                      <tr key={car.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                              <Car className="w-6 h-6 text-gray-400" />
+                    {paginatedCars.map((car) => {
+                      const getVehicleTypeName = (type: string) => {
+                        const types: Record<string, string> = {
+                          'automobil': 'Automobil',
+                          'motocikl': 'Motocikl',
+                          'kamion': 'Kamion',
+                          'kombi': 'Kombi',
+                          'autobus': 'Autobus',
+                          'prikolica': 'Prikolica',
+                          'opoloprivredna_masina': 'Polj. Mašina',
+                          'gradjevinska_masina': 'Građ. Mašina'
+                        };
+                        return types[type] || type;
+                      };
+
+                      return (
+                        <tr key={car.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <Car className="w-6 h-6 text-gray-400" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">{car.brand} {car.model}</p>
+                                <p className="text-sm text-gray-500">{car.year}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{car.brand} {car.model}</p>
-                              <p className="text-sm text-gray-500">{car.year}</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                              {getVehicleTypeName(car.vehicle_type)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="font-medium text-gray-900">{car.user_profiles?.nickname}</p>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{car.location}</td>
+                          <td className="px-4 py-3">
+                            <p className="font-semibold text-gray-900">{car.price?.toLocaleString()} €</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
+                              car.status === 'active' ? 'bg-green-100 text-green-700' :
+                              car.status === 'sold' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {car.status === 'active' ? 'Aktivan' : car.status === 'sold' ? 'Prodat' : 'Neaktivan'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">
+                            {formatDate(car.created_at)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-end">
+                              <button
+                                onClick={() => deleteCar(car.id)}
+                                className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                                title="Obriši oglas"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-gray-900">{car.user_profiles?.nickname}</p>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{car.location}</td>
-                        <td className="px-4 py-3">
-                          <p className="font-semibold text-gray-900">{car.price?.toLocaleString()} €</p>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
-                            car.status === 'active' ? 'bg-green-100 text-green-700' :
-                            car.status === 'sold' ? 'bg-blue-100 text-blue-700' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
-                            {car.status === 'active' ? 'Aktivan' : car.status === 'sold' ? 'Prodat' : 'Neaktivan'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">
-                          {formatDate(car.created_at)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end">
-                            <button
-                              onClick={() => deleteCar(car.id)}
-                              className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
-                              title="Obriši oglas"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1632,6 +1693,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
               onClick={() => {
                 setActiveSection('cars');
                 setSearchTerm('');
+                setSelectedVehicleType('all');
                 setCurrentPage(1);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
