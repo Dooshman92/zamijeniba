@@ -302,6 +302,37 @@ function App() {
     }
   };
 
+  const handleLogoClick = () => {
+    setShowAddForm(false);
+    setShowAuthModal(false);
+    setShowProfileEdit(false);
+    setShowPremiumModal(false);
+    setShowMyAds(false);
+    setShowAdminPanel(false);
+    setShowInbox(false);
+    setShowPromoCode(false);
+    setShowBuyCredits(false);
+    setShowUserProfile(false);
+    setShowDirectChat(false);
+    setShowCarDetail(false);
+    setEditingCar(null);
+    setSelectedCarForSwap(null);
+    setSelectedCarForDetail(null);
+    setActiveTab('cars');
+    setSearchQuery('');
+    setFilters({
+      location: '',
+      brand: '',
+      minYear: 1990,
+      maxYear: currentYear,
+      minPrice: 0,
+      maxPrice: 1000000,
+      fuelType: '',
+      transmission: '',
+      onlyDamaged: false,
+    });
+  };
+
   const filteredCars = cars.filter(car => {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -339,7 +370,7 @@ function App() {
         <nav className="backdrop-blur-md bg-white/5 border-b border-white/10 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-20">
-              <Logo size="md" />
+              <Logo size="md" onClick={handleLogoClick} />
 
               <div className="flex items-center gap-3">
                 {user ? (
