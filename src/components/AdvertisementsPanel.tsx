@@ -212,17 +212,17 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
   };
 
   return (
-    <div className="w-full">
-      <div className="mb-6">
+    <div className="w-full space-y-6 pb-8">
+      <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Upravljanje Reklamama</h2>
         <p className="text-gray-600">Ukupno {advertisements.length} reklama</p>
       </div>
 
-      <div>
+      <div className="space-y-6">
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
-              className="mb-6 w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all duration-300 flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
               Dodaj novu reklamu
@@ -230,7 +230,7 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
           )}
 
           {showForm && (
-            <form onSubmit={handleSubmit} className="mb-6 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 {editingAd ? 'Uredi reklamu' : 'Nova reklama'}
               </h3>
