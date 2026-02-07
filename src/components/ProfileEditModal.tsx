@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, User, Mail, Phone, MapPin, Save, Camera, Upload, AlertCircle, UserCircle2, Gift, Sparkles } from 'lucide-react';
+import { X, User, Mail, Phone, MapPin, Save, Camera, Upload, AlertCircle, UserCircle2, Gift, Sparkles, Lock, Eye, EyeOff } from 'lucide-react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { bosnianCities } from '../data/cities';
@@ -15,6 +15,11 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [nicknameError, setNicknameError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(currentProfile?.avatar_url || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -25,6 +30,12 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
     location: currentProfile?.location || '',
     gender: currentProfile?.gender || null as 'male' | 'female' | null,
     show_phone_number: currentProfile?.show_phone_number || false
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
 
   const checkNicknameAvailability = async (nickname: string) => {
@@ -107,6 +118,64 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
 
     setAvatarUrl(publicUrl);
     setUploadingAvatar(false);
+  };
+
+  const handlePasswordChange = async () => {
+    if (!user?.email) return;
+
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (!passwordData.currentPassword) {
+      setPasswordError('Unesite trenutnu lozinku');
+      return;
+    }
+
+    if (!passwordData.newPassword) {
+      setPasswordError('Unesite novu lozinku');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('Nova lozinka mora imati najmanje 6 karaktera');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('Nova lozinka i potvrda se ne poklapaju');
+      return;
+    }
+
+    setLoading(true);
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: passwordData.currentPassword
+    });
+
+    if (signInError) {
+      setPasswordError('Trenutna lozinka nije ispravna');
+      setLoading(false);
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: passwordData.newPassword
+    });
+
+    setLoading(false);
+
+    if (updateError) {
+      setPasswordError('Greška pri promjeni lozinke');
+      return;
+    }
+
+    setPasswordSuccess('Lozinka uspješno promijenjena');
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -220,6 +289,110 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
               className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 cursor-not-allowed opacity-50"
             />
             <p className="text-xs text-gray-500 mt-2">Email ne može biti promijenjen</p>
+          </div>
+
+          <div className="backdrop-blur-md bg-gradient-to-r from-red-600/20 to-orange-600/20 border border-red-500/30 rounded-2xl p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg">
+                <Lock className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Promjena lozinke</h3>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-semibold text-gray-300 mb-2 block">Trenutna lozinka</label>
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    placeholder="Unesite trenutnu lozinku"
+                    className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-gray-300 mb-2 block">Nova lozinka</label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    placeholder="Unesite novu lozinku (min. 6 karaktera)"
+                    className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-gray-300 mb-2 block">Potvrda nove lozinke</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    placeholder="Ponovo unesite novu lozinku"
+                    className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {passwordError && (
+                <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/30 rounded-xl">
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                  <span className="text-sm text-red-300">{passwordError}</span>
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="flex items-center gap-2 p-3 bg-green-500/20 border border-green-500/30 rounded-xl">
+                  <AlertCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <span className="text-sm text-green-300">{passwordSuccess}</span>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handlePasswordChange}
+                disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                className="w-full bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    <span>Promjena u toku...</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-5 h-5" />
+                    <span>Promijeni lozinku</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {!currentProfile?.is_premium && (
