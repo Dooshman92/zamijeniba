@@ -5,12 +5,15 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export type VehicleType = 'automobil' | 'motocikl' | 'quad' | 'motorne_sanke' | 'jetski';
+
 export interface Car {
   id: string;
   user_id: string;
   user_email: string;
   owner_is_premium?: boolean;
   owner_nickname?: string;
+  vehicle_type: VehicleType;
   brand: string;
   model: string;
   year: number;
@@ -38,6 +41,9 @@ export interface Car {
   featured_until?: string;
   view_count?: number;
   last_promoted_at?: string;
+  engine_displacement?: number;
+  hull_material?: string;
+  track_length?: number;
   xenon_lights?: boolean;
   heated_seats?: boolean;
   leather_seats?: boolean;

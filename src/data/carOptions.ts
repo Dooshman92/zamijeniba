@@ -1,3 +1,67 @@
+export const vehicleTypes = [
+  { value: 'automobil', label: 'Automobil' },
+  { value: 'motocikl', label: 'Motocikl' },
+  { value: 'quad', label: 'Quad/ATV' },
+  { value: 'motorne_sanke', label: 'Motorne sanke' },
+  { value: 'jetski', label: 'Jet Ski' }
+];
+
+export const motorcycleBrands = [
+  'Honda',
+  'Yamaha',
+  'Suzuki',
+  'Kawasaki',
+  'Harley-Davidson',
+  'BMW',
+  'Ducati',
+  'KTM',
+  'Aprilia',
+  'Triumph',
+  'Royal Enfield',
+  'Husqvarna',
+  'Indian',
+  'Moto Guzzi',
+  'MV Agusta',
+  'Benelli',
+  'Vespa',
+  'Piaggio',
+  'Kymco',
+  'SYM',
+  'Ostalo'
+];
+
+export const quadBrands = [
+  'Yamaha',
+  'Honda',
+  'Can-Am',
+  'Polaris',
+  'Kawasaki',
+  'Suzuki',
+  'Arctic Cat',
+  'Kymco',
+  'CF Moto',
+  'Linhai',
+  'Ostalo'
+];
+
+export const snowmobileBrands = [
+  'Ski-Doo',
+  'Polaris',
+  'Arctic Cat',
+  'Yamaha',
+  'Lynx',
+  'Ostalo'
+];
+
+export const jetskiBrands = [
+  'Sea-Doo',
+  'Yamaha',
+  'Kawasaki',
+  'Honda',
+  'Polaris',
+  'Ostalo'
+];
+
 export const carBrands = [
   'Audi',
   'BMW',
@@ -129,3 +193,34 @@ export const yearOptions = Array.from(
   { length: new Date().getFullYear() - 1989 },
   (_, i) => new Date().getFullYear() - i
 );
+
+export function getBrandsByVehicleType(vehicleType: string): string[] {
+  switch (vehicleType) {
+    case 'motocikl':
+      return motorcycleBrands;
+    case 'quad':
+      return quadBrands;
+    case 'motorne_sanke':
+      return snowmobileBrands;
+    case 'jetski':
+      return jetskiBrands;
+    case 'automobil':
+    default:
+      return carBrands;
+  }
+}
+
+export function getFuelTypesByVehicleType(vehicleType: string): string[] {
+  switch (vehicleType) {
+    case 'motocikl':
+    case 'quad':
+      return ['Benzin', 'Električni', 'Dizel'];
+    case 'motorne_sanke':
+      return ['Benzin', 'Električni'];
+    case 'jetski':
+      return ['Benzin', 'Električni'];
+    case 'automobil':
+    default:
+      return fuelTypes;
+  }
+}

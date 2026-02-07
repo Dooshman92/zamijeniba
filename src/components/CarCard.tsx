@@ -1,5 +1,5 @@
-import { Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, MapPin } from 'lucide-react';
-import { Car } from '../lib/supabase';
+import { Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, MapPin, Car as CarIcon } from 'lucide-react';
+import { Car, VehicleType } from '../lib/supabase';
 
 interface CarCardProps {
   car: Car;
@@ -11,6 +11,17 @@ interface CarCardProps {
   onCardClick?: (car: Car) => void;
   layout?: 'grid' | 'list';
 }
+
+const getVehicleTypeLabel = (type: VehicleType): string => {
+  const labels: Record<VehicleType, string> = {
+    'automobil': 'Automobil',
+    'motocikl': 'Motocikl',
+    'quad': 'Quad/ATV',
+    'motorne_sanke': 'Motorne sanke',
+    'jetski': 'Jet Ski'
+  };
+  return labels[type] || 'Vozilo';
+};
 
 export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser = false, currentUserId, onOwnerClick, onCardClick, layout = 'grid' }: CarCardProps) {
   const isOwnCar = currentUserId && car.user_id === currentUserId;
@@ -39,9 +50,16 @@ export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser
           <div className="flex-1 p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-3xl font-black text-white mb-2">
-                  {car.brand} {car.model}
-                </h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-3xl font-black text-white">
+                    {car.brand} {car.model}
+                  </h3>
+                  {car.vehicle_type && car.vehicle_type !== 'automobil' && (
+                    <span className="px-3 py-1 bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 text-xs font-bold rounded-lg">
+                      {getVehicleTypeLabel(car.vehicle_type)}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
                   <span className="text-gray-400 text-sm">
@@ -163,9 +181,16 @@ export function CarCard({ car, onSwapOffer, showSwapButton = true, isPremiumUser
           {car.year}
         </div>
         <div className="absolute bottom-2 left-2 right-2 z-20">
-          <h3 className="text-base font-black text-white drop-shadow-lg">
-            {car.brand} {car.model}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-base font-black text-white drop-shadow-lg">
+              {car.brand} {car.model}
+            </h3>
+            {car.vehicle_type && car.vehicle_type !== 'automobil' && (
+              <span className="px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 text-[10px] font-bold rounded">
+                {getVehicleTypeLabel(car.vehicle_type)}
+              </span>
+            )}
+          </div>
           <div className="mt-1 flex items-center gap-1.5 flex-wrap">
             <div className="backdrop-blur-md bg-green-500/90 px-2 py-0.5 rounded shadow">
               <p className="text-sm font-black text-white">

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Upload, Star, Crown } from 'lucide-react';
-import { supabase, UserProfile } from '../lib/supabase';
+import { supabase, UserProfile, VehicleType } from '../lib/supabase';
 import { uploadMultipleCarImages } from '../lib/storage';
 import { useAuth } from '../lib/auth';
-import { carBrands, carModels, carColors, fuelTypes, transmissionTypes, driveTypes, yearOptions } from '../data/carOptions';
+import { vehicleTypes, carBrands, carModels, carColors, fuelTypes, transmissionTypes, driveTypes, yearOptions, getBrandsByVehicleType, getFuelTypesByVehicleType } from '../data/carOptions';
 import { bosnianCities } from '../data/cities';
 import { calculateCarAdCost, spendCredits, markFirstCarAdUsed } from '../lib/credits';
 import { FEATURES } from '../config/features';
@@ -68,6 +68,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
   };
 
   const [formData, setFormData] = useState({
+    vehicle_type: (carToEdit?.vehicle_type || 'automobil') as VehicleType,
     brand: carToEdit?.brand || '',
     model: carToEdit?.model || '',
     year: carToEdit?.year || '' as any,
@@ -80,6 +81,9 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
     kilowatts: carToEdit?.kilowatts || '' as any,
     horse_power: carToEdit?.horse_power || '' as any,
     engine_size: carToEdit?.engine_size || '',
+    engine_displacement: carToEdit?.engine_displacement || '' as any,
+    hull_material: carToEdit?.hull_material || '',
+    track_length: carToEdit?.track_length || '' as any,
     doors: carToEdit?.doors || 4,
     seats: carToEdit?.seats || 5,
     location: carToEdit?.location || '',
@@ -406,6 +410,20 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Osnovni podaci</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Tip vozila *</label>
+                  <select
+                    required
+                    value={formData.vehicle_type}
+                    onChange={(e) => setFormData({ ...formData, vehicle_type: e.target.value as VehicleType, brand: '', model: '', fuel_type: '' })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    {vehicleTypes.map((type) => (
+                      <option key={type.value} value={type.value}>{type.label}</option>
+                    ))}
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Marka *</label>
                   <select
@@ -415,7 +433,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Odaberi</option>
-                    {carBrands.map((brand) => (
+                    {getBrandsByVehicleType(formData.vehicle_type).map((brand) => (
                       <option key={brand} value={brand}>{brand}</option>
                     ))}
                   </select>
@@ -508,7 +526,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Odaberi</option>
-                    {fuelTypes.map((fuel) => (
+                    {getFuelTypesByVehicleType(formData.vehicle_type).map((fuel) => (
                       <option key={fuel} value={fuel}>{fuel}</option>
                     ))}
                   </select>

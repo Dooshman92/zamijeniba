@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Filter, X, ChevronDown } from 'lucide-react';
-import { carBrands, fuelTypes, transmissionTypes } from '../data/carOptions';
+import { vehicleTypes, carBrands, fuelTypes, transmissionTypes } from '../data/carOptions';
 import { bosnianCities } from '../data/cities';
 
 export interface FilterOptions {
@@ -13,6 +13,7 @@ export interface FilterOptions {
   fuelType: string;
   transmission: string;
   onlyDamaged: boolean;
+  vehicleType?: string;
 }
 
 interface AdvancedFiltersProps {
@@ -41,7 +42,8 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
     filters.maxPrice < 1000000 ||
     filters.fuelType ||
     filters.transmission ||
-    filters.onlyDamaged;
+    filters.onlyDamaged ||
+    filters.vehicleType;
 
   const handleFilterChange = (key: keyof FilterOptions, value: string | number) => {
     onFiltersChange({
@@ -106,6 +108,25 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
             </div>
 
           <div className="p-6 pt-0 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Tip vozila
+              </label>
+              <select
+                value={filters.vehicleType || ''}
+                onChange={(e) => handleFilterChange('vehicleType', e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              >
+                <option value="">Svi tipovi</option>
+                {vehicleTypes.map((type) => (
+                  <option key={type.value} value={type.value} className="bg-gray-800">
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Lokacija

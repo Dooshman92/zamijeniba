@@ -431,6 +431,7 @@ function App() {
       if (!matchesSearch) return false;
     }
 
+    if (filters.vehicleType && car.vehicle_type !== filters.vehicleType) return false;
     if (filters.location && car.location !== filters.location) return false;
     if (filters.brand && car.brand !== filters.brand) return false;
     if (car.year < filters.minYear || car.year > filters.maxYear) return false;
