@@ -1392,17 +1392,16 @@ function App() {
 
             <div className="border-t border-white/10 pt-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col gap-2">
                   <button
                     onClick={() => setShowAbout(true)}
-                    className="text-gray-400 hover:text-cyan-400 transition-colors font-medium"
+                    className="text-gray-400 hover:text-cyan-400 transition-colors font-medium text-left"
                   >
                     O nama
                   </button>
-                  <span className="text-gray-600">|</span>
                   <button
                     onClick={() => setShowTerms(true)}
-                    className="text-gray-400 hover:text-cyan-400 transition-colors font-medium"
+                    className="text-gray-400 hover:text-cyan-400 transition-colors font-medium text-left"
                   >
                     Uslovi korištenja
                   </button>
