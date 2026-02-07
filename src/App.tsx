@@ -367,32 +367,8 @@ function App() {
       });
 
       const sortedCars = carsWithOwnerInfo.sort((a, b) => {
-        const now = new Date();
-        const aIsFeatured = a.is_featured && (!a.featured_until || new Date(a.featured_until) > now);
-        const bIsFeatured = b.is_featured && (!b.featured_until || new Date(b.featured_until) > now);
-
-        if (aIsFeatured && !bIsFeatured) return -1;
-        if (!aIsFeatured && bIsFeatured) return 1;
-
-        if (aIsFeatured && bIsFeatured) {
-          const scoreDiff = (b.priority_score || 0) - (a.priority_score || 0);
-          if (scoreDiff !== 0) return scoreDiff;
-        }
-
-        if (a.owner_is_premium && !b.owner_is_premium) return -1;
-        if (!a.owner_is_premium && b.owner_is_premium) return 1;
-
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
-
-      console.log('Featured cars:', sortedCars.filter(c => c.is_featured).map(c => ({
-        id: c.id,
-        brand: c.brand,
-        model: c.model,
-        is_featured: c.is_featured,
-        featured_until: c.featured_until,
-        priority_score: c.priority_score
-      })));
 
       setCars(sortedCars as Car[]);
     }
@@ -926,93 +902,10 @@ function App() {
                   </div>
 
                   {(() => {
-                    const now = new Date();
-                    const featuredCars = filteredCars.filter(car =>
-                      car.is_featured && (!car.featured_until || new Date(car.featured_until) > now)
-                    );
-                    return premiumEnabled && featuredCars.length > 0 && (
-                      <div className="mb-8">
-                        <div className="relative mb-6">
-                          <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-orange-500/20 to-yellow-500/20 rounded-2xl blur-2xl"></div>
-                          <div className="relative backdrop-blur-md bg-gradient-to-r from-red-500/10 via-orange-500/10 to-yellow-500/10 border-2 border-orange-500/40 rounded-2xl p-4">
-                            <div className="flex items-center justify-center gap-2">
-                              <Zap className="w-6 h-6 text-orange-400 animate-pulse" />
-                              <h3 className="text-2xl font-black bg-gradient-to-r from-red-400 via-orange-300 to-yellow-400 bg-clip-text text-transparent">
-                                Istaknuti Oglasi
-                              </h3>
-                              <Zap className="w-6 h-6 text-orange-400 animate-pulse" />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          {featuredCars.map((car) => (
-                            <CarCard
-                              key={car.id}
-                              car={car}
-                              onSwapOffer={setSelectedCarForSwap}
-                              isPremiumUser={userProfile?.is_premium || false}
-                              currentUserId={user?.id}
-                              onOwnerClick={handleOwnerClick}
-                              onCardClick={handleCarClick}
-                              layout="list"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
+                    const visibleRegularCars = filteredCars.slice(0, visibleCarsCount);
+                    const hasMoreCars = filteredCars.length > visibleCarsCount;
 
-                  {(() => {
-                    const now = new Date();
-                    const premiumCars = filteredCars.filter(car => {
-                      const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
-                      return !isFeatured && car.owner_is_premium;
-                    });
-                    return premiumEnabled && premiumCars.length > 0 && (
-                      <div className="mb-8">
-                        <div className="relative mb-6">
-                          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-yellow-500/20 rounded-2xl blur-2xl"></div>
-                          <div className="relative backdrop-blur-md bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-yellow-500/10 border-2 border-yellow-500/30 rounded-2xl p-4">
-                            <div className="flex items-center justify-center gap-2">
-                              <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-                              <h3 className="text-2xl font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
-                                Premium Oglasi
-                              </h3>
-                              <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          {premiumCars.map((car) => (
-                            <CarCard
-                              key={car.id}
-                              car={car}
-                              onSwapOffer={setSelectedCarForSwap}
-                              isPremiumUser={userProfile?.is_premium || false}
-                              currentUserId={user?.id}
-                              onOwnerClick={handleOwnerClick}
-                              onCardClick={handleCarClick}
-                              layout="list"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {(() => {
-                    const now = new Date();
-                    const regularCars = premiumEnabled
-                      ? filteredCars.filter(car => {
-                          const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
-                          return !isFeatured && !car.owner_is_premium;
-                        })
-                      : filteredCars;
-
-                    const visibleRegularCars = regularCars.slice(0, visibleCarsCount);
-                    const hasMoreCars = regularCars.length > visibleCarsCount;
-
-                    return regularCars.length > 0 && (
+                    return filteredCars.length > 0 && (
                       <div>
                         <div className="mb-6">
                           <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
@@ -1052,97 +945,10 @@ function App() {
               ) : (
                 <>
                   {(() => {
-                    const now = new Date();
-                    const featuredCars = filteredCars.filter(car =>
-                      car.is_featured && (!car.featured_until || new Date(car.featured_until) > now)
-                    );
-                    return premiumEnabled && featuredCars.length > 0 && (
-                      <div className="mb-16">
-                        <div className="relative mb-8">
-                          <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-orange-500/20 to-yellow-500/20 rounded-3xl blur-3xl"></div>
-                          <div className="relative backdrop-blur-md bg-gradient-to-r from-red-500/10 via-orange-500/10 to-yellow-500/10 border-2 border-orange-500/40 rounded-3xl p-6">
-                            <div className="flex items-center justify-center gap-3">
-                              <Zap className="w-8 h-8 text-orange-400 animate-pulse" />
-                              <h2 className="text-4xl font-black bg-gradient-to-r from-red-400 via-orange-300 to-yellow-400 bg-clip-text text-transparent">
-                                Istaknuti Oglasi
-                              </h2>
-                              <Zap className="w-8 h-8 text-orange-400 animate-pulse" />
-                            </div>
-                            <p className="text-center text-orange-200/80 mt-2 font-medium">
-                              Super istakni svoj oglas i dobij do 10x više pregleda
-                            </p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                          {featuredCars.map((car) => (
-                            <CarCard
-                              key={car.id}
-                              car={car}
-                              onSwapOffer={setSelectedCarForSwap}
-                              isPremiumUser={userProfile?.is_premium || false}
-                              currentUserId={user?.id}
-                              onOwnerClick={handleOwnerClick}
-                              onCardClick={handleCarClick}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
+                    const visibleRegularCars = filteredCars.slice(0, visibleCarsCount);
+                    const hasMoreCars = filteredCars.length > visibleCarsCount;
 
-                  {(() => {
-                    const now = new Date();
-                    const premiumCars = filteredCars.filter(car => {
-                      const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
-                      return !isFeatured && car.owner_is_premium;
-                    });
-                    return premiumEnabled && premiumCars.length > 0 && (
-                      <div className="mb-16">
-                        <div className="relative mb-8">
-                          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-yellow-500/20 rounded-3xl blur-3xl"></div>
-                          <div className="relative backdrop-blur-md bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl p-6">
-                            <div className="flex items-center justify-center gap-3">
-                              <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
-                              <h2 className="text-4xl font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
-                                Premium Oglasi
-                              </h2>
-                              <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
-                            </div>
-                            <p className="text-center text-yellow-200/80 mt-2 font-medium">
-                              Oglasi premium korisnika dobijaju više pregleda
-                            </p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                          {premiumCars.map((car) => (
-                            <CarCard
-                              key={car.id}
-                              car={car}
-                              onSwapOffer={setSelectedCarForSwap}
-                              isPremiumUser={userProfile?.is_premium || false}
-                              currentUserId={user?.id}
-                              onOwnerClick={handleOwnerClick}
-                              onCardClick={handleCarClick}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {(() => {
-                    const now = new Date();
-                    const regularCars = premiumEnabled
-                      ? filteredCars.filter(car => {
-                          const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
-                          return !isFeatured && !car.owner_is_premium;
-                        })
-                      : filteredCars;
-
-                    const visibleRegularCars = regularCars.slice(0, visibleCarsCount);
-                    const hasMoreCars = regularCars.length > visibleCarsCount;
-
-                    return regularCars.length > 0 && (
+                    return filteredCars.length > 0 && (
                       <div>
                         <div className="mb-8">
                           <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-5">
