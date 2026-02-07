@@ -716,7 +716,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                 <Car className="w-8 h-8 opacity-80" />
                 <span className="text-3xl font-bold">{stats.totalCars}</span>
               </div>
-              <p className="text-green-100">Ukupno Automobila</p>
+              <p className="text-green-100">Ukupno Vozila</p>
               <p className="text-sm text-green-200 mt-1">{stats.activeCars} aktivnih</p>
             </div>
 
@@ -752,7 +752,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{stats.soldCars}</p>
-                  <p className="text-sm text-gray-600">Prodato Automobila</p>
+                  <p className="text-sm text-gray-600">Prodato Vozila</p>
                 </div>
               </div>
             </div>
@@ -792,7 +792,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                 </span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                <span className="text-gray-600">Prodato/Ukupno Automobila</span>
+                <span className="text-gray-600">Prodato/Ukupno Vozila</span>
                 <span className="font-semibold text-gray-900">
                   {((stats.soldCars / stats.totalCars) * 100).toFixed(1)}%
                 </span>
@@ -1159,7 +1159,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Upravljanje Automobilima</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Upravljanje Vozilima</h2>
             <p className="text-gray-600">Ukupno {filteredCars.length} oglasa</p>
           </div>
           <button
@@ -1175,7 +1175,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
           <Search className="w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Pretraži automobile (brend, model, lokacija...)"
+            placeholder="Pretraži vozila (brend, model, lokacija...)"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -1196,7 +1196,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Automobil</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Vozilo</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Vlasnik</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Lokacija</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Cena</th>
@@ -1640,7 +1640,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
               }`}
             >
               <Car className="w-5 h-5" />
-              <span className="font-medium">Automobili</span>
+              <span className="font-medium">Vozila</span>
             </button>
 
             <button

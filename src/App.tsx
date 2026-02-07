@@ -604,12 +604,12 @@ function App() {
 
             <div className="inline-flex items-center gap-2 backdrop-blur-md bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 px-4 py-2 rounded-full mb-8 animate-pulse">
               <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span className="text-sm font-medium text-cyan-300">Nova era trgovine automobilima</span>
+              <span className="text-sm font-medium text-cyan-300">Nova era trgovine vozilima</span>
             </div>
 
             <h2 className="text-6xl md:text-7xl font-black mb-6 leading-tight">
               <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
-                Zamijeni svoj auto
+                Zamijeni svoje vozilo
               </span>
               <br />
               <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-blue-500 bg-clip-text text-transparent">
@@ -618,7 +618,7 @@ function App() {
             </h2>
 
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed">
-              Najbolja platforma za direktnu zamjenu automobila. Pronađi savršenu zamjenu,
+              Najbolja platforma za direktnu zamjenu vozila. Pronađi savršenu zamjenu,
               pregovaraj direktno i ostvari bolji deal nego ikad prije.
             </p>
 
@@ -628,7 +628,7 @@ function App() {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
               <Plus className="w-6 h-6 relative z-10" />
-              <span className="relative z-10 text-lg">Dodaj svoj automobil</span>
+              <span className="relative z-10 text-lg">Dodaj svoje vozilo</span>
             </button>
           </div>
         </header>
@@ -658,7 +658,7 @@ function App() {
                     : 'text-gray-300 hover:text-white hover:bg-white/5'
                 }`}
               >
-                Automobili
+                Vozila
               </button>
               <button
                 onClick={() => setActiveTab('offers')}
@@ -683,7 +683,7 @@ function App() {
                     <div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-500/30 border-t-cyan-500"></div>
                     <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-4 border-cyan-500/20"></div>
                   </div>
-                  <p className="mt-6 text-gray-300 font-medium">Učitavanje automobila...</p>
+                  <p className="mt-6 text-gray-300 font-medium">Učitavanje vozila...</p>
                 </div>
               ) : filteredCars.length === 0 ? (
                 <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-16 text-center">
@@ -692,10 +692,10 @@ function App() {
                     <CarIcon className="relative w-24 h-24 text-gray-400" />
                   </div>
                   <h3 className="text-3xl font-bold text-white mb-3">
-                    {searchQuery ? 'Nema rezultata' : 'Nema dostupnih automobila'}
+                    {searchQuery ? 'Nema rezultata' : 'Nema dostupnih vozila'}
                   </h3>
                   <p className="text-gray-400 text-lg">
-                    {searchQuery ? 'Pokušajte sa drugom pretragom' : 'Budi prvi koji će dodati automobil za zamjenu!'}
+                    {searchQuery ? 'Pokušajte sa drugom pretragom' : 'Budi prvi koji će dodati vozilo za zamjenu!'}
                   </p>
                 </div>
               ) : searchQuery.trim() ? (
@@ -705,7 +705,7 @@ function App() {
                       Rezultati pretrage: <span className="text-cyan-400">{searchQuery}</span>
                     </h2>
                     <p className="text-gray-400 mt-2">
-                      Pronađeno {filteredCars.length} {filteredCars.length === 1 ? 'automobil' : filteredCars.length < 5 ? 'automobila' : 'automobila'}
+                      Pronađeno {filteredCars.length} {filteredCars.length === 1 ? 'vozilo' : filteredCars.length < 5 ? 'vozila' : 'vozila'}
                     </p>
                   </div>
 
@@ -1188,7 +1188,7 @@ function App() {
               </div>
               <div className="w-[200px]"></div>
             </div>
-            <p className="text-gray-400 text-center">autozamjena.ba © 2026 - Najbolja platforma za zamjenu automobila u BiH</p>
+            <p className="text-gray-400 text-center">autozamjena.ba © 2026 - Najbolja platforma za zamjenu vozila u BiH</p>
             <p className="text-sm text-gray-500 mt-2 text-center">Brzo. Sigurno. Jednostavno.</p>
           </div>
         </footer>

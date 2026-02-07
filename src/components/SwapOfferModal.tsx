@@ -66,7 +66,7 @@ export function SwapOfferModal({ targetCar, onClose, onSuccess, premiumEnabled =
     if (!selectedCar || !user || !targetCar.user_id) return;
 
     if (user.id === targetCar.user_id) {
-      alert('Ne možete ponuditi zamjenu za svoj automobil');
+      alert('Ne možete ponuditi zamjenu za svoje vozilo');
       return;
     }
 
@@ -149,13 +149,13 @@ export function SwapOfferModal({ targetCar, onClose, onSuccess, premiumEnabled =
           {!selectedCar ? (
             <>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Odaberi svoj automobil za zamjenu:
+                Odaberi svoje vozilo za zamjenu:
               </h3>
               {loading ? (
                 <div className="text-center py-12 text-gray-500">Učitavanje...</div>
               ) : myCars.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
-                  Nema dostupnih automobila za zamjenu
+                  Nema dostupnih vozila za zamjenu
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

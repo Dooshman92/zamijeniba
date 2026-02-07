@@ -149,7 +149,7 @@ export function SearchWithAutocomplete({ searchQuery, onSearchChange, cars }: Se
         onChange={(e) => onSearchChange(e.target.value)}
         onFocus={() => setShowSuggestions(true)}
         onKeyDown={handleKeyDown}
-        placeholder="Pretraži automobile (marka, model, godina, cijena...)"
+        placeholder="Pretraži vozila (marka, model, godina, cijena...)"
         className="w-full pl-12 pr-4 py-4 backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
       />
       {searchQuery && (

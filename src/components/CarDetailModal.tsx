@@ -277,7 +277,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
         <div className="sticky top-0 z-10 backdrop-blur-md bg-gray-900/90 border-b border-white/10 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold text-white">Detalji automobila</h2>
+              <h2 className="text-2xl font-bold text-white">Detalji vozila</h2>
               {car.owner_is_premium && <PremiumBadge size="sm" />}
             </div>
             <button

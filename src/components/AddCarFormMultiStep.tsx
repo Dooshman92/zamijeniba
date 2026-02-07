@@ -236,7 +236,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
         .eq('id', carToEdit.id);
 
       if (updateError) {
-        alert('Greška pri ažuriranju automobila');
+        alert('Greška pri ažuriranju vozila');
         setLoading(false);
         return;
       }
@@ -315,7 +315,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
 
     if (carError || !carData) {
       console.error('Error creating car:', carError);
-      alert('Greška pri dodavanju automobila: ' + (carError?.message || 'Nepoznata greška'));
+      alert('Greška pri dodavanju vozila: ' + (carError?.message || 'Nepoznata greška'));
       setLoading(false);
       return;
     }
@@ -386,7 +386,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl flex-shrink-0">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{editMode ? 'Uredi automobil' : 'Dodaj automobil'}</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{editMode ? 'Uredi vozilo' : 'Dodaj vozilo'}</h2>
             <p className="text-sm text-gray-600">Korak {currentStep} od {editMode ? 3 : 4}</p>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
