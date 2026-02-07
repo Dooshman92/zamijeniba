@@ -69,25 +69,32 @@ export function AboutModal({ onClose }: AboutModalProps) {
               <div className="border-l-4 border-yellow-500 pl-6">
                 <div className="flex items-center gap-3 mb-3">
                   <Sparkles className="w-6 h-6 text-yellow-400" />
-                  <h4 className="text-xl font-bold text-white">Premium funkcionalnosti</h4>
+                  <h4 className="text-xl font-bold text-white flex items-center gap-2">
+                    Premium funkcionalnosti
+                    <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full border border-yellow-500/30">Uskoro</span>
+                  </h4>
                 </div>
                 <p className="text-gray-300 leading-relaxed">
-                  Uz besplatne osnovne funkcije, nudimo i Premium članstvo koje vam pruža dodatne pogodnosti:
-                  neograničenu direktnu komunikaciju sa svim korisnicima, mogućnost slanja ponuda za zamjenu,
-                  veću vidljivost vaših oglasa, i prioritetnu podršku. Premium korisnici dobijaju značajno
-                  više pregleda i kontakata za svoja vozila.
+                  Radimo na ekskluzivnim Premium funkcijama koje će vam pružiti dodatne mogućnosti za
+                  još uspješniju razmjenu vozila. Premium korisnici će uživati u posebnim pogodnostima
+                  koje će olakšati i ubrzati proces pronalaženja savršenog vozila za zamjenu.
+                  Ostanite sa nama za još novosti!
                 </p>
               </div>
 
               <div className="border-l-4 border-green-500 pl-6">
                 <div className="flex items-center gap-3 mb-3">
                   <Zap className="w-6 h-6 text-green-400" />
-                  <h4 className="text-xl font-bold text-white">Istaknuti oglasi</h4>
+                  <h4 className="text-xl font-bold text-white flex items-center gap-2">
+                    Istaknuti oglasi
+                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">Uskoro</span>
+                  </h4>
                 </div>
                 <p className="text-gray-300 leading-relaxed">
-                  Želite da vaš oglas bude prvo što potencijalni kupci vide? Istaknuti oglasi dobijaju
-                  premium poziciju na vrhu svih rezultata pretraživanja i do 10 puta više pregleda. Savršeno
-                  rješenje za brzu prodaju ili zamjenu vašeg vozila.
+                  Priprema se nova funkcionalnost koja će omogućiti da vaš oglas bude u prvom planu!
+                  Istaknuti oglasi će biti prikazani na vrhu liste rezultata i imaće poseban vizuelni
+                  identitet koji će privući pažnju potencijalnih kupaca. Idealno rješenje za one koji žele
+                  maksimalnu vidljivost svog vozila.
                 </p>
               </div>
 
@@ -97,10 +104,11 @@ export function AboutModal({ onClose }: AboutModalProps) {
                   <h4 className="text-xl font-bold text-white">Direktna komunikacija</h4>
                 </div>
                 <p className="text-gray-300 leading-relaxed">
-                  Naš ugrađeni sistem poruka omogućava direktnu komunikaciju između korisnika.
-                  Pregovarajte o detaljima, dogovarajte preglede vozila i finalizirajte dogovor
-                  sve na jednom mjestu. Notifikacije u realnom vremenu vas obavještavaju o novim
-                  porukama i ponudama.
+                  Naš ugrađeni sistem poruka omogućava sigurnu komunikaciju između korisnika. Direktno
+                  možete kontaktirati vlasnike vozila u dva slučaja: kada korisnik ima javno otkriven
+                  broj telefona u svom profilu, ili nakon što prihvate vašu ponudu za zamjenu. Ovaj pristup
+                  osigurava privatnost svih korisnika i sprječava neželjene poruke, dok omogućava efikasnu
+                  komunikaciju sa zainteresovanim stranama.
                 </p>
               </div>
             </div>
