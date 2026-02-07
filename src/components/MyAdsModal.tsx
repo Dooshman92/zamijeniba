@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, Car as CarIcon, Eye, EyeOff, Archive, Trash2, Edit, Zap, Clock } from 'lucide-react';
+import { X, Car as CarIcon, Eye, EyeOff, Trash2, Edit } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Car } from '../lib/supabase';
 import { AddCarFormMultiStep } from './AddCarFormMultiStep';
-import { BoostCarModal } from './BoostCarModal';
 
 interface MyAdsModalProps {
   onClose: () => void;
@@ -12,7 +11,7 @@ interface MyAdsModalProps {
   premiumEnabled?: boolean;
 }
 
-type CarStatus = 'active' | 'inactive' | 'hidden';
+type CarStatus = 'active' | 'hidden';
 
 interface CarWithStatus extends Car {
   status: CarStatus;
@@ -23,7 +22,6 @@ export function MyAdsModal({ onClose, userId, onCarUpdated, premiumEnabled = fal
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<CarStatus>('active');
   const [editingCar, setEditingCar] = useState<CarWithStatus | null>(null);
-  const [boostingCar, setBoostingCar] = useState<CarWithStatus | null>(null);
 
   useEffect(() => {
     loadMyCars();
@@ -85,29 +83,6 @@ export function MyAdsModal({ onClose, userId, onCarUpdated, premiumEnabled = fal
     return cars.filter(car => car.status === status).length;
   };
 
-  const getRemainingFeaturedTime = (car: Car) => {
-    if (!car.is_featured || !car.featured_until) return null;
-
-    const now = new Date();
-    const featuredUntil = new Date(car.featured_until);
-    const diffMs = featuredUntil.getTime() - now.getTime();
-
-    if (diffMs <= 0) return null;
-
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const diffDays = Math.floor(diffHours / 24);
-    const remainingHours = diffHours % 24;
-
-    if (diffDays > 0) {
-      return `${diffDays}d ${remainingHours}h`;
-    } else if (diffHours > 0) {
-      return `${diffHours}h ${diffMinutes}m`;
-    } else {
-      return `${diffMinutes}m`;
-    }
-  };
-
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden border border-cyan-500/30">
@@ -139,19 +114,6 @@ export function MyAdsModal({ onClose, userId, onCarUpdated, premiumEnabled = fal
               </div>
             </button>
             <button
-              onClick={() => setActiveTab('inactive')}
-              className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                activeTab === 'inactive'
-                  ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/30'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Archive className="w-4 h-4" />
-                Neaktivni ({getStatusCount('inactive')})
-              </div>
-            </button>
-            <button
               onClick={() => setActiveTab('hidden')}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                 activeTab === 'hidden'
@@ -177,7 +139,6 @@ export function MyAdsModal({ onClose, userId, onCarUpdated, premiumEnabled = fal
               <CarIcon className="w-16 h-16 mx-auto text-gray-600 mb-4" />
               <p className="text-gray-400 text-lg">
                 {activeTab === 'active' && 'Nemate aktivnih oglasa'}
-                {activeTab === 'inactive' && 'Nemate neaktivnih oglasa'}
                 {activeTab === 'hidden' && 'Nemate skrivenih oglasa'}
               </p>
             </div>
@@ -218,56 +179,22 @@ export function MyAdsModal({ onClose, userId, onCarUpdated, premiumEnabled = fal
                           <Edit className="w-4 h-4" />
                           Uredi
                         </button>
-                        {activeTab === 'active' && !car.is_featured && (
-                          <button
-                            onClick={() => setBoostingCar(car)}
-                            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors flex items-center gap-2"
-                          >
-                            <Zap className="w-4 h-4" />
-                            Istakni
-                          </button>
-                        )}
-                        {activeTab === 'active' && car.is_featured && (
-                          <div className="flex flex-col gap-1">
-                            <div className="px-4 py-2 bg-yellow-500/20 border border-yellow-500 text-yellow-500 rounded-lg flex items-center gap-2">
-                              <Zap className="w-4 h-4" />
-                              Istaknut
-                            </div>
-                            {getRemainingFeaturedTime(car) && (
-                              <div className="px-3 py-1 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-2 text-xs">
-                                <Clock className="w-3 h-3 text-yellow-400" />
-                                <span className="text-yellow-300 font-semibold">
-                                  Preostalo: {getRemainingFeaturedTime(car)}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {activeTab !== 'active' && (
-                          <button
-                            onClick={() => updateCarStatus(car.id, 'active')}
-                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2"
-                          >
-                            <Eye className="w-4 h-4" />
-                            Aktiviraj
-                          </button>
-                        )}
-                        {activeTab !== 'inactive' && (
-                          <button
-                            onClick={() => updateCarStatus(car.id, 'inactive')}
-                            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors flex items-center gap-2"
-                          >
-                            <Archive className="w-4 h-4" />
-                            Deaktiviraj
-                          </button>
-                        )}
-                        {activeTab !== 'hidden' && (
+                        {activeTab === 'active' && (
                           <button
                             onClick={() => updateCarStatus(car.id, 'hidden')}
                             className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center gap-2"
                           >
                             <EyeOff className="w-4 h-4" />
                             Sakrij
+                          </button>
+                        )}
+                        {activeTab === 'hidden' && (
+                          <button
+                            onClick={() => updateCarStatus(car.id, 'active')}
+                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Aktiviraj
                           </button>
                         )}
                         <button
@@ -294,22 +221,6 @@ export function MyAdsModal({ onClose, userId, onCarUpdated, premiumEnabled = fal
           onClose={() => setEditingCar(null)}
           onSuccess={() => {
             setEditingCar(null);
-            loadMyCars();
-            if (onCarUpdated) {
-              onCarUpdated();
-            }
-          }}
-          premiumEnabled={premiumEnabled}
-        />
-      )}
-
-      {boostingCar && (
-        <BoostCarModal
-          carId={boostingCar.id}
-          carTitle={`${boostingCar.brand} ${boostingCar.model}`}
-          onClose={() => setBoostingCar(null)}
-          onSuccess={() => {
-            setBoostingCar(null);
             loadMyCars();
             if (onCarUpdated) {
               onCarUpdated();
