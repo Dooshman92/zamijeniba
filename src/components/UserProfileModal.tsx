@@ -399,149 +399,134 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
 
             <div className="mt-8">
               <div className="flex items-center gap-3 mb-4">
-                <Star className="w-6 h-6 text-amber-400" />
+                <Star className="w-5 h-5 text-amber-400" />
                 <h3 className="text-xl font-bold text-white">
                   Dojmovi ({reviews.length})
                 </h3>
+                {averageRatings && (
+                  <div className="ml-auto flex items-center gap-2">
+                    {renderStars(averageRatings.overall)}
+                    <span className="text-white font-bold">{averageRatings.overall.toFixed(1)}</span>
+                  </div>
+                )}
               </div>
 
-              {averageRatings && (
-                <div className="backdrop-blur-md bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-6 mb-6">
-                  <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <div className="text-5xl font-bold text-white mb-2">
-                        {averageRatings.overall.toFixed(1)}
-                      </div>
-                      {renderStars(averageRatings.overall, 'lg')}
-                      <p className="text-gray-400 text-sm mt-2">
-                        {reviews.length} {reviews.length === 1 ? 'dojam' : reviews.length < 5 ? 'dojma' : 'dojmova'}
-                      </p>
-                    </div>
-
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4 text-blue-400" />
-                          <span className="text-sm text-gray-300">Komunikacija</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {renderStars(averageRatings.communication)}
-                          <span className="text-sm text-gray-400 min-w-[2rem]">
-                            {averageRatings.communication.toFixed(1)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Shield className="w-4 h-4 text-green-400" />
-                          <span className="text-sm text-gray-300">Pouzdanost</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {renderStars(averageRatings.reliability)}
-                          <span className="text-sm text-gray-400 min-w-[2rem]">
-                            {averageRatings.reliability.toFixed(1)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Smile className="w-4 h-4 text-pink-400" />
-                          <span className="text-sm text-gray-300">Ljubaznost</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {renderStars(averageRatings.friendliness)}
-                          <span className="text-sm text-gray-400 min-w-[2rem]">
-                            {averageRatings.friendliness.toFixed(1)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {loadingReviews ? (
-                <div className="text-center py-12">
+                <div className="text-center py-8">
                   <div className="inline-block relative">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-amber-500/30 border-t-amber-500"></div>
+                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-amber-500/30 border-t-amber-500"></div>
                   </div>
-                  <p className="mt-4 text-gray-300">Učitavanje dojmova...</p>
+                  <p className="mt-3 text-gray-300 text-sm">Učitavanje dojmova...</p>
                 </div>
               ) : reviews.length === 0 ? (
-                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-12 text-center">
-                  <Star className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-400 text-lg">
+                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
+                  <Star className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-400">
                     {isOwnProfile
                       ? 'Još uvijek niste primili nijedan dojam'
                       : 'Korisnik još nije primio nijedan dojam'}
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {reviews.map((review) => (
-                    <div
-                      key={review.id}
-                      className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-all"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0">
-                          {review.reviewer_avatar ? (
-                            <img
-                              src={review.reviewer_avatar}
-                              alt="Avatar"
-                              className="w-12 h-12 rounded-full object-cover border-2 border-cyan-400"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                              <User className="w-6 h-6 text-white" />
-                            </div>
-                          )}
+                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
+                  {averageRatings && (
+                    <div className="pb-4 mb-4 border-b border-white/10">
+                      <div className="flex items-center justify-between gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="w-4 h-4 text-blue-400" />
+                          <span className="text-gray-300">Komunikacija</span>
                         </div>
-
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
-                              <p className="font-semibold text-white">
-                                {review.reviewer_nickname ? `@${review.reviewer_nickname}` : 'Korisnik'}
-                              </p>
-                              <p className="text-xs text-gray-500">{formatDate(review.created_at)}</p>
-                            </div>
-                            {renderStars((review.rating_communication + review.rating_reliability + review.rating_friendliness) / 3)}
-                          </div>
-
-                          <p className="text-gray-300 mb-3 leading-relaxed">{review.comment}</p>
-
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {['helpful', 'accurate', 'supportive'].map((reactionType) => {
-                              const count = review.reactions[reactionType as keyof typeof review.reactions] as number;
-                              const isActive = review.reactions.user_reaction === reactionType;
-
-                              return (
-                                <button
-                                  key={reactionType}
-                                  onClick={() => handleReaction(review.id, reactionType)}
-                                  disabled={!currentUser}
-                                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-sm ${
-                                    isActive
-                                      ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
-                                      : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
-                                  } border`}
-                                >
-                                  {getReactionIcon(reactionType)}
-                                  <span className="text-xs">{getReactionLabel(reactionType)}</span>
-                                  {count > 0 && (
-                                    <span className="text-xs font-semibold">{count}</span>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
+                        <div className="flex items-center gap-1.5">
+                          {renderStars(averageRatings.communication, 'sm')}
+                          <span className="text-gray-400 text-xs ml-1">{averageRatings.communication.toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-4 text-sm mt-2">
+                        <div className="flex items-center gap-2">
+                          <Shield className="w-4 h-4 text-green-400" />
+                          <span className="text-gray-300">Pouzdanost</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {renderStars(averageRatings.reliability, 'sm')}
+                          <span className="text-gray-400 text-xs ml-1">{averageRatings.reliability.toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-4 text-sm mt-2">
+                        <div className="flex items-center gap-2">
+                          <Smile className="w-4 h-4 text-pink-400" />
+                          <span className="text-gray-300">Ljubaznost</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {renderStars(averageRatings.friendliness, 'sm')}
+                          <span className="text-gray-400 text-xs ml-1">{averageRatings.friendliness.toFixed(1)}</span>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
+
+                  <div className="space-y-3">
+                    {reviews.map((review) => (
+                      <div
+                        key={review.id}
+                        className="bg-white/5 rounded-xl p-3 hover:bg-white/10 transition-all"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0">
+                            {review.reviewer_avatar ? (
+                              <img
+                                src={review.reviewer_avatar}
+                                alt="Avatar"
+                                className="w-10 h-10 rounded-full object-cover border-2 border-cyan-400"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                                <User className="w-5 h-5 text-white" />
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <p className="font-semibold text-white text-sm">
+                                {review.reviewer_nickname ? `@${review.reviewer_nickname}` : 'Korisnik'}
+                              </p>
+                              <div className="flex items-center gap-1">
+                                {renderStars((review.rating_communication + review.rating_reliability + review.rating_friendliness) / 3, 'sm')}
+                              </div>
+                            </div>
+                            <p className="text-xs text-gray-500 mb-2">{formatDate(review.created_at)}</p>
+                            <p className="text-gray-300 text-sm mb-2 leading-snug">{review.comment}</p>
+
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {['helpful', 'accurate', 'supportive'].map((reactionType) => {
+                                const count = review.reactions[reactionType as keyof typeof review.reactions] as number;
+                                const isActive = review.reactions.user_reaction === reactionType;
+
+                                return (
+                                  <button
+                                    key={reactionType}
+                                    onClick={() => handleReaction(review.id, reactionType)}
+                                    disabled={!currentUser}
+                                    className={`flex items-center gap-1 px-2 py-1 rounded-full transition-all text-xs ${
+                                      isActive
+                                        ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+                                        : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                                    } border`}
+                                  >
+                                    {getReactionIcon(reactionType)}
+                                    <span className="text-xs">{getReactionLabel(reactionType)}</span>
+                                    {count > 0 && (
+                                      <span className="text-xs font-semibold">{count}</span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
