@@ -1145,61 +1145,65 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Min. godina</label>
-                  <input
-                    type="number"
-                    value={preferences.min_year || ''}
-                    onChange={(e) => {
-                      const value = e.target.value === '' ? 0 : parseInt(e.target.value);
-                      setPreferences({ ...preferences, min_year: value });
-                    }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Max. godina</label>
-                  <input
-                    type="number"
-                    value={preferences.max_year || ''}
-                    onChange={(e) => {
-                      const value = e.target.value === '' ? 0 : parseInt(e.target.value);
-                      setPreferences({ ...preferences, max_year: value });
-                    }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
+              {preferences.preferred_vehicle_type !== 'Razno' && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Min. godina</label>
+                      <input
+                        type="number"
+                        value={preferences.min_year || ''}
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                          setPreferences({ ...preferences, min_year: value });
+                        }}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Max. godina</label>
+                      <input
+                        type="number"
+                        value={preferences.max_year || ''}
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                          setPreferences({ ...preferences, max_year: value });
+                        }}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Max. kilometraža</label>
-                <input
-                  type="number"
-                  value={preferences.max_mileage || ''}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? 0 : parseInt(e.target.value);
-                    setPreferences({ ...preferences, max_mileage: value });
-                  }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Max. kilometraža</label>
+                    <input
+                      type="number"
+                      value={preferences.max_mileage || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                        setPreferences({ ...preferences, max_mileage: value });
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Razlika u cijeni (koliko ste spremni doplatiti €)
-                </label>
-                <input
-                  type="number"
-                  value={preferences.price_difference || ''}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? 0 : parseInt(e.target.value);
-                    setPreferences({ ...preferences, price_difference: value });
-                  }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Razlika u cijeni (koliko ste spremni doplatiti €)
+                    </label>
+                    <input
+                      type="number"
+                      value={preferences.price_difference || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                        setPreferences({ ...preferences, price_difference: value });
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="0"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

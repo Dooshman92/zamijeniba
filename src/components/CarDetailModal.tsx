@@ -627,7 +627,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                     </div>
                   </div>
 
-                  {(car.swap_preference.min_year || car.swap_preference.max_year) && (
+                  {car.swap_preference.preferred_vehicle_type !== 'Razno' && (car.swap_preference.min_year || car.swap_preference.max_year) && (
                     <div className="grid grid-cols-2 gap-3">
                       {car.swap_preference.min_year && (
                         <div>
@@ -644,14 +644,14 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                     </div>
                   )}
 
-                  {car.swap_preference.max_mileage > 0 && (
+                  {car.swap_preference.preferred_vehicle_type !== 'Razno' && car.swap_preference.max_mileage > 0 && (
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Max. kilometraža</p>
                       <p className="text-sm font-bold text-white">{car.swap_preference.max_mileage.toLocaleString()} km</p>
                     </div>
                   )}
 
-                  {car.swap_preference.price_difference > 0 && (
+                  {car.swap_preference.preferred_vehicle_type !== 'Razno' && car.swap_preference.price_difference > 0 && (
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Spreman/a doplatiti</p>
                       <p className="text-sm font-bold text-green-400">{car.swap_preference.price_difference.toLocaleString()} KM</p>
