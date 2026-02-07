@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
-import { X, Send, User, Phone, Mail, Image as ImageIcon, ExternalLink, Car as CarIcon, Ban, Unlock } from 'lucide-react';
+import { X, Send, User, Phone, Mail, Image as ImageIcon, ExternalLink, Car as CarIcon, Ban, Unlock, Star } from 'lucide-react';
 import { supabase, Message, UserProfile, Car } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { CarDetailModal } from './CarDetailModal';
+import { UserReviewModal } from './UserReviewModal';
 
 interface DirectChatModalProps {
   conversationId: string;
@@ -23,6 +24,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedCarId, setSelectedCarId] = useState<string | null>(null);
   const [blockedByUserId, setBlockedByUserId] = useState<string | null>(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
@@ -438,6 +440,14 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
 
           <div className="flex items-center gap-2 ml-auto">
             <button
+              onClick={() => setShowReviewModal(true)}
+              className="p-2 rounded-lg transition-all duration-300 hover:scale-110 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400"
+              title="Ostavi dojam"
+            >
+              <Star className="w-4 h-4" />
+            </button>
+
+            <button
               onClick={toggleBlockConversation}
               className={`p-2 rounded-lg transition-all duration-300 hover:scale-110 ${
                 blockedByUserId
@@ -612,6 +622,15 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
             onClose={() => setSelectedCarId(null)}
           />
         )}
+        {showReviewModal && otherUserProfile && (
+          <UserReviewModal
+            reviewedUserId={otherUserId}
+            reviewedUserNickname={otherUserProfile.nickname || otherUserProfile.email?.split('@')[0] || 'Korisnik'}
+            conversationId={conversationId}
+            onClose={() => setShowReviewModal(false)}
+            onReviewSubmitted={() => setShowReviewModal(false)}
+          />
+        )}
       </>
     );
   }
@@ -627,6 +646,15 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
         <CarDetailModal
           carId={selectedCarId}
           onClose={() => setSelectedCarId(null)}
+        />
+      )}
+      {showReviewModal && otherUserProfile && (
+        <UserReviewModal
+          reviewedUserId={otherUserId}
+          reviewedUserNickname={otherUserProfile.nickname || otherUserProfile.email?.split('@')[0] || 'Korisnik'}
+          conversationId={conversationId}
+          onClose={() => setShowReviewModal(false)}
+          onReviewSubmitted={() => setShowReviewModal(false)}
         />
       )}
     </>
