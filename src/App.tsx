@@ -26,6 +26,7 @@ const UserProfileModal = lazy(() => import('./components/UserProfileModal').then
 const CarDetailModal = lazy(() => import('./components/CarDetailModal').then(m => ({ default: m.CarDetailModal })));
 const SupportModal = lazy(() => import('./components/SupportModal').then(m => ({ default: m.SupportModal })));
 const AboutModal = lazy(() => import('./components/AboutModal').then(m => ({ default: m.AboutModal })));
+const TermsModal = lazy(() => import('./components/TermsModal').then(m => ({ default: m.TermsModal })));
 
 function App() {
   const [cars, setCars] = useState<Car[]>([]);
@@ -43,6 +44,7 @@ function App() {
   const [showSupport, setShowSupport] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showDirectChat, setShowDirectChat] = useState(false);
@@ -1331,6 +1333,12 @@ function App() {
               onClose={() => setShowAbout(false)}
             />
           )}
+
+          {showTerms && (
+            <TermsModal
+              onClose={() => setShowTerms(false)}
+            />
+          )}
         </Suspense>
 
         <footer className="border-t border-white/10 backdrop-blur-md bg-white/5 py-12 mt-20">
@@ -1390,6 +1398,13 @@ function App() {
                     className="text-gray-400 hover:text-cyan-400 transition-colors font-medium"
                   >
                     O nama
+                  </button>
+                  <span className="text-gray-600">|</span>
+                  <button
+                    onClick={() => setShowTerms(true)}
+                    className="text-gray-400 hover:text-cyan-400 transition-colors font-medium"
+                  >
+                    Uslovi korištenja
                   </button>
                 </div>
 
