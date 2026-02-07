@@ -295,19 +295,39 @@ export function SupportPanel({ onClose }: SupportPanelProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl p-4 shadow-sm">
+        <div
+          onClick={() => setStatusFilter('all')}
+          className={`bg-gradient-to-br from-gray-50 to-gray-100 border-2 rounded-xl p-4 shadow-sm cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
+            statusFilter === 'all' ? 'border-gray-500 ring-2 ring-gray-400' : 'border-gray-200'
+          }`}
+        >
           <p className="text-gray-600 text-sm font-semibold mb-1">Ukupno</p>
           <p className="text-3xl font-black text-gray-800">{stats.total}</p>
         </div>
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-300 rounded-xl p-4 shadow-sm">
+        <div
+          onClick={() => setStatusFilter('pending')}
+          className={`bg-gradient-to-br from-orange-50 to-orange-100 border-2 rounded-xl p-4 shadow-sm cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
+            statusFilter === 'pending' ? 'border-orange-500 ring-2 ring-orange-400' : 'border-orange-300'
+          }`}
+        >
           <p className="text-orange-700 text-sm font-semibold mb-1">Na čekanju</p>
           <p className="text-3xl font-black text-orange-600">{stats.pending}</p>
         </div>
-        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-xl p-4 shadow-sm">
+        <div
+          onClick={() => setStatusFilter('open')}
+          className={`bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 rounded-xl p-4 shadow-sm cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
+            statusFilter === 'open' ? 'border-yellow-500 ring-2 ring-yellow-400' : 'border-yellow-300'
+          }`}
+        >
           <p className="text-yellow-700 text-sm font-semibold mb-1">Otvoreno</p>
           <p className="text-3xl font-black text-yellow-600">{stats.open}</p>
         </div>
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-4 shadow-sm">
+        <div
+          onClick={() => setStatusFilter('closed')}
+          className={`bg-gradient-to-br from-gray-50 to-gray-100 border-2 rounded-xl p-4 shadow-sm cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
+            statusFilter === 'closed' ? 'border-gray-500 ring-2 ring-gray-400' : 'border-gray-300'
+          }`}
+        >
           <p className="text-gray-700 text-sm font-semibold mb-1">Zatvoreno</p>
           <p className="text-3xl font-black text-gray-600">{stats.closed}</p>
         </div>
