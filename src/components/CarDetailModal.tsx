@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, Clock, Zap, AlertTriangle, Phone, Trash2 } from 'lucide-react';
+import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, AlertTriangle, Phone, Trash2 } from 'lucide-react';
 import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
-import { PremiumBadge } from './PremiumBadge';
 
 interface CarDetailModalProps {
   car?: Car;
@@ -216,29 +215,6 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
     }
   };
 
-  const getRemainingFeaturedTime = () => {
-    if (!car?.is_featured || !car?.featured_until) return null;
-
-    const now = new Date();
-    const featuredUntil = new Date(car.featured_until);
-    const diffMs = featuredUntil.getTime() - now.getTime();
-
-    if (diffMs <= 0) return null;
-
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const diffDays = Math.floor(diffHours / 24);
-    const remainingHours = diffHours % 24;
-
-    if (diffDays > 0) {
-      return `${diffDays}d ${remainingHours}h`;
-    } else if (diffHours > 0) {
-      return `${diffHours}h ${diffMinutes}m`;
-    } else {
-      return `${diffMinutes}m`;
-    }
-  };
-
   const handleReportCar = async () => {
     if (!user) {
       alert('Morate biti prijavljeni da biste prijavili oglas');
@@ -403,21 +379,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                     <h3 className="text-4xl font-black text-white">
                       {car.brand} {car.model}
                     </h3>
-                    {isOwnCar && car.is_featured && (
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 border border-yellow-500 rounded-lg">
-                        <Zap className="w-4 h-4 text-yellow-500" />
-                        <span className="text-yellow-500 font-bold text-sm">Istaknut</span>
-                      </div>
-                    )}
                   </div>
-                  {isOwnCar && car.is_featured && getRemainingFeaturedTime() && (
-                    <div className="mb-3 px-3 py-1.5 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-lg inline-flex items-center gap-2">
-                      <Clock className="w-3 h-3 text-yellow-400" />
-                      <span className="text-yellow-300 font-semibold text-xs">
-                        Preostalo: {getRemainingFeaturedTime()}
-                      </span>
-                    </div>
-                  )}
                   <div className="flex items-center gap-2 text-sm">
                     <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
                     <span className="text-gray-400">Vlasnik: </span>

@@ -3,7 +3,6 @@ import { X, Car as CarIcon, User, MapPin, Star, MessageSquare, Shield, Smile, Th
 import { Car, supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { CarCard } from './CarCard';
-import { PremiumBadge } from './PremiumBadge';
 
 interface UserReview {
   id: string;
@@ -301,11 +300,6 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                         : 'bg-gradient-to-br from-cyan-500 to-blue-600'
                     } flex items-center justify-center border-4 border-white/20 shadow-lg`}>
                       <User className="w-12 h-12 text-white" />
-                    </div>
-                  )}
-                  {userProfile?.is_premium && (
-                    <div className="absolute -bottom-2 -right-2">
-                      <PremiumBadge size="sm" />
                     </div>
                   )}
                 </div>
