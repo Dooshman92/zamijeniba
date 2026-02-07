@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
-import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap, Headset, Bike, Ship, Waves } from 'lucide-react';
+import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap, Headset, Bike, Ship, Waves, Bell } from 'lucide-react';
 import { Car, supabase, UserProfile } from './lib/supabase';
 import { useAuth } from './lib/auth';
 import { initializeStorage } from './lib/storage';
@@ -27,6 +27,7 @@ const CarDetailModal = lazy(() => import('./components/CarDetailModal').then(m =
 const SupportModal = lazy(() => import('./components/SupportModal').then(m => ({ default: m.SupportModal })));
 const AboutModal = lazy(() => import('./components/AboutModal').then(m => ({ default: m.AboutModal })));
 const TermsModal = lazy(() => import('./components/TermsModal').then(m => ({ default: m.TermsModal })));
+const NotificationsPanel = lazy(() => import('./components/NotificationsPanel').then(m => ({ default: m.NotificationsPanel })));
 
 function App() {
   const [cars, setCars] = useState<Car[]>([]);
@@ -55,6 +56,8 @@ function App() {
   const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
   const [offersUnreadCount, setOffersUnreadCount] = useState(0);
   const [supportUnreadCount, setSupportUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationsUnreadCount, setNotificationsUnreadCount] = useState(0);
   const [selectedCarForSwap, setSelectedCarForSwap] = useState<Car | null>(null);
   const [activeTab, setActiveTab] = useState<'cars' | 'offers'>('cars');
   const [selectedVehicleCategory, setSelectedVehicleCategory] = useState<string | null>(null);
@@ -139,6 +142,21 @@ function App() {
     setSupportUnreadCount(count ?? 0);
   };
 
+  const fetchNotificationsUnreadCount = async () => {
+    if (!user) {
+      setNotificationsUnreadCount(0);
+      return;
+    }
+
+    const { count } = await supabase
+      .from('system_notifications')
+      .select('*', { count: 'exact', head: true })
+      .or(`user_id.is.null,user_id.eq.${user.id}`)
+      .eq('is_read', false);
+
+    setNotificationsUnreadCount(count ?? 0);
+  };
+
   const loadSystemSettings = async () => {
     const { data: creditsData, error: creditsError } = await supabase
       .from('system_settings')
@@ -204,6 +222,7 @@ function App() {
       fetchUserProfile();
       fetchUnreadCount();
       fetchSupportUnreadCount();
+      fetchNotificationsUnreadCount();
 
       const unreadChannel = supabase
         .channel('unread-count-changes')
@@ -256,16 +275,33 @@ function App() {
         )
         .subscribe();
 
+      const notificationsChannel = supabase
+        .channel('notifications-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'system_notifications',
+          },
+          () => {
+            fetchNotificationsUnreadCount();
+          }
+        )
+        .subscribe();
+
       return () => {
         supabase.removeChannel(unreadChannel);
         supabase.removeChannel(messagesChannel);
         supabase.removeChannel(supportChannel);
+        supabase.removeChannel(notificationsChannel);
       };
     } else {
       setUserProfile(null);
       setInboxUnreadCount(0);
       setOffersUnreadCount(0);
       setSupportUnreadCount(0);
+      setNotificationsUnreadCount(0);
     }
   }, [user]);
 
@@ -599,6 +635,18 @@ function App() {
                       {offersUnreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center animate-pulse text-[10px] sm:text-xs">
                           {offersUnreadCount > 9 ? '9+' : offersUnreadCount}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setShowNotifications(true)}
+                      className="relative backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-2 sm:px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      title="Obavještenja"
+                    >
+                      <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+                      {notificationsUnreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center animate-pulse text-[10px] sm:text-xs">
+                          {notificationsUnreadCount > 9 ? '9+' : notificationsUnreadCount}
                         </span>
                       )}
                     </button>
@@ -1337,6 +1385,12 @@ function App() {
           {showTerms && (
             <TermsModal
               onClose={() => setShowTerms(false)}
+            />
+          )}
+
+          {showNotifications && (
+            <NotificationsPanel
+              onClose={() => setShowNotifications(false)}
             />
           )}
         </Suspense>

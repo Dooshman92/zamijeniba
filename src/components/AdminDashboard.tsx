@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserX, Car, Ticket, TrendingUp, MessageSquare,
   RefreshCw, Shield, Crown, Package, Search, Filter,
-  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus, ShieldCheck, AlertTriangle, Trash2, Power, Headset
+  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus, ShieldCheck, AlertTriangle, Trash2, Power, Headset, Bell
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDate } from '../lib/dateUtils';
 import { SupportPanel } from './SupportPanel';
 import AdvertisementsPanel from './AdvertisementsPanel';
+import { NotificationsAdminPanel } from './NotificationsAdminPanel';
 
-type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports' | 'support' | 'advertisements';
+type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports' | 'support' | 'advertisements' | 'notifications';
 
 interface UserProfile {
   id: string;
@@ -1816,6 +1817,22 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                   <TrendingUp className="w-5 h-5" />
                   <span className="font-medium">Reklame</span>
                 </button>
+
+                <button
+                  onClick={() => {
+                    setActiveSection('notifications');
+                    setSearchTerm('');
+                    setCurrentPage(1);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    activeSection === 'notifications'
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="font-medium">Obavještenja</span>
+                </button>
               </>
             )}
           </div>
@@ -1845,6 +1862,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
           {activeSection === 'promo' && renderPromoCodes()}
           {activeSection === 'support' && <SupportPanel onClose={() => {}} />}
           {activeSection === 'advertisements' && <AdvertisementsPanel onClose={() => {}} />}
+          {activeSection === 'notifications' && <NotificationsAdminPanel />}
         </div>
       </div>
     </div>
