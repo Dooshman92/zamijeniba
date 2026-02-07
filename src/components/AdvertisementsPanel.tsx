@@ -96,6 +96,13 @@ export default function AdvertisementsPanel({ onClose }: AdvertisementsPanelProp
         .getPublicUrl(fileName);
 
       setFormData({ ...formData, image_url: publicUrl });
+
+      setTimeout(() => {
+        const submitButton = document.querySelector('button[type="submit"]');
+        if (submitButton) {
+          submitButton.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }, 100);
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Greška pri upload-u slike');

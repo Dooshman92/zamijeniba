@@ -512,7 +512,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
 
         <div className="overflow-y-auto max-h-[calc(90vh-120px)] px-6 py-4">
           {activeTab === 'ads' && (
-            <div className="-mx-6 -my-4">
+            <div>
               <AdvertisementsPanel onClose={() => {}} />
             </div>
           )}

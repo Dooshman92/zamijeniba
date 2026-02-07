@@ -1547,9 +1547,9 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-64 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 bg-gradient-to-br ${
@@ -1574,7 +1574,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
           </div>
         </div>
 
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 overflow-y-auto">
           <div className="space-y-1">
             {userProfile?.is_admin && (
               <>
