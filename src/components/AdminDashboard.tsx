@@ -7,7 +7,6 @@ import {
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDate } from '../lib/dateUtils';
-import { FEATURES } from '../config/features';
 
 type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'premium' | 'swaps' | 'inquiries';
 
@@ -91,7 +90,7 @@ export default function AdminDashboard() {
       loadBannedUsers();
     } else if (activeSection === 'cars') {
       loadCars();
-    } else if (FEATURES.PREMIUM_ENABLED && activeSection === 'promo') {
+    } else if (activeSection === 'promo') {
       loadPromoCodes();
     }
   }, [activeSection]);
@@ -429,18 +428,16 @@ export default function AdminDashboard() {
               <p className="text-sm text-green-200 mt-1">{stats.activeCars} aktivnih</p>
             </div>
 
-            {FEATURES.PREMIUM_ENABLED && (
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white">
-                <div className="flex items-center justify-between mb-2">
-                  <Crown className="w-8 h-8 opacity-80" />
-                  <span className="text-3xl font-bold">{stats.premiumUsers}</span>
-                </div>
-                <p className="text-purple-100">Premium Korisnika</p>
-                <p className="text-sm text-purple-200 mt-1">
-                  {((stats.premiumUsers / stats.totalUsers) * 100).toFixed(1)}% od ukupno
-                </p>
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white">
+              <div className="flex items-center justify-between mb-2">
+                <Crown className="w-8 h-8 opacity-80" />
+                <span className="text-3xl font-bold">{stats.premiumUsers}</span>
               </div>
-            )}
+              <p className="text-purple-100">Premium Korisnika</p>
+              <p className="text-sm text-purple-200 mt-1">
+                {((stats.premiumUsers / stats.totalUsers) * 100).toFixed(1)}% od ukupno
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -502,20 +499,18 @@ export default function AdminDashboard() {
                   {((stats.activeCars / stats.totalCars) * 100).toFixed(1)}%
                 </span>
               </div>
-              <div className={`flex items-center justify-between py-2 ${FEATURES.PREMIUM_ENABLED ? 'border-b border-gray-100' : ''}`}>
+              <div className="flex items-center justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">Prodato/Ukupno Automobila</span>
                 <span className="font-semibold text-gray-900">
                   {((stats.soldCars / stats.totalCars) * 100).toFixed(1)}%
                 </span>
               </div>
-              {FEATURES.PREMIUM_ENABLED && (
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-gray-600">Premium Adoption Rate</span>
-                  <span className="font-semibold text-gray-900">
-                    {((stats.premiumUsers / stats.totalUsers) * 100).toFixed(1)}%
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center justify-between py-2">
+                <span className="text-gray-600">Premium Adoption Rate</span>
+                <span className="font-semibold text-gray-900">
+                  {((stats.premiumUsers / stats.totalUsers) * 100).toFixed(1)}%
+                </span>
+              </div>
             </div>
           </div>
         </>
@@ -577,9 +572,7 @@ export default function AdminDashboard() {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Korisnik</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Kontakt</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                      {FEATURES.PREMIUM_ENABLED && (
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Krediti</th>
-                      )}
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Krediti</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Datum</th>
                       <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Akcije</th>
                     </tr>
@@ -616,7 +609,7 @@ export default function AdminDashboard() {
                                 Admin
                               </span>
                             )}
-                            {FEATURES.PREMIUM_ENABLED && user.is_premium && (
+                            {user.is_premium && (
                               <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
                                 <Crown className="w-3 h-3" />
                                 Premium
@@ -630,11 +623,9 @@ export default function AdminDashboard() {
                             )}
                           </div>
                         </td>
-                        {FEATURES.PREMIUM_ENABLED && (
-                          <td className="px-4 py-3">
-                            <span className="font-semibold text-gray-900">{user.credits}</span>
-                          </td>
-                        )}
+                        <td className="px-4 py-3">
+                          <span className="font-semibold text-gray-900">{user.credits}</span>
+                        </td>
                         <td className="px-4 py-3 text-sm text-gray-600">
                           {formatDate(user.created_at)}
                         </td>
@@ -642,19 +633,17 @@ export default function AdminDashboard() {
                           <div className="flex items-center justify-end gap-2">
                             {!user.is_admin && (
                               <>
-                                {FEATURES.PREMIUM_ENABLED && (
-                                  <button
-                                    onClick={() => togglePremium(user.id, user.is_premium)}
-                                    className={`p-2 rounded-lg ${
-                                      user.is_premium
-                                        ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                                    title={user.is_premium ? 'Ukloni Premium' : 'Dodaj Premium'}
-                                  >
-                                    <Crown className="w-4 h-4" />
-                                  </button>
-                                )}
+                                <button
+                                  onClick={() => togglePremium(user.id, user.is_premium)}
+                                  className={`p-2 rounded-lg ${
+                                    user.is_premium
+                                      ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                  }`}
+                                  title={user.is_premium ? 'Ukloni Premium' : 'Dodaj Premium'}
+                                >
+                                  <Crown className="w-4 h-4" />
+                                </button>
                                 {user.is_banned ? (
                                   <button
                                     onClick={() => unbanUser(user.id)}
@@ -1173,23 +1162,21 @@ export default function AdminDashboard() {
               <span className="font-medium">Automobili</span>
             </button>
 
-            {FEATURES.PREMIUM_ENABLED && (
-              <button
-                onClick={() => {
-                  setActiveSection('promo');
-                  setSearchTerm('');
-                  setCurrentPage(1);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeSection === 'promo'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <Ticket className="w-5 h-5" />
-                <span className="font-medium">Promo Kodovi</span>
-              </button>
-            )}
+            <button
+              onClick={() => {
+                setActiveSection('promo');
+                setSearchTerm('');
+                setCurrentPage(1);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                activeSection === 'promo'
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Ticket className="w-5 h-5" />
+              <span className="font-medium">Promo Kodovi</span>
+            </button>
           </div>
         </nav>
 
@@ -1213,7 +1200,7 @@ export default function AdminDashboard() {
           {activeSection === 'users' && renderUsers()}
           {activeSection === 'banned' && renderBannedUsers()}
           {activeSection === 'cars' && renderCars()}
-          {FEATURES.PREMIUM_ENABLED && activeSection === 'promo' && renderPromoCodes()}
+          {activeSection === 'promo' && renderPromoCodes()}
         </div>
       </div>
     </div>
