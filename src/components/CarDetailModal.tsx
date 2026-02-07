@@ -694,22 +694,38 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-3">
                   Razlog prijave *
                 </label>
-                <select
-                  value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-orange-500/50"
-                >
-                  <option value="">Izaberite razlog</option>
-                  <option value="Lažan oglas">Lažan oglas</option>
-                  <option value="Neprikladne fotografije">Neprikladne fotografije</option>
-                  <option value="Prevara">Prevara</option>
-                  <option value="Duplikat">Duplikat oglasa</option>
-                  <option value="Netačni podaci">Netačni podaci</option>
-                  <option value="Ostalo">Ostalo</option>
-                </select>
+                <div className="space-y-2">
+                  {[
+                    'Lažan oglas',
+                    'Neprikladne fotografije',
+                    'Prevara',
+                    'Duplikat oglasa',
+                    'Netačni podaci',
+                    'Ostalo'
+                  ].map((reason) => (
+                    <label
+                      key={reason}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all border ${
+                        reportReason === reason
+                          ? 'bg-orange-500/20 border-orange-500/50'
+                          : 'bg-white/5 border-white/10 hover:bg-white/10'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="reportReason"
+                        value={reason}
+                        checked={reportReason === reason}
+                        onChange={(e) => setReportReason(e.target.value)}
+                        className="w-4 h-4 text-orange-500 bg-white/10 border-white/20 focus:ring-orange-500"
+                      />
+                      <span className="text-white">{reason}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div>
