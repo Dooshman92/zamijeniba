@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap, AlertTriangle } from 'lucide-react';
+import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap, Headset } from 'lucide-react';
 import { Car, supabase, UserProfile } from './lib/supabase';
 import { useAuth } from './lib/auth';
 import { initializeStorage } from './lib/storage';
@@ -23,7 +23,6 @@ import { UserProfileModal } from './components/UserProfileModal';
 import { CarDetailModal } from './components/CarDetailModal';
 import { AdvancedFilters, FilterOptions } from './components/AdvancedFilters';
 import { SearchWithAutocomplete } from './components/SearchWithAutocomplete';
-import { ReportsPanel } from './components/ReportsPanel';
 import { SupportModal } from './components/SupportModal';
 import { FEATURES } from './config/features';
 
@@ -37,7 +36,6 @@ function App() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showMyAds, setShowMyAds] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [showReportsPanel, setShowReportsPanel] = useState(false);
   const [showInbox, setShowInbox] = useState(false);
   const [showPromoCode, setShowPromoCode] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
@@ -51,6 +49,7 @@ function App() {
   const [selectedCarForDetail, setSelectedCarForDetail] = useState<Car | null>(null);
   const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
   const [offersUnreadCount, setOffersUnreadCount] = useState(0);
+  const [supportUnreadCount, setSupportUnreadCount] = useState(0);
   const [selectedCarForSwap, setSelectedCarForSwap] = useState<Car | null>(null);
   const [activeTab, setActiveTab] = useState<'cars' | 'offers'>('cars');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -106,6 +105,17 @@ function App() {
     }
   };
 
+  const fetchSupportUnreadCount = async () => {
+    if (!user || !userProfile?.is_admin && !userProfile?.is_moderator) return;
+
+    const { count } = await supabase
+      .from('support_tickets')
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['pending', 'open']);
+
+    setSupportUnreadCount(count || 0);
+  };
+
   const loadSystemSettings = async () => {
     const { data: creditsData, error: creditsError } = await supabase
       .from('system_settings')
@@ -138,6 +148,7 @@ function App() {
     if (user) {
       fetchUserProfile();
       fetchUnreadCount();
+      fetchSupportUnreadCount();
 
       const unreadChannel = supabase
         .channel('unread-count-changes')
@@ -175,16 +186,39 @@ function App() {
         )
         .subscribe();
 
+      const supportChannel = supabase
+        .channel('support-tickets-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'support_tickets',
+          },
+          () => {
+            fetchSupportUnreadCount();
+          }
+        )
+        .subscribe();
+
       return () => {
         supabase.removeChannel(unreadChannel);
         supabase.removeChannel(messagesChannel);
+        supabase.removeChannel(supportChannel);
       };
     } else {
       setUserProfile(null);
       setInboxUnreadCount(0);
       setOffersUnreadCount(0);
+      setSupportUnreadCount(0);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (userProfile && (userProfile.is_admin || userProfile.is_moderator)) {
+      fetchSupportUnreadCount();
+    }
+  }, [userProfile]);
 
   const fetchUserProfile = async () => {
     if (!user) return;
@@ -340,7 +374,6 @@ function App() {
     setShowPremiumModal(false);
     setShowMyAds(false);
     setShowAdminPanel(false);
-    setShowReportsPanel(false);
     setShowInbox(false);
     setShowPromoCode(false);
     setShowBuyCredits(false);
@@ -493,11 +526,16 @@ function App() {
                           {userProfile?.is_admin ? <Shield className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
                         </button>
                         <button
-                          onClick={() => setShowReportsPanel(true)}
-                          className="backdrop-blur-md bg-orange-600/80 hover:bg-orange-600 border border-orange-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
-                          title="Prijavljeni oglasi"
+                          onClick={() => setShowAdminPanel(true)}
+                          className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                          title="Podrška korisnicima"
                         >
-                          <AlertTriangle className="w-5 h-5" />
+                          <Headset className="w-5 h-5" />
+                          {supportUnreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                              {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
+                            </span>
+                          )}
                         </button>
                       </>
                     )}
@@ -1048,10 +1086,6 @@ function App() {
             </div>
             <AdminDashboard />
           </div>
-        )}
-
-        {showReportsPanel && (userProfile?.is_admin || userProfile?.is_moderator) && (
-          <ReportsPanel onClose={() => setShowReportsPanel(false)} />
         )}
 
         {showInbox && user && (
