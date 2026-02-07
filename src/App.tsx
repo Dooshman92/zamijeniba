@@ -490,21 +490,6 @@ function App() {
                         >
                           {userProfile?.is_admin ? <Shield className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
                         </button>
-                        <button
-                          onClick={() => {
-                            setAdminPanelSection('support');
-                            setShowAdminPanel(true);
-                          }}
-                          className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
-                          title="Podrška korisnicima"
-                        >
-                          <Headset className="w-5 h-5" />
-                          {supportUnreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                              {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
-                            </span>
-                          )}
-                        </button>
                       </>
                     )}
                     <button
@@ -526,20 +511,6 @@ function App() {
                         </span>
                       )}
                     </button>
-                    {!userProfile?.is_admin && !userProfile?.is_moderator && (
-                      <button
-                        onClick={() => setShowSupport(true)}
-                        className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
-                        title="Podrška korisnicima"
-                      >
-                        <Headset className="w-5 h-5" />
-                        {supportUnreadCount > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                            {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
-                          </span>
-                        )}
-                      </button>
-                    )}
                     <button
                       onClick={signOut}
                       className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
@@ -1184,12 +1155,36 @@ function App() {
         )}
 
         <footer className="border-t border-white/10 backdrop-blur-md bg-white/5 py-12 mt-20">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <div className="flex items-center justify-center mb-4">
-              <Logo size="md" />
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center justify-between mb-4">
+              {user && (
+                <button
+                  onClick={() => {
+                    if (userProfile?.is_admin || userProfile?.is_moderator) {
+                      setAdminPanelSection('support');
+                      setShowAdminPanel(true);
+                    } else {
+                      setShowSupport(true);
+                    }
+                  }}
+                  className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                >
+                  <Headset className="w-5 h-5" />
+                  <span>Podrška korisnicima</span>
+                  {supportUnreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                      {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
+                    </span>
+                  )}
+                </button>
+              )}
+              <div className="flex items-center justify-center flex-1">
+                <Logo size="md" />
+              </div>
+              <div className="w-[200px]"></div>
             </div>
-            <p className="text-gray-400">autozamjena.ba © 2026 - Najbolja platforma za zamjenu automobila u BiH</p>
-            <p className="text-sm text-gray-500 mt-2">Brzo. Sigurno. Jednostavno.</p>
+            <p className="text-gray-400 text-center">autozamjena.ba © 2026 - Najbolja platforma za zamjenu automobila u BiH</p>
+            <p className="text-sm text-gray-500 mt-2 text-center">Brzo. Sigurno. Jednostavno.</p>
           </div>
         </footer>
       </div>
