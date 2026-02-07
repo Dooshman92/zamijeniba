@@ -237,7 +237,9 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
                     <span className={`text-xs ${getPriorityColor(ticket.priority)}`}>
                       {ticket.priority}
                     </span>
-                    <span className="text-xs text-gray-500">{formatDateTime(ticket.created_at)}</span>
+                    <span className="text-xs text-gray-500">
+                      Kreirano {formatDateTime(ticket.created_at)}
+                    </span>
                   </div>
                 </div>
               ))}
