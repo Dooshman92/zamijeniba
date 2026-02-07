@@ -75,24 +75,18 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
       .select('id')
       .eq('user_id', user.id);
 
-    const { data: ownerCars } = await supabase
-      .from('cars')
-      .select('id')
-      .eq('user_id', car.user_id);
-
-    if (!userCars?.length || !ownerCars?.length) {
+    if (!userCars?.length) {
       setPhoneRevealed(false);
       return;
     }
 
     const userCarIds = userCars.map(c => c.id);
-    const ownerCarIds = ownerCars.map(c => c.id);
 
     const { data: acceptedOffers } = await supabase
       .from('swap_offers')
       .select('id')
       .eq('status', 'accepted')
-      .or(`and(car_id.in.(${ownerCarIds.join(',')}),offered_car_id.in.(${userCarIds.join(',')})),and(car_id.in.(${userCarIds.join(',')}),offered_car_id.in.(${ownerCarIds.join(',')}))`);
+      .or(`and(car_id.eq.${car.id},offered_car_id.in.(${userCarIds.join(',')})),and(offered_car_id.eq.${car.id},car_id.in.(${userCarIds.join(',')}))`);
 
     setPhoneRevealed(!!acceptedOffers && acceptedOffers.length > 0);
   };
