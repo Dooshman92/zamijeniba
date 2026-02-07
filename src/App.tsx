@@ -688,7 +688,7 @@ function App() {
                     const featuredCars = filteredCars.filter(car =>
                       car.is_featured && (!car.featured_until || new Date(car.featured_until) > now)
                     );
-                    return featuredCars.length > 0 && (
+                    return premiumEnabled && featuredCars.length > 0 && (
                       <div className="mb-8">
                         <div className="relative mb-6">
                           <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-orange-500/20 to-yellow-500/20 rounded-2xl blur-2xl"></div>
@@ -726,7 +726,7 @@ function App() {
                       const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
                       return !isFeatured && car.owner_is_premium;
                     });
-                    return premiumCars.length > 0 && (
+                    return premiumEnabled && premiumCars.length > 0 && (
                       <div className="mb-8">
                         <div className="relative mb-6">
                           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-yellow-500/20 rounded-2xl blur-2xl"></div>
@@ -798,7 +798,7 @@ function App() {
                     const featuredCars = filteredCars.filter(car =>
                       car.is_featured && (!car.featured_until || new Date(car.featured_until) > now)
                     );
-                    return featuredCars.length > 0 && (
+                    return premiumEnabled && featuredCars.length > 0 && (
                       <div className="mb-16">
                         <div className="relative mb-8">
                           <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-orange-500/20 to-yellow-500/20 rounded-3xl blur-3xl"></div>
@@ -838,7 +838,7 @@ function App() {
                       const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
                       return !isFeatured && car.owner_is_premium;
                     });
-                    return premiumCars.length > 0 && (
+                    return premiumEnabled && premiumCars.length > 0 && (
                       <div className="mb-16">
                         <div className="relative mb-8">
                           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-yellow-500/20 rounded-3xl blur-3xl"></div>
