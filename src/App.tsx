@@ -107,16 +107,21 @@ function App() {
   };
 
   const fetchSupportUnreadCount = async () => {
-    if (!user || !userProfile?.is_admin && !userProfile?.is_moderator) {
+    if (!user) {
       setSupportUnreadCount(0);
       return;
     }
 
-    const { count } = await supabase
+    let query = supabase
       .from('support_tickets')
       .select('*', { count: 'exact', head: true })
       .in('status', ['pending', 'open']);
 
+    if (!userProfile?.is_admin && !userProfile?.is_moderator) {
+      query = query.eq('user_id', user.id);
+    }
+
+    const { count } = await query;
     setSupportUnreadCount(count ?? 0);
   };
 
@@ -219,7 +224,7 @@ function App() {
   }, [user]);
 
   useEffect(() => {
-    if (userProfile && (userProfile.is_admin || userProfile.is_moderator)) {
+    if (userProfile) {
       fetchSupportUnreadCount();
     }
   }, [userProfile]);
@@ -579,10 +584,15 @@ function App() {
                     {!userProfile?.is_admin && !userProfile?.is_moderator && (
                       <button
                         onClick={() => setShowSupport(true)}
-                        className="backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                        className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                         title="Podrška korisnicima"
                       >
                         <MessageCircle className="w-5 h-5" />
+                        {supportUnreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                            {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
+                          </span>
+                        )}
                       </button>
                     )}
                     <button
