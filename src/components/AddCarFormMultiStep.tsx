@@ -548,19 +548,21 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Pogon</label>
-                  <select
-                    value={formData.drive_type}
-                    onChange={(e) => setFormData({ ...formData, drive_type: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Odaberi</option>
-                    {driveTypes.map((drive) => (
-                      <option key={drive} value={drive}>{drive}</option>
-                    ))}
-                  </select>
-                </div>
+                {formData.vehicle_type === 'automobil' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Pogon</label>
+                    <select
+                      value={formData.drive_type}
+                      onChange={(e) => setFormData({ ...formData, drive_type: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Odaberi</option>
+                      {driveTypes.map((drive) => (
+                        <option key={drive} value={drive}>{drive}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Boja *</label>
@@ -591,42 +593,93 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Zapremina motora</label>
-                  <input
-                    type="text"
-                    placeholder="npr. 2.0L"
-                    value={formData.engine_size}
-                    onChange={(e) => setFormData({ ...formData, engine_size: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                {(formData.vehicle_type === 'motocikl' || formData.vehicle_type === 'quad') && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Zapremina motora (cm³)</label>
+                    <input
+                      type="number"
+                      placeholder="npr. 600"
+                      value={formData.engine_displacement || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? '' : parseInt(e.target.value);
+                        setFormData({ ...formData, engine_displacement: value });
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Broj vrata</label>
-                  <input
-                    type="number"
-                    value={formData.doors}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      setFormData({ ...formData, doors: isNaN(value) ? 4 : value });
-                    }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                {formData.vehicle_type === 'automobil' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Zapremina motora</label>
+                    <input
+                      type="text"
+                      placeholder="npr. 2.0L"
+                      value={formData.engine_size}
+                      onChange={(e) => setFormData({ ...formData, engine_size: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Broj sjedišta</label>
-                  <input
-                    type="number"
-                    value={formData.seats}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      setFormData({ ...formData, seats: isNaN(value) ? 5 : value });
-                    }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                {formData.vehicle_type === 'jetski' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Materijal trupa</label>
+                    <input
+                      type="text"
+                      placeholder="npr. Fiberglas"
+                      value={formData.hull_material}
+                      onChange={(e) => setFormData({ ...formData, hull_material: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
+
+                {formData.vehicle_type === 'motorne_sanke' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Dužina gusenice (cm)</label>
+                    <input
+                      type="number"
+                      placeholder="npr. 380"
+                      value={formData.track_length || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? '' : parseInt(e.target.value);
+                        setFormData({ ...formData, track_length: value });
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
+
+                {formData.vehicle_type === 'automobil' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Broj vrata</label>
+                    <input
+                      type="number"
+                      value={formData.doors}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        setFormData({ ...formData, doors: isNaN(value) ? 4 : value });
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
+
+                {(formData.vehicle_type === 'automobil' || formData.vehicle_type === 'quad') && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Broj sjedišta</label>
+                    <input
+                      type="number"
+                      value={formData.seats}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        setFormData({ ...formData, seats: isNaN(value) ? (formData.vehicle_type === 'quad' ? 1 : 5) : value });
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
 
               </div>
 
