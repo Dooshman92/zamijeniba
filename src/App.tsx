@@ -455,54 +455,6 @@ function App() {
               <div className="flex items-center gap-3">
                 {user ? (
                   <>
-                    <div className="hidden sm:flex items-center gap-3 backdrop-blur-md bg-white/10 border border-white/20 px-4 py-2 rounded-xl">
-                      {userProfile?.avatar_url ? (
-                        <img
-                          src={userProfile.avatar_url}
-                          alt="Avatar"
-                          className="w-8 h-8 rounded-full object-cover border-2 border-cyan-400"
-                        />
-                      ) : (
-                        <div className={`w-8 h-8 rounded-full ${
-                          userProfile?.gender === 'female'
-                            ? 'bg-gradient-to-br from-pink-500 to-pink-600'
-                            : userProfile?.gender === 'male'
-                            ? 'bg-gradient-to-br from-blue-500 to-blue-600'
-                            : 'bg-gradient-to-br from-cyan-500 to-blue-600'
-                        } flex items-center justify-center`}>
-                          {userProfile?.gender === 'female' ? (
-                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
-                            </svg>
-                          ) : userProfile?.gender === 'male' ? (
-                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
-                            </svg>
-                          ) : (
-                            <User className="w-5 h-5 text-white" />
-                          )}
-                        </div>
-                      )}
-                      <div className="flex flex-col">
-                        {userProfile?.nickname && (
-                          <span className="text-sm font-bold text-white">@{userProfile.nickname}</span>
-                        )}
-                        <span className="text-xs text-gray-400">{user.email}</span>
-                        {premiumEnabled && !userProfile?.is_premium && creditsEnabled && (
-                          <button
-                            onClick={() => setShowBuyCredits(true)}
-                            className="text-xs text-green-400 font-semibold flex items-center gap-1 mt-0.5 hover:text-green-300 transition-colors"
-                            title="Kupi kredite"
-                          >
-                            <Coins className="w-3 h-3" />
-                            {userProfile?.credits || 0} kredita
-                          </button>
-                        )}
-                      </div>
-                      {premiumEnabled && userProfile?.is_premium && (
-                        <PremiumBadge size="sm" onClick={() => setShowPremiumModal(true)} />
-                      )}
-                    </div>
                     {premiumEnabled && !userProfile?.is_premium && (
                       <>
                         <button
@@ -574,13 +526,6 @@ function App() {
                         </span>
                       )}
                     </button>
-                    <button
-                      onClick={() => setShowProfileEdit(true)}
-                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
-                      title="Uredi profil"
-                    >
-                      <Settings className="w-5 h-5" />
-                    </button>
                     {!userProfile?.is_admin && !userProfile?.is_moderator && (
                       <button
                         onClick={() => setShowSupport(true)}
@@ -601,6 +546,39 @@ function App() {
                       title="Odjavi se"
                     >
                       <LogOut className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setShowProfileEdit(true)}
+                      className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white p-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      title="Profil"
+                    >
+                      {userProfile?.avatar_url ? (
+                        <img
+                          src={userProfile.avatar_url}
+                          alt="Avatar"
+                          className="w-10 h-10 rounded-full object-cover border-2 border-cyan-400"
+                        />
+                      ) : (
+                        <div className={`w-10 h-10 rounded-full ${
+                          userProfile?.gender === 'female'
+                            ? 'bg-gradient-to-br from-pink-500 to-pink-600'
+                            : userProfile?.gender === 'male'
+                            ? 'bg-gradient-to-br from-blue-500 to-blue-600'
+                            : 'bg-gradient-to-br from-cyan-500 to-blue-600'
+                        } flex items-center justify-center`}>
+                          {userProfile?.gender === 'female' ? (
+                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
+                            </svg>
+                          ) : userProfile?.gender === 'male' ? (
+                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2a5 5 0 105 5 5 5 0 00-5-5zm0 8a3 3 0 113-3 3 3 0 01-3 3zM12 11c-4.42 0-8 2.69-8 6v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-3.31-3.58-6-8-6z"/>
+                            </svg>
+                          ) : (
+                            <User className="w-6 h-6 text-white" />
+                          )}
+                        </div>
+                      )}
                     </button>
                   </>
                 ) : (
