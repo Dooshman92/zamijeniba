@@ -90,8 +90,29 @@ export function TermsModal({ onClose }: TermsModalProps) {
                   </p>
                 </div>
 
+                <div>
+                  <h4 className="text-lg font-bold text-white mb-2">9. Recenzije korisnika</h4>
+                  <p className="mb-3">
+                    Sistem recenzija korisnika omogućava transparentnu i pouzdanu razmjenu iskustava između članova zajednice. Svaki korisnik ima javno vidljiv profil sa prikazom prosječne ocjene i broja recenzija, što pomaže u izgradnji povjerenja i reputacije na platformi.
+                  </p>
+                  <div className="space-y-2 pl-4">
+                    <p className="text-sm">
+                      <span className="text-cyan-400 font-semibold">Kako sistem radi:</span> Nakon što dvoje korisnika uspostave komunikaciju putem internog sistema poruka (razmijene najmanje jednu poruku), oboje dobijaju mogućnost da se međusobno recenziraju. Svaki korisnik može ostaviti samo jednu recenziju po drugom korisniku, što sprečava višestruke ili spam recenzije.
+                    </p>
+                    <p className="text-sm">
+                      <span className="text-cyan-400 font-semibold">Ocjene i komentari:</span> Recenzije se sastoje od zvjezdica (ocjena od 1 do 5) i tekstualnog komentara. Prosječna ocjena korisnika se automatski izračunava na osnovu svih primljenih recenzija i javno je vidljiva na profilu. Broj recenzija također je prikazan, pružajući dodatni kontekst o iskustvu korisnika.
+                    </p>
+                    <p className="text-sm">
+                      <span className="text-cyan-400 font-semibold">Pravilnost recenzija:</span> Recenzije moraju biti iskrene, zasnovane na stvarnom iskustvu, i ne smiju sadržavati uvredljiv, diskriminatoran ili lažan sadržaj. Lažne ili zlonamjerne recenzije koje imaju za cilj oštećenje reputacije drugih korisnika predstavljaju ozbiljno kršenje uslova platforme i mogu rezultirati trajnom zabranom naloga.
+                    </p>
+                    <p className="text-sm">
+                      <span className="text-cyan-400 font-semibold">Transparentnost:</span> Sve recenzije su javno vidljive na profilu korisnika i dostupne svim članovima zajednice. Korisnici mogu prijaviti neprikladne recenzije administratorskom timu koji će ih pregledati i po potrebi ukloniti. Sistem recenzija je ključan alat za održavanje visoke etike i povjerenja u zajednici zamjenavozila.ba.
+                    </p>
+                  </div>
+                </div>
+
                 <div className="pt-6 border-t border-gray-700">
-                  <h4 className="text-lg font-bold text-white mb-2">9. Prihvatanje uslova</h4>
+                  <h4 className="text-lg font-bold text-white mb-2">Prihvatanje uslova</h4>
                   <p>
                     Korištenjem platforme zamjenavozila.ba potvrđujete da ste pročitali, razumjeli i u potpunosti prihvatili ove Uslove korištenja. Ako se ne slažete sa bilo kojim dijelom ovih uslova, molimo da ne koristite našu platformu.
                   </p>
