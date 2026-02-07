@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserX, Car, Ticket, TrendingUp, MessageSquare,
   RefreshCw, Shield, Crown, Package, Search, Filter,
-  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus, ShieldCheck
+  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus, ShieldCheck, AlertTriangle, Trash2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDate } from '../lib/dateUtils';
 
-type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'premium' | 'swaps' | 'inquiries';
+type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports';
 
 interface UserProfile {
   id: string;
@@ -69,15 +69,41 @@ interface DashboardStats {
   activePromoCodes: number;
 }
 
+interface Report {
+  id: string;
+  car_id: string | null;
+  reported_by: string;
+  reported_user_id: string | null;
+  reason: string;
+  description: string;
+  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  resolution_notes: string | null;
+  created_at: string;
+  reporter: {
+    nickname: string;
+  } | null;
+  reported_user: {
+    nickname: string;
+  } | null;
+  car: {
+    brand: string;
+    model: string;
+    year: number;
+  } | null;
+}
+
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
+  const [activeSection, setActiveSection] = useState<AdminSection>('banned');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [bannedUsers, setBannedUsers] = useState<UserProfile[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -91,7 +117,14 @@ export default function AdminDashboard() {
         .select('*')
         .eq('id', user.id)
         .maybeSingle();
-      if (data) setUserProfile(data);
+      if (data) {
+        setUserProfile(data);
+        if (data.is_admin) {
+          setActiveSection('dashboard');
+        } else {
+          setActiveSection('banned');
+        }
+      }
     };
     loadCurrentUserProfile();
   }, [user]);
@@ -107,6 +140,8 @@ export default function AdminDashboard() {
       loadCars();
     } else if (activeSection === 'promo') {
       loadPromoCodes();
+    } else if (activeSection === 'reports') {
+      loadReports();
     }
   }, [activeSection]);
 
@@ -401,6 +436,68 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadReports = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('reports')
+        .select(`
+          *,
+          reporter:user_profiles!reported_by(nickname),
+          reported_user:user_profiles!reported_user_id(nickname),
+          car:cars(brand, model, year)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading reports:', error);
+      }
+
+      setReports(data || []);
+    } catch (error) {
+      console.error('Error loading reports:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateReportStatus = async (reportId: string, status: string, notes?: string) => {
+    try {
+      await supabase
+        .from('reports')
+        .update({
+          status,
+          reviewed_by: user!.id,
+          reviewed_at: new Date().toISOString(),
+          resolution_notes: notes || null
+        })
+        .eq('id', reportId);
+
+      alert('Status reporta ažuriran');
+      loadReports();
+    } catch (error) {
+      console.error('Error updating report:', error);
+      alert('Greška pri ažuriranju reporta');
+    }
+  };
+
+  const deleteCar = async (carId: string) => {
+    if (!confirm('Da li ste sigurni da želite da obrišete ovaj oglas?')) return;
+
+    try {
+      await supabase
+        .from('cars')
+        .delete()
+        .eq('id', carId);
+
+      alert('Oglas je obrisan');
+      loadCars();
+    } catch (error) {
+      console.error('Error deleting car:', error);
+      alert('Greška pri brisanju oglasa');
+    }
+  };
+
   const filterData = (data: any[]) => {
     if (!searchTerm) return data;
 
@@ -674,28 +771,32 @@ export default function AdminDashboard() {
                           <div className="flex items-center justify-end gap-2">
                             {!user.is_admin && (
                               <>
-                                <button
-                                  onClick={() => toggleModerator(user.id, user.is_moderator)}
-                                  className={`p-2 rounded-lg ${
-                                    user.is_moderator
-                                      ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                  }`}
-                                  title={user.is_moderator ? 'Ukloni Moderatora' : 'Dodaj Moderatora'}
-                                >
-                                  <ShieldCheck className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => togglePremium(user.id, user.is_premium)}
-                                  className={`p-2 rounded-lg ${
-                                    user.is_premium
-                                      ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
-                                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                  }`}
-                                  title={user.is_premium ? 'Ukloni Premium' : 'Dodaj Premium'}
-                                >
-                                  <Crown className="w-4 h-4" />
-                                </button>
+                                {userProfile?.is_admin && (
+                                  <>
+                                    <button
+                                      onClick={() => toggleModerator(user.id, user.is_moderator)}
+                                      className={`p-2 rounded-lg ${
+                                        user.is_moderator
+                                          ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                      }`}
+                                      title={user.is_moderator ? 'Ukloni Moderatora' : 'Dodaj Moderatora'}
+                                    >
+                                      <ShieldCheck className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => togglePremium(user.id, user.is_premium)}
+                                      className={`p-2 rounded-lg ${
+                                        user.is_premium
+                                          ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                      }`}
+                                      title={user.is_premium ? 'Ukloni Premium' : 'Dodaj Premium'}
+                                    >
+                                      <Crown className="w-4 h-4" />
+                                    </button>
+                                  </>
+                                )}
                                 {user.is_banned ? (
                                   <button
                                     onClick={() => unbanUser(user.id)}
@@ -941,6 +1042,7 @@ export default function AdminDashboard() {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Cena</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Datum</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Akcije</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -975,6 +1077,17 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">
                           {formatDate(car.created_at)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end">
+                            <button
+                              onClick={() => deleteCar(car.id)}
+                              className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                              title="Obriši oglas"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1132,6 +1245,146 @@ export default function AdminDashboard() {
     );
   };
 
+  const renderReports = () => {
+    const filteredReports = filterData(reports);
+    const paginatedReports = paginateData(filteredReports);
+    const totalPages = getTotalPages(filteredReports);
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Prijave Korisnika</h2>
+            <p className="text-gray-600">Ukupno {filteredReports.length} prijava</p>
+          </div>
+          <button
+            onClick={loadReports}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Osveži
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+        ) : reports.length === 0 ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <AlertTriangle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nema prijava</h3>
+            <p className="text-gray-600">Trenutno nema prijava za pregled</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-4">
+              {paginatedReports.map((report) => (
+                <div key={report.id} className={`bg-white rounded-lg border p-6 ${
+                  report.status === 'pending' ? 'border-orange-200' : 'border-gray-200'
+                }`}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                        <AlertTriangle className="w-6 h-6 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-lg font-semibold text-gray-900">{report.reason}</h3>
+                          <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
+                            report.status === 'pending' ? 'bg-orange-100 text-orange-700' :
+                            report.status === 'resolved' ? 'bg-green-100 text-green-700' :
+                            report.status === 'dismissed' ? 'bg-gray-100 text-gray-700' :
+                            'bg-blue-100 text-blue-700'
+                          }`}>
+                            {report.status === 'pending' ? 'Na čekanju' :
+                             report.status === 'resolved' ? 'Rešeno' :
+                             report.status === 'dismissed' ? 'Odbijeno' : 'Pregledano'}
+                          </span>
+                        </div>
+
+                        <div className="space-y-2 text-sm text-gray-600 mb-3">
+                          <p><span className="font-medium">Prijavio:</span> @{report.reporter?.nickname || 'Nepoznat'}</p>
+                          {report.reported_user_id && (
+                            <p><span className="font-medium">Prijavljeni korisnik:</span> @{report.reported_user?.nickname || 'Nepoznat'}</p>
+                          )}
+                          {report.car_id && report.car && (
+                            <p><span className="font-medium">Prijavljen oglas:</span> {report.car.brand} {report.car.model} ({report.car.year})</p>
+                          )}
+                          {report.description && (
+                            <p className="mt-2"><span className="font-medium">Opis:</span> {report.description}</p>
+                          )}
+                          <p className="text-xs text-gray-500">Prijavljeno: {new Date(report.created_at).toLocaleString('sr-RS')}</p>
+                        </div>
+
+                        {report.resolution_notes && (
+                          <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                            <p className="text-sm font-medium text-blue-900 mb-1">Beleške:</p>
+                            <p className="text-sm text-blue-700">{report.resolution_notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {report.status === 'pending' && (
+                      <div className="flex flex-col gap-2 ml-4">
+                        <button
+                          onClick={() => {
+                            const notes = prompt('Beleške (opciono):');
+                            updateReportStatus(report.id, 'resolved', notes || undefined);
+                          }}
+                          className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                        >
+                          Reši
+                        </button>
+                        <button
+                          onClick={() => {
+                            const notes = prompt('Razlog odbijanja (opciono):');
+                            updateReportStatus(report.id, 'dismissed', notes || undefined);
+                          }}
+                          className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                        >
+                          Odbij
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4">
+                <p className="text-sm text-gray-600">
+                  Prikazano {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredReports.length)} od {filteredReports.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <span className="text-sm font-medium text-gray-900">
+                    Strana {currentPage} od {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -1162,37 +1415,41 @@ export default function AdminDashboard() {
 
         <nav className="flex-1 p-4">
           <div className="space-y-1">
-            <button
-              onClick={() => {
-                setActiveSection('dashboard');
-                setSearchTerm('');
-                setCurrentPage(1);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeSection === 'dashboard'
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <TrendingUp className="w-5 h-5" />
-              <span className="font-medium">Dashboard</span>
-            </button>
+            {userProfile?.is_admin && (
+              <>
+                <button
+                  onClick={() => {
+                    setActiveSection('dashboard');
+                    setSearchTerm('');
+                    setCurrentPage(1);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    activeSection === 'dashboard'
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="font-medium">Dashboard</span>
+                </button>
 
-            <button
-              onClick={() => {
-                setActiveSection('users');
-                setSearchTerm('');
-                setCurrentPage(1);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeSection === 'users'
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <Users className="w-5 h-5" />
-              <span className="font-medium">Korisnici</span>
-            </button>
+                <button
+                  onClick={() => {
+                    setActiveSection('users');
+                    setSearchTerm('');
+                    setCurrentPage(1);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    activeSection === 'users'
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Users className="w-5 h-5" />
+                  <span className="font-medium">Korisnici</span>
+                </button>
+              </>
+            )}
 
             <button
               onClick={() => {
@@ -1228,19 +1485,37 @@ export default function AdminDashboard() {
 
             <button
               onClick={() => {
-                setActiveSection('promo');
+                setActiveSection('reports');
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeSection === 'promo'
+                activeSection === 'reports'
                   ? 'bg-blue-50 text-blue-600'
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <Ticket className="w-5 h-5" />
-              <span className="font-medium">Promo Kodovi</span>
+              <AlertTriangle className="w-5 h-5" />
+              <span className="font-medium">Prijave</span>
             </button>
+
+            {userProfile?.is_admin && (
+              <button
+                onClick={() => {
+                  setActiveSection('promo');
+                  setSearchTerm('');
+                  setCurrentPage(1);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  activeSection === 'promo'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Ticket className="w-5 h-5" />
+                <span className="font-medium">Promo Kodovi</span>
+              </button>
+            )}
           </div>
         </nav>
 
@@ -1264,6 +1539,7 @@ export default function AdminDashboard() {
           {activeSection === 'users' && renderUsers()}
           {activeSection === 'banned' && renderBannedUsers()}
           {activeSection === 'cars' && renderCars()}
+          {activeSection === 'reports' && renderReports()}
           {activeSection === 'promo' && renderPromoCodes()}
         </div>
       </div>
