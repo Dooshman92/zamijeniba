@@ -86,14 +86,14 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
         </button>
 
         {showFilters && (
-          <div className="absolute left-0 top-full mt-2 backdrop-blur-md bg-gray-900/95 border border-white/10 rounded-2xl shadow-2xl z-50 w-[900px] max-w-[95vw]">
+          <div className="absolute left-0 top-full mt-2 backdrop-blur-md bg-gray-900/95 border border-white/10 rounded-2xl shadow-2xl z-50 w-[1100px] max-w-[calc(100vw-2rem)]">
             <div className="bg-gray-900/95 backdrop-blur-md p-6 pb-4 border-b border-white/10 flex items-center justify-between">
               <h3 className="text-xl font-bold text-white">Napredni filteri</h3>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 {hasActiveFilters && (
                   <button
                     onClick={onClearFilters}
-                    className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+                    className="px-4 py-2 text-sm bg-red-500/20 text-red-300 hover:bg-red-500/30 rounded-lg transition-colors font-medium"
                   >
                     Očisti sve
                   </button>
@@ -107,8 +107,8 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
               </div>
             </div>
 
-          <div className="p-6 pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Tip vozila
