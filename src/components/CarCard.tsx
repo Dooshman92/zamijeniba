@@ -30,6 +30,11 @@ const formatSwapPreference = (car: Car): string | null => {
   }
 
   const pref = car.swap_preference;
+
+  if (pref.preferred_vehicle_type === 'Razno') {
+    return 'Razno';
+  }
+
   const vehicleType = getVehicleTypeLabel(pref.preferred_vehicle_type as VehicleType);
 
   if (pref.preferred_brand === 'Razno' || !pref.preferred_brand) {

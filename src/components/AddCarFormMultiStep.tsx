@@ -411,10 +411,20 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
 
     await supabase.from('car_images').insert(imageInserts);
 
-    await supabase.from('car_preferences').insert([{
-      car_id: carData.id,
-      ...preferences,
-    }]);
+    if (preferences.preferred_vehicle_type) {
+      const cleanPreferences = {
+        car_id: carData.id,
+        preferred_vehicle_type: preferences.preferred_vehicle_type || null,
+        preferred_brand: preferences.preferred_brand || null,
+        preferred_model: preferences.preferred_model || null,
+        min_year: preferences.min_year && !isNaN(preferences.min_year) ? preferences.min_year : null,
+        max_year: preferences.max_year && !isNaN(preferences.max_year) ? preferences.max_year : null,
+        max_mileage: preferences.max_mileage && !isNaN(preferences.max_mileage) ? preferences.max_mileage : null,
+        price_difference: preferences.price_difference && !isNaN(preferences.price_difference) ? preferences.price_difference : 0,
+      };
+
+      await supabase.from('car_preferences').insert([cleanPreferences]);
+    }
 
     if (premiumEnabled) {
       const costInfo = await calculateCarAdCost(user.id);
@@ -965,6 +975,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Odaberite tip vozila</option>
+                  <option value="Razno">Razno (bilo koji tip)</option>
                   <option value="automobil">Automobil</option>
                   <option value="motocikl">Motocikl</option>
                   <option value="quad">Quad</option>
@@ -973,7 +984,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 </select>
               </div>
 
-              {preferences.preferred_vehicle_type && (
+              {preferences.preferred_vehicle_type && preferences.preferred_vehicle_type !== 'Razno' && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Marka</label>
                   <select
@@ -1019,8 +1030,11 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Min. godina</label>
                   <input
                     type="number"
-                    value={preferences.min_year}
-                    onChange={(e) => setPreferences({ ...preferences, min_year: parseInt(e.target.value) })}
+                    value={preferences.min_year || ''}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                      setPreferences({ ...preferences, min_year: value });
+                    }}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -1028,8 +1042,11 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Max. godina</label>
                   <input
                     type="number"
-                    value={preferences.max_year}
-                    onChange={(e) => setPreferences({ ...preferences, max_year: parseInt(e.target.value) })}
+                    value={preferences.max_year || ''}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                      setPreferences({ ...preferences, max_year: value });
+                    }}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -1039,8 +1056,11 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Max. kilometraža</label>
                 <input
                   type="number"
-                  value={preferences.max_mileage}
-                  onChange={(e) => setPreferences({ ...preferences, max_mileage: parseInt(e.target.value) })}
+                  value={preferences.max_mileage || ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                    setPreferences({ ...preferences, max_mileage: value });
+                  }}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -1051,8 +1071,11 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
                 </label>
                 <input
                   type="number"
-                  value={preferences.price_difference}
-                  onChange={(e) => setPreferences({ ...preferences, price_difference: parseInt(e.target.value) })}
+                  value={preferences.price_difference || ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                    setPreferences({ ...preferences, price_difference: value });
+                  }}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="0"
                 />

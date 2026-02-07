@@ -599,6 +599,11 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                       <p className="text-lg font-bold text-orange-300">
                         {(() => {
                           const pref = car.swap_preference;
+
+                          if (pref.preferred_vehicle_type === 'Razno') {
+                            return 'Razno';
+                          }
+
                           const vehicleLabels = {
                             'automobil': 'Automobil',
                             'motocikl': 'Motocikl',
