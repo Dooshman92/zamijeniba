@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Send, Plus, MessageCircle, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Send, Plus, MessageCircle, Clock, CheckCircle, AlertCircle, Lock } from 'lucide-react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { formatDateTime } from '../lib/dateUtils';
 
@@ -18,6 +18,9 @@ interface SupportTicket {
   priority: 'low' | 'normal' | 'high' | 'urgent';
   created_at: string;
   updated_at: string;
+  locked: boolean;
+  locked_at: string | null;
+  locked_by: string | null;
 }
 
 interface SupportMessage {
@@ -231,7 +234,10 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-bold text-white text-sm line-clamp-1">{ticket.subject}</h3>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {ticket.locked && <Lock className="w-4 h-4 text-red-400 flex-shrink-0" />}
+                      <h3 className="font-bold text-white text-sm line-clamp-1">{ticket.subject}</h3>
+                    </div>
                     {getStatusIcon(ticket.status)}
                   </div>
                   <p className="text-xs text-gray-400 line-clamp-2 mb-2">{ticket.message}</p>
@@ -331,6 +337,15 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
                     </div>
                   </div>
                   <p className="text-sm text-gray-400">ID: {selectedTicket.id}</p>
+                  {selectedTicket.locked && selectedTicket.locked_at && (
+                    <div className="mt-3 flex items-center gap-2 text-sm bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                      <Lock className="w-4 h-4 text-red-400" />
+                      <span className="text-red-400 font-semibold">
+                        Tiket je zaključan {formatDateTime(selectedTicket.locked_at)} i biti će automatski obrisan za{' '}
+                        {Math.max(0, 3 - Math.floor((Date.now() - new Date(selectedTicket.locked_at).getTime()) / (1000 * 60 * 60 * 24)))} dana
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -362,7 +377,7 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
                   ))}
                 </div>
 
-                {selectedTicket.status !== 'closed' && (
+                {selectedTicket.status !== 'closed' && !selectedTicket.locked && (
                   <div className="p-6 border-t border-white/10">
                     <div className="flex gap-3">
                       <input

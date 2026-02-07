@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Send, AlertCircle, Clock, CheckCircle, Filter } from 'lucide-react';
+import { Send, AlertCircle, Clock, CheckCircle, Filter, Lock, Unlock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatDateTime } from '../lib/dateUtils';
 
@@ -16,6 +16,9 @@ interface SupportTicket {
   priority: 'low' | 'normal' | 'high' | 'urgent';
   created_at: string;
   updated_at: string;
+  locked: boolean;
+  locked_at: string | null;
+  locked_by: string | null;
 }
 
 interface SupportMessage {
@@ -157,6 +160,34 @@ export function SupportPanel({ userId }: SupportPanelProps) {
     }
   };
 
+  const toggleLockTicket = async (ticketId: string, currentlyLocked: boolean) => {
+    setLoading(true);
+    const updates: any = {
+      locked: !currentlyLocked,
+      locked_at: !currentlyLocked ? new Date().toISOString() : null,
+      locked_by: !currentlyLocked ? userId : null
+    };
+
+    const { error } = await supabase
+      .from('support_tickets')
+      .update(updates)
+      .eq('id', ticketId);
+
+    setLoading(false);
+
+    if (!error) {
+      loadTickets();
+      if (selectedTicket?.id === ticketId) {
+        setSelectedTicket({
+          ...selectedTicket,
+          locked: !currentlyLocked,
+          locked_at: updates.locked_at,
+          locked_by: updates.locked_by
+        });
+      }
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return <Clock className="w-4 h-4 text-orange-400" />;
@@ -262,8 +293,11 @@ export function SupportPanel({ userId }: SupportPanelProps) {
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-bold text-white text-sm line-clamp-1">{ticket.subject}</h3>
-                    <div className={`px-2 py-0.5 rounded text-xs border ${getPriorityColor(ticket.priority)}`}>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {ticket.locked && <Lock className="w-4 h-4 text-red-400 flex-shrink-0" />}
+                      <h3 className="font-bold text-white text-sm line-clamp-1">{ticket.subject}</h3>
+                    </div>
+                    <div className={`px-2 py-0.5 rounded text-xs border ${getPriorityColor(ticket.priority)} flex-shrink-0 ml-2`}>
                       {ticket.priority}
                     </div>
                   </div>
@@ -295,10 +329,19 @@ export function SupportPanel({ userId }: SupportPanelProps) {
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-white mb-2">{selectedTicket.subject}</h3>
                       <p className="text-sm text-gray-400">ID: {selectedTicket.id}</p>
+                      {selectedTicket.locked && selectedTicket.locked_at && (
+                        <div className="mt-2 flex items-center gap-2 text-sm">
+                          <Lock className="w-4 h-4 text-red-400" />
+                          <span className="text-red-400 font-semibold">
+                            Zaključano {formatDateTime(selectedTicket.locked_at)} - Automatski će se obrisati za{' '}
+                            {Math.max(0, 3 - Math.floor((Date.now() - new Date(selectedTicket.locked_at).getTime()) / (1000 * 60 * 60 * 24)))} dana
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mb-3">
                     <button
                       onClick={() => updateTicketStatus(selectedTicket.id, 'open')}
                       disabled={loading || selectedTicket.status === 'open'}
@@ -342,6 +385,30 @@ export function SupportPanel({ userId }: SupportPanelProps) {
                       }`}
                     >
                       Zatvoreno
+                    </button>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => toggleLockTicket(selectedTicket.id, selectedTicket.locked)}
+                      disabled={loading}
+                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 ${
+                        selectedTicket.locked
+                          ? 'bg-red-500/20 text-red-400 border-2 border-red-500/50 hover:bg-red-500/30'
+                          : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
+                      }`}
+                    >
+                      {selectedTicket.locked ? (
+                        <>
+                          <Unlock className="w-4 h-4" />
+                          Otključaj tiket
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-4 h-4" />
+                          Zaključaj tiket (briše se za 3 dana)
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
