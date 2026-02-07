@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, Shield, Crown, User, Search, CheckCircle, XCircle, Power, Gift, Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Users, Ban, UserX, Clock } from 'lucide-react';
+import { X, Shield, Crown, User, Search, CheckCircle, XCircle, Power, Gift, Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Users, Ban, UserX, Clock, MessageCircle } from 'lucide-react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDate, formatDateTimeShort } from '../lib/dateUtils';
+import { SupportPanel } from './SupportPanel';
 
 interface PromoCode {
   code: string;
@@ -34,6 +35,7 @@ interface AdminPanelProps {
 
 export function AdminPanel({ onClose }: AdminPanelProps) {
   const { user: currentUser } = useAuth();
+  const [activeTab, setActiveTab] = useState<'users' | 'support' | 'promo'>('users');
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [promoCodes, setPromoCodes] = useState<PromoCodeWithRedemption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -438,23 +440,68 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden border border-red-500/30">
-        <div className="sticky top-0 bg-gradient-to-r from-red-900 via-red-800 to-red-900 border-b border-red-500/30 px-6 py-4 flex justify-between items-center z-10">
-          <div className="flex items-center gap-3">
-            <Shield className="w-7 h-7 text-red-400" />
-            <h2 className="text-2xl font-bold text-white">
-              Admin Panel
-            </h2>
+        <div className="sticky top-0 bg-gradient-to-r from-red-900 via-red-800 to-red-900 border-b border-red-500/30 px-6 py-4 z-10">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-3">
+              <Shield className="w-7 h-7 text-red-400" />
+              <h2 className="text-2xl font-bold text-white">
+                Admin Panel
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+            >
+              <X className="w-6 h-6" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
-          >
-            <X className="w-6 h-6" />
-          </button>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                activeTab === 'users'
+                  ? 'bg-white/20 text-white'
+                  : 'text-gray-400 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Users className="w-5 h-5" />
+              Korisnici
+            </button>
+            <button
+              onClick={() => setActiveTab('support')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                activeTab === 'support'
+                  ? 'bg-white/20 text-white'
+                  : 'text-gray-400 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <MessageCircle className="w-5 h-5" />
+              Podrška
+            </button>
+            <button
+              onClick={() => setActiveTab('promo')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                activeTab === 'promo'
+                  ? 'bg-white/20 text-white'
+                  : 'text-gray-400 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Gift className="w-5 h-5" />
+              Promo Kodovi
+            </button>
+          </div>
         </div>
 
-        <div className="px-6 py-4 border-b border-gray-700 space-y-4">
-          <div className={`p-4 rounded-xl border-2 ${
+        <div className="overflow-y-auto max-h-[calc(90vh-120px)] px-6 py-4">
+          {activeTab === 'support' && currentUser?.id && (
+            <SupportPanel userId={currentUser.id} />
+          )}
+
+          {activeTab === 'users' && (
+            <>
+              <div className="space-y-4 mb-6">
+                <div className={`p-4 rounded-xl border-2 ${
             premiumEnabled
               ? 'bg-gradient-to-r from-yellow-900/30 to-yellow-800/30 border-yellow-500/50'
               : 'bg-gradient-to-r from-green-900/30 to-green-800/30 border-green-500/50'
@@ -529,17 +576,20 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
               </button>
             </div>
           </div>
-
-          <div className="flex items-center justify-between p-4 rounded-xl border-2 bg-gradient-to-r from-purple-900/30 to-purple-800/30 border-purple-500/50">
-            <div className="flex items-center gap-3">
-              <Gift className="w-6 h-6 text-purple-400" />
-              <div>
-                <h3 className="text-lg font-bold text-white">Promo Kodovi</h3>
-                <p className="text-sm text-gray-300">
-                  Aktivnih kodova: {promoCodes.filter(p => p.is_active).length} / {promoCodes.length}
-                </p>
               </div>
-            </div>
+
+          {activeTab === 'promo' && (
+            <>
+              <div className="flex items-center justify-between p-4 rounded-xl border-2 bg-gradient-to-r from-purple-900/30 to-purple-800/30 border-purple-500/50 mb-4">
+                <div className="flex items-center gap-3">
+                  <Gift className="w-6 h-6 text-purple-400" />
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Promo Kodovi</h3>
+                    <p className="text-sm text-gray-300">
+                      Aktivnih kodova: {promoCodes.filter(p => p.is_active).length} / {promoCodes.length}
+                    </p>
+                  </div>
+                </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowCreateForm(!showCreateForm)}
@@ -782,7 +832,11 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
               )}
             </div>
           )}
+            </>
+          )}
 
+          {activeTab === 'users' && (
+            <>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -964,6 +1018,9 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
           )}
         </div>
       </div>
+            </>
+          )}
+        </div>
 
       {showBanModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">

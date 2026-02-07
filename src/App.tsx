@@ -24,6 +24,7 @@ import { CarDetailModal } from './components/CarDetailModal';
 import { AdvancedFilters, FilterOptions } from './components/AdvancedFilters';
 import { SearchWithAutocomplete } from './components/SearchWithAutocomplete';
 import { ReportsPanel } from './components/ReportsPanel';
+import { SupportModal } from './components/SupportModal';
 import { FEATURES } from './config/features';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
   const [showReportsPanel, setShowReportsPanel] = useState(false);
   const [showInbox, setShowInbox] = useState(false);
   const [showPromoCode, setShowPromoCode] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -343,6 +345,7 @@ function App() {
     setShowPromoCode(false);
     setShowBuyCredits(false);
     setShowUserProfile(false);
+    setShowSupport(false);
     setShowDirectChat(false);
     setShowCarDetail(false);
     setEditingCar(null);
@@ -523,6 +526,13 @@ function App() {
                       title="Uredi profil"
                     >
                       <Settings className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setShowSupport(true)}
+                      className="backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                      title="Podrška korisnicima"
+                    >
+                      <MessageCircle className="w-5 h-5" />
                     </button>
                     <button
                       onClick={signOut}
@@ -1123,6 +1133,14 @@ function App() {
             onSendMessage={handleSendMessage}
             onEdit={handleEditCar}
             isPremiumUser={userProfile?.is_premium || false}
+          />
+        )}
+
+        {showSupport && user && (
+          <SupportModal
+            isOpen={showSupport}
+            onClose={() => setShowSupport(false)}
+            userId={user.id}
           />
         )}
 
