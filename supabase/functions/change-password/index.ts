@@ -100,10 +100,20 @@ Deno.serve(async (req: Request) => {
     })
 
     if (updateError) {
+      console.error('Password update error:', updateError)
+
+      let errorMessage = 'Greška pri promjeni lozinke'
+
+      if (updateError.message.includes('Password should be different')) {
+        errorMessage = 'Nova lozinka mora biti različita od trenutne'
+      } else if (updateError.message.includes('password')) {
+        errorMessage = 'Lozinka ne zadovoljava sigurnosne zahtjeve'
+      }
+
       return new Response(
-        JSON.stringify({ error: 'Greška pri promjeni lozinke' }),
+        JSON.stringify({ error: errorMessage }),
         {
-          status: 500,
+          status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       )
