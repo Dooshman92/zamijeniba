@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { X, Car as CarIcon, User, MessageCircle, MapPin, Star, MessageSquare, Shield, Smile, ThumbsUp, CheckCircle, Heart, Phone } from 'lucide-react';
+import { X, Car as CarIcon, User, MapPin, Star, MessageSquare, Shield, Smile, ThumbsUp, CheckCircle, Heart, Phone } from 'lucide-react';
 import { Car, supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { CarCard } from './CarCard';
@@ -186,36 +186,6 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
     reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleSendMessage = async () => {
-    if (!currentUser || !userProfile) return;
-
-    const participants = [currentUser.id, userId].sort();
-    const conversationId = `${participants[0]}_${participants[1]}`;
-
-    const { data: existingConv } = await supabase
-      .from('conversations')
-      .select('id')
-      .eq('id', conversationId)
-      .maybeSingle();
-
-    if (!existingConv) {
-      await supabase.from('conversations').insert({
-        id: conversationId,
-        created_at: new Date().toISOString(),
-      });
-
-      await supabase.from('conversation_participants').insert([
-        { conversation_id: conversationId, user_id: currentUser.id },
-        { conversation_id: conversationId, user_id: userId },
-      ]);
-    }
-
-    if (onStartConversation) {
-      onStartConversation(userId);
-    }
-    onClose();
-  };
-
   const displayName = userProfile?.nickname
     ? `@${userProfile.nickname}`
     : userProfile?.email?.split('@')[0] || 'Korisnik';
@@ -376,16 +346,6 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                       <Phone className="w-4 h-4" />
                       <span>{userProfile.phone}</span>
                     </div>
-                  )}
-
-                  {!isOwnProfile && currentUser && currentUserProfile?.is_premium && (
-                    <button
-                      onClick={handleSendMessage}
-                      className="mt-4 flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-2.5 px-5 rounded-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      Pošalji poruku
-                    </button>
                   )}
                 </div>
               </div>
