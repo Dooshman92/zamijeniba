@@ -1,6 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Filter, X } from 'lucide-react';
-import { vehicleTypes, carBrands, fuelTypes, transmissionTypes } from '../data/carOptions';
+import {
+  vehicleTypes,
+  getBrandsByVehicleType,
+  getFuelTypesByVehicleType,
+  getTransmissionTypesByVehicleType
+} from '../data/carOptions';
 import { bosnianCities } from '../data/cities';
 
 export interface FilterOptions {
@@ -26,6 +31,18 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
   const [showFilters, setShowFilters] = useState(false);
   const currentYear = new Date().getFullYear();
 
+  const availableBrands = useMemo(() => {
+    return getBrandsByVehicleType(filters.vehicleType || 'automobil');
+  }, [filters.vehicleType]);
+
+  const availableFuelTypes = useMemo(() => {
+    return getFuelTypesByVehicleType(filters.vehicleType || 'automobil');
+  }, [filters.vehicleType]);
+
+  const availableTransmissionTypes = useMemo(() => {
+    return getTransmissionTypesByVehicleType(filters.vehicleType || 'automobil');
+  }, [filters.vehicleType]);
+
   const scrollToResults = () => {
     const resultsElement = document.getElementById('results-section');
     if (resultsElement) {
@@ -46,10 +63,20 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
     filters.vehicleType;
 
   const handleFilterChange = (key: keyof FilterOptions, value: string | number | boolean) => {
-    onFiltersChange({
-      ...filters,
-      [key]: value,
-    });
+    if (key === 'vehicleType') {
+      onFiltersChange({
+        ...filters,
+        [key]: value,
+        brand: '',
+        fuelType: '',
+        transmission: '',
+      });
+    } else {
+      onFiltersChange({
+        ...filters,
+        [key]: value,
+      });
+    }
   };
 
   const applyFilters = () => {
@@ -139,7 +166,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                 >
                   <option value="">Sve marke</option>
-                  {carBrands.map((brand) => (
+                  {availableBrands.map((brand) => (
                     <option key={brand} value={brand}>
                       {brand}
                     </option>
@@ -221,7 +248,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                 >
                   <option value="">Svi tipovi</option>
-                  {fuelTypes.map((type) => (
+                  {availableFuelTypes.map((type) => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -239,7 +266,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                 >
                   <option value="">Svi tipovi</option>
-                  {transmissionTypes.map((type) => (
+                  {availableTransmissionTypes.map((type) => (
                     <option key={type} value={type}>
                       {type}
                     </option>
