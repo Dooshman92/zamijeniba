@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserX, Car, Ticket, TrendingUp, MessageSquare,
   RefreshCw, Shield, Crown, Package, Search, Filter,
-  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus, ShieldCheck, AlertTriangle, Trash2
+  ChevronLeft, ChevronRight, Ban, Check, X, Phone, Plus, ShieldCheck, AlertTriangle, Trash2, Power
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -108,6 +108,10 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [premiumEnabled, setPremiumEnabled] = useState(true);
+  const [updatingPremiumSystem, setUpdatingPremiumSystem] = useState(false);
+  const [creditsEnabled, setCreditsEnabled] = useState(true);
+  const [updatingCreditsSystem, setUpdatingCreditsSystem] = useState(false);
 
   useEffect(() => {
     const loadCurrentUserProfile = async () => {
@@ -132,6 +136,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeSection === 'dashboard') {
       loadDashboardStats();
+      loadSiteSettings();
+      loadSystemSettings();
     } else if (activeSection === 'users') {
       loadUsers();
     } else if (activeSection === 'banned') {
@@ -183,6 +189,75 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadSiteSettings = async () => {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('id', 'premium_enabled')
+      .maybeSingle();
+
+    if (!error && data) {
+      setPremiumEnabled(data.value);
+    }
+  };
+
+  const loadSystemSettings = async () => {
+    const { data, error } = await supabase
+      .from('system_settings')
+      .select('credits_enabled')
+      .eq('id', '00000000-0000-0000-0000-000000000000')
+      .maybeSingle();
+
+    if (!error && data) {
+      setCreditsEnabled(data.credits_enabled);
+    }
+  };
+
+  const togglePremiumSystem = async () => {
+    setUpdatingPremiumSystem(true);
+
+    const { data: currentUser } = await supabase.auth.getUser();
+    const newValue = !premiumEnabled;
+
+    const { error } = await supabase
+      .from('site_settings')
+      .update({
+        value: newValue,
+        updated_at: new Date().toISOString(),
+        updated_by: currentUser?.user?.id
+      })
+      .eq('id', 'premium_enabled');
+
+    if (!error) {
+      setPremiumEnabled(newValue);
+    } else {
+      alert('Greška pri ažuriranju sistema');
+    }
+
+    setUpdatingPremiumSystem(false);
+  };
+
+  const toggleCreditsSystem = async () => {
+    setUpdatingCreditsSystem(true);
+
+    const newValue = !creditsEnabled;
+
+    const { error } = await supabase
+      .from('system_settings')
+      .update({
+        credits_enabled: newValue
+      })
+      .eq('id', '00000000-0000-0000-0000-000000000000');
+
+    if (!error) {
+      setCreditsEnabled(newValue);
+    } else {
+      alert('Greška pri ažuriranju sistema kredita');
+    }
+
+    setUpdatingCreditsSystem(false);
   };
 
   const loadUsers = async () => {
@@ -522,6 +597,84 @@ export default function AdminDashboard() {
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Pregled Statistika</h2>
         <p className="text-gray-600">Kompletan uvid u platformu</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className={`rounded-lg border-2 p-6 ${
+          premiumEnabled
+            ? 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-300'
+            : 'bg-gradient-to-r from-green-50 to-green-100 border-green-300'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Power className={`w-8 h-8 ${premiumEnabled ? 'text-yellow-600' : 'text-green-600'}`} />
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Premium Sistem</h3>
+                <p className="text-sm text-gray-700 mt-1">
+                  {premiumEnabled
+                    ? 'Premium funkcije su aktivne - korisnici moraju platiti'
+                    : 'Premium funkcije su besplatne za sve korisnike'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={togglePremiumSystem}
+              disabled={updatingPremiumSystem}
+              className={`px-6 py-3 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 ${
+                premiumEnabled
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+              } ${updatingPremiumSystem ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-xl'}`}
+            >
+              {updatingPremiumSystem ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+              ) : (
+                <>
+                  <Power className="w-5 h-5" />
+                  {premiumEnabled ? 'Isključi' : 'Uključi'}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div className={`rounded-lg border-2 p-6 ${
+          creditsEnabled
+            ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-300'
+            : 'bg-gradient-to-r from-red-50 to-red-100 border-red-300'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Ticket className={`w-8 h-8 ${creditsEnabled ? 'text-blue-600' : 'text-red-600'}`} />
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Sistem Kredita</h3>
+                <p className="text-sm text-gray-700 mt-1">
+                  {creditsEnabled
+                    ? 'Sistem kupovine kredita je aktivan - korisnici mogu kupiti kredite'
+                    : 'Sistem kupovine kredita je isključen - opcija kupovine je skrivena'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={toggleCreditsSystem}
+              disabled={updatingCreditsSystem}
+              className={`px-6 py-3 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 ${
+                creditsEnabled
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+              } ${updatingCreditsSystem ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-xl'}`}
+            >
+              {updatingCreditsSystem ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+              ) : (
+                <>
+                  <Power className="w-5 h-5" />
+                  {creditsEnabled ? 'Isključi' : 'Uključi'}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {loading ? (
