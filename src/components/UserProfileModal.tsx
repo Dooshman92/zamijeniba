@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Car as CarIcon, User, MessageCircle, MapPin, Star, MessageSquare, Shield, Smile, ThumbsUp, CheckCircle, Heart, Phone, Eye } from 'lucide-react';
+import { X, Car as CarIcon, User, MessageCircle, MapPin, Star, MessageSquare, Shield, Smile, ThumbsUp, CheckCircle, Heart, Phone } from 'lucide-react';
 import { Car, supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { CarCard } from './CarCard';
@@ -36,8 +36,6 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
   const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
   const [reviews, setReviews] = useState<UserReview[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
-  const [phoneRevealed, setPhoneRevealed] = useState(false);
-  const [revealingPhone, setRevealingPhone] = useState(false);
   const { user: currentUser } = useAuth();
 
   useEffect(() => {
@@ -46,22 +44,8 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
     fetchReviews();
     if (currentUser) {
       fetchCurrentUserProfile();
-      checkPhoneRevealed();
     }
   }, [userId, currentUser]);
-
-  const checkPhoneRevealed = async () => {
-    if (!currentUser || currentUser.id === userId) return;
-
-    const { data } = await supabase
-      .from('phone_reveals')
-      .select('id')
-      .eq('revealer_id', currentUser.id)
-      .eq('owner_id', userId)
-      .maybeSingle();
-
-    setPhoneRevealed(!!data);
-  };
 
   const fetchCurrentUserProfile = async () => {
     if (!currentUser) return;
@@ -196,28 +180,6 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
     fetchReviews();
   };
 
-  const handleRevealPhone = async () => {
-    if (!currentUser || !userProfile?.phone) return;
-
-    setRevealingPhone(true);
-
-    const { error } = await supabase
-      .from('phone_reveals')
-      .insert({
-        revealer_id: currentUser.id,
-        owner_id: userId,
-        car_id: null
-      });
-
-    if (error) {
-      console.error('Error revealing phone:', error);
-      alert('Greška pri otkrivanju telefona');
-    } else {
-      setPhoneRevealed(true);
-    }
-
-    setRevealingPhone(false);
-  };
 
   const handleSendMessage = async () => {
     if (!currentUser || !userProfile) return;
@@ -383,26 +345,13 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                   )}
 
                   {!isOwnProfile && userProfile?.phone && userProfile?.show_phone_number && (
-                    <div className="mb-3">
-                      {phoneRevealed ? (
-                        <a
-                          href={`tel:${userProfile.phone}`}
-                          className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors group"
-                        >
-                          <Phone className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">{userProfile.phone}</span>
-                        </a>
-                      ) : (
-                        <button
-                          onClick={handleRevealPhone}
-                          disabled={revealingPhone}
-                          className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
-                        >
-                          <Eye className="w-4 h-4" />
-                          {revealingPhone ? 'Otkrivanje...' : 'Otkrij telefon'}
-                        </button>
-                      )}
-                    </div>
+                    <a
+                      href={`tel:${userProfile.phone}`}
+                      className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors group mb-3"
+                    >
+                      <Phone className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      <span className="font-medium">{userProfile.phone}</span>
+                    </a>
                   )}
 
                   {isOwnProfile && userProfile?.phone && userProfile?.show_phone_number && (

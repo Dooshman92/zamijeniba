@@ -70,14 +70,31 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
   const checkPhoneRevealed = async () => {
     if (!user || !car || !car.user_id || user.id === car.user_id) return;
 
-    const { data } = await supabase
-      .from('phone_reveals')
+    const { data: userCars } = await supabase
+      .from('cars')
       .select('id')
-      .eq('revealer_id', user.id)
-      .eq('owner_id', car.user_id)
-      .maybeSingle();
+      .eq('user_id', user.id);
 
-    setPhoneRevealed(!!data);
+    const { data: ownerCars } = await supabase
+      .from('cars')
+      .select('id')
+      .eq('user_id', car.user_id);
+
+    if (!userCars?.length || !ownerCars?.length) {
+      setPhoneRevealed(false);
+      return;
+    }
+
+    const userCarIds = userCars.map(c => c.id);
+    const ownerCarIds = ownerCars.map(c => c.id);
+
+    const { data: acceptedOffers } = await supabase
+      .from('swap_offers')
+      .select('id')
+      .eq('status', 'accepted')
+      .or(`and(car_id.in.(${ownerCarIds.join(',')}),offered_car_id.in.(${userCarIds.join(',')})),and(car_id.in.(${userCarIds.join(',')}),offered_car_id.in.(${ownerCarIds.join(',')}))`);
+
+    setPhoneRevealed(!!acceptedOffers && acceptedOffers.length > 0);
   };
 
   const loadUserProfile = async () => {
@@ -420,7 +437,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                       {ownerDisplayName}
                     </button>
                   </div>
-                  {!isOwnCar && ownerProfile?.phone && ownerProfile?.show_phone_number && phoneRevealed && (
+                  {!isOwnCar && ownerProfile?.phone && (ownerProfile?.show_phone_number || phoneRevealed) && (
                     <div className="mt-3 backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
                         <Phone className="w-4 h-4 text-green-400" />
@@ -435,7 +452,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                       </div>
                     </div>
                   )}
-                  {!isOwnCar && (!ownerProfile?.phone || !ownerProfile?.show_phone_number || !phoneRevealed) && (
+                  {!isOwnCar && (!ownerProfile?.phone || (!ownerProfile?.show_phone_number && !phoneRevealed)) && (
                     <div className="mt-3 backdrop-blur-md bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
                       <p className="text-xs text-blue-300 flex items-center gap-2">
                         <span className="text-blue-400">ℹ️</span>

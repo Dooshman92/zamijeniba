@@ -83,14 +83,31 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
   const checkPhoneRevealed = async () => {
     if (!currentUserId || !car.user_id || currentUserId === car.user_id) return;
 
-    const { data } = await supabase
-      .from('phone_reveals')
+    const { data: userCars } = await supabase
+      .from('cars')
       .select('id')
-      .eq('revealer_id', currentUserId)
-      .eq('owner_id', car.user_id)
-      .maybeSingle();
+      .eq('user_id', currentUserId);
 
-    setPhoneRevealed(!!data);
+    const { data: ownerCars } = await supabase
+      .from('cars')
+      .select('id')
+      .eq('user_id', car.user_id);
+
+    if (!userCars?.length || !ownerCars?.length) {
+      setPhoneRevealed(false);
+      return;
+    }
+
+    const userCarIds = userCars.map(c => c.id);
+    const ownerCarIds = ownerCars.map(c => c.id);
+
+    const { data: acceptedOffers } = await supabase
+      .from('swap_offers')
+      .select('id')
+      .eq('status', 'accepted')
+      .or(`and(car_id.in.(${ownerCarIds.join(',')}),offered_car_id.in.(${userCarIds.join(',')})),and(car_id.in.(${userCarIds.join(',')}),offered_car_id.in.(${ownerCarIds.join(',')}))`);
+
+    setPhoneRevealed(!!acceptedOffers && acceptedOffers.length > 0);
   };
 
   if (layout === 'list') {
@@ -131,7 +148,7 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
                     {ownerDisplayName}
                   </span>
                 </div>
-                {!isOwnCar && ownerProfile?.phone && ownerProfile?.show_phone_number && phoneRevealed && (
+                {!isOwnCar && ownerProfile?.phone && (ownerProfile?.show_phone_number || phoneRevealed) && (
                   <div className="flex items-center gap-2 backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded-lg px-2 py-1 mb-2">
                     <Phone className="w-3 h-3 text-green-400" />
                     <a
@@ -305,7 +322,7 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
           </span>
         </div>
 
-        {!isOwnCar && ownerProfile?.phone && ownerProfile?.show_phone_number && phoneRevealed && (
+        {!isOwnCar && ownerProfile?.phone && (ownerProfile?.show_phone_number || phoneRevealed) && (
           <div className="flex items-center gap-1 backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded px-1.5 py-1 mb-2">
             <Phone className="w-2.5 h-2.5 text-green-400 flex-shrink-0" />
             <a
