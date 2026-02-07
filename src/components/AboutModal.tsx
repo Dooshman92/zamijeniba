@@ -30,12 +30,12 @@ export function AboutModal({ onClose }: AboutModalProps) {
             <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-4">
                 <Sparkles className="w-8 h-8 text-cyan-400" />
-                <h3 className="text-2xl font-bold text-white">Dobrodošli na autozamjena.ba</h3>
+                <h3 className="text-2xl font-bold text-white">Dobrodošli na zamjenavozila.ba</h3>
               </div>
               <p className="text-gray-300 leading-relaxed text-lg">
                 Revolucionarna platforma koja spaja vlasnike vozila širom Bosne i Hercegovine,
                 omogućavajući brzu, sigurnu i jednostavnu zamjenu automobila, motocikala, quad vozila,
-                jet ski aparata i motornih sanki.
+                jet ski vozila i motornih sanki.
               </p>
             </div>
 
@@ -114,7 +114,7 @@ export function AboutModal({ onClose }: AboutModalProps) {
             </div>
 
             <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-2 border-yellow-500/30 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Zašto izabrati autozamjena.ba?</h3>
+              <h3 className="text-xl font-bold text-white mb-4">Zašto izabrati zamjenavozila.ba?</h3>
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2"></div>
@@ -148,7 +148,7 @@ export function AboutModal({ onClose }: AboutModalProps) {
                 Pridružite se hiljadama zadovoljnih korisnika koji su već pronašli savršenu zamjenu!
               </p>
               <p className="text-cyan-400 font-semibold">
-                autozamjena.ba - Jednostavna zamjena vozila, složenih procedura bez!
+                zamjenavozila.ba - Jednostavna zamjena vozila, složenih procedura bez!
               </p>
             </div>
           </div>

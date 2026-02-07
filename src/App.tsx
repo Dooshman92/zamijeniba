@@ -1374,7 +1374,7 @@ function App() {
                 <div className="flex flex-col items-center gap-6">
                   <Logo size="md" />
                   <div className="text-center">
-                    <p className="text-gray-400 font-medium">autozamjena.ba © 2026</p>
+                    <p className="text-gray-400 font-medium">zamjenavozila.ba © 2026</p>
                     <p className="text-sm text-gray-500 mt-1">Brzo. Sigurno. Jednostavno.</p>
                     <p className="text-gray-400 text-sm mt-2">Najbolja platforma za zamjenu vozila u BiH</p>
                   </div>
