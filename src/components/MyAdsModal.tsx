@@ -9,6 +9,7 @@ interface MyAdsModalProps {
   onClose: () => void;
   userId: string;
   onCarUpdated?: () => void;
+  premiumEnabled?: boolean;
 }
 
 type CarStatus = 'active' | 'inactive' | 'hidden';
@@ -17,7 +18,7 @@ interface CarWithStatus extends Car {
   status: CarStatus;
 }
 
-export function MyAdsModal({ onClose, userId, onCarUpdated }: MyAdsModalProps) {
+export function MyAdsModal({ onClose, userId, onCarUpdated, premiumEnabled = false }: MyAdsModalProps) {
   const [cars, setCars] = useState<CarWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<CarStatus>('active');
@@ -298,6 +299,7 @@ export function MyAdsModal({ onClose, userId, onCarUpdated }: MyAdsModalProps) {
               onCarUpdated();
             }
           }}
+          premiumEnabled={premiumEnabled}
         />
       )}
 
@@ -313,6 +315,7 @@ export function MyAdsModal({ onClose, userId, onCarUpdated }: MyAdsModalProps) {
               onCarUpdated();
             }
           }}
+          premiumEnabled={premiumEnabled}
         />
       )}
     </div>

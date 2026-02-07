@@ -10,9 +10,10 @@ interface SwapOfferModalProps {
   targetCar: Car;
   onClose: () => void;
   onSuccess: () => void;
+  premiumEnabled?: boolean;
 }
 
-export function SwapOfferModal({ targetCar, onClose, onSuccess }: SwapOfferModalProps) {
+export function SwapOfferModal({ targetCar, onClose, onSuccess, premiumEnabled = false }: SwapOfferModalProps) {
   const [myCars, setMyCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
@@ -71,7 +72,7 @@ export function SwapOfferModal({ targetCar, onClose, onSuccess }: SwapOfferModal
 
     setSubmitting(true);
 
-    if (FEATURES.PREMIUM_ENABLED) {
+    if (premiumEnabled) {
       const costInfo = await calculateSwapOfferCost(user.id);
 
       if (!costInfo.isFree) {
@@ -110,7 +111,7 @@ export function SwapOfferModal({ targetCar, onClose, onSuccess }: SwapOfferModal
       return;
     }
 
-    if (FEATURES.PREMIUM_ENABLED) {
+    if (premiumEnabled) {
       const costInfo = await calculateSwapOfferCost(user.id);
 
       if (!costInfo.isFree) {

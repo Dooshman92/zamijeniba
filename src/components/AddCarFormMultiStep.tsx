@@ -13,9 +13,10 @@ interface AddCarFormMultiStepProps {
   onSuccess: () => void;
   editMode?: boolean;
   carToEdit?: any;
+  premiumEnabled?: boolean;
 }
 
-export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carToEdit }: AddCarFormMultiStepProps) {
+export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carToEdit, premiumEnabled = false }: AddCarFormMultiStepProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -23,8 +24,8 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const { user } = useAuth();
 
-  const baseImageLimit = (!FEATURES.PREMIUM_ENABLED || userProfile?.is_premium) ? 15 : 5;
-  const creditBonusImages = (FEATURES.PREMIUM_ENABLED && !userProfile?.is_premium) ? Math.min(userProfile?.credits || 0, 10) : 0;
+  const baseImageLimit = (!premiumEnabled || userProfile?.is_premium) ? 15 : 5;
+  const creditBonusImages = (premiumEnabled && !userProfile?.is_premium) ? Math.min(userProfile?.credits || 0, 10) : 0;
   const imageLimit = baseImageLimit + creditBonusImages;
 
   useEffect(() => {
@@ -256,7 +257,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       return;
     }
 
-    if (FEATURES.PREMIUM_ENABLED) {
+    if (premiumEnabled) {
       const costInfo = await calculateCarAdCost(user.id);
 
       if (!costInfo.isFree) {
@@ -329,7 +330,7 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       ...preferences,
     }]);
 
-    if (FEATURES.PREMIUM_ENABLED) {
+    if (premiumEnabled) {
       const costInfo = await calculateCarAdCost(user.id);
 
       if (!costInfo.isFree) {

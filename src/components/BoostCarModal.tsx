@@ -10,6 +10,7 @@ interface BoostCarModalProps {
   carTitle: string;
   onClose: () => void;
   onSuccess: () => void;
+  premiumEnabled?: boolean;
 }
 
 interface BoostOption {
@@ -25,7 +26,7 @@ const BOOST_OPTIONS: BoostOption[] = [
   { duration: 24, label: '24 sata', cost: CREDIT_COSTS.FEATURED_24H },
 ];
 
-export function BoostCarModal({ carId, carTitle, onClose, onSuccess }: BoostCarModalProps) {
+export function BoostCarModal({ carId, carTitle, onClose, onSuccess, premiumEnabled = false }: BoostCarModalProps) {
   const [selectedOption, setSelectedOption] = useState<BoostOption>(BOOST_OPTIONS[1]);
   const [loading, setLoading] = useState(false);
   const [userCredits, setUserCredits] = useState<number>(0);
@@ -49,7 +50,7 @@ export function BoostCarModal({ carId, carTitle, onClose, onSuccess }: BoostCarM
       return;
     }
 
-    if (FEATURES.PREMIUM_ENABLED) {
+    if (premiumEnabled) {
       if (userCredits < selectedOption.cost) {
         alert(`Nemate dovoljno kredita. Potrebno: ${selectedOption.cost}, Imate: ${userCredits}`);
         return;

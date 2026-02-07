@@ -54,6 +54,7 @@ function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [creditsEnabled, setCreditsEnabled] = useState(true);
+  const [premiumEnabled, setPremiumEnabled] = useState(false);
   const currentYear = new Date().getFullYear();
   const [filters, setFilters] = useState<FilterOptions>({
     location: '',
@@ -103,14 +104,24 @@ function App() {
   };
 
   const loadSystemSettings = async () => {
-    const { data, error } = await supabase
+    const { data: creditsData, error: creditsError } = await supabase
       .from('system_settings')
       .select('credits_enabled')
       .eq('id', '00000000-0000-0000-0000-000000000000')
       .maybeSingle();
 
-    if (!error && data) {
-      setCreditsEnabled(data.credits_enabled);
+    if (!creditsError && creditsData) {
+      setCreditsEnabled(creditsData.credits_enabled);
+    }
+
+    const { data: premiumData, error: premiumError } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('id', 'premium_enabled')
+      .maybeSingle();
+
+    if (!premiumError && premiumData) {
+      setPremiumEnabled(premiumData.value);
     }
   };
 
@@ -426,7 +437,7 @@ function App() {
                           <span className="text-sm font-bold text-white">@{userProfile.nickname}</span>
                         )}
                         <span className="text-xs text-gray-400">{user.email}</span>
-                        {FEATURES.PREMIUM_ENABLED && !userProfile?.is_premium && creditsEnabled && (
+                        {premiumEnabled && !userProfile?.is_premium && creditsEnabled && (
                           <button
                             onClick={() => setShowBuyCredits(true)}
                             className="text-xs text-green-400 font-semibold flex items-center gap-1 mt-0.5 hover:text-green-300 transition-colors"
@@ -437,11 +448,11 @@ function App() {
                           </button>
                         )}
                       </div>
-                      {FEATURES.PREMIUM_ENABLED && userProfile?.is_premium && (
+                      {premiumEnabled && userProfile?.is_premium && (
                         <PremiumBadge size="sm" onClick={() => setShowPremiumModal(true)} />
                       )}
                     </div>
-                    {FEATURES.PREMIUM_ENABLED && !userProfile?.is_premium && (
+                    {premiumEnabled && !userProfile?.is_premium && (
                       <>
                         <button
                           onClick={() => setShowPromoCode(true)}
@@ -532,7 +543,7 @@ function App() {
 
         <header className="py-20 px-4">
           <div className="max-w-7xl mx-auto text-center">
-            {FEATURES.PREMIUM_ENABLED && (
+            {premiumEnabled && (
               <div className="flex justify-center gap-4 mb-8 flex-wrap">
                 <button
                   onClick={() => user ? setShowPremiumModal(true) : setShowAuthModal(true)}
@@ -924,6 +935,7 @@ function App() {
             }}
             editMode={!!editingCar}
             carToEdit={editingCar || undefined}
+            premiumEnabled={premiumEnabled}
           />
         )}
 
@@ -935,6 +947,7 @@ function App() {
               loadCars();
               setActiveTab('offers');
             }}
+            premiumEnabled={premiumEnabled}
           />
         )}
 
@@ -967,6 +980,7 @@ function App() {
             }}
             userId={user.id}
             onCarUpdated={loadCars}
+            premiumEnabled={premiumEnabled}
           />
         )}
 
