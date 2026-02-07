@@ -107,14 +107,17 @@ function App() {
   };
 
   const fetchSupportUnreadCount = async () => {
-    if (!user || !userProfile?.is_admin && !userProfile?.is_moderator) return;
+    if (!user || !userProfile?.is_admin && !userProfile?.is_moderator) {
+      setSupportUnreadCount(0);
+      return;
+    }
 
     const { count } = await supabase
       .from('support_tickets')
       .select('*', { count: 'exact', head: true })
       .in('status', ['pending', 'open']);
 
-    setSupportUnreadCount(count || 0);
+    setSupportUnreadCount(count ?? 0);
   };
 
   const loadSystemSettings = async () => {
