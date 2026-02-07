@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, Clock, Zap } from 'lucide-react';
+import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, Clock, Zap, AlertTriangle } from 'lucide-react';
 import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
@@ -23,6 +23,10 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
   const [loading, setLoading] = useState(true);
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDescription, setReportDescription] = useState('');
+  const [submittingReport, setSubmittingReport] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -176,6 +180,44 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
       return `${diffHours}h ${diffMinutes}m`;
     } else {
       return `${diffMinutes}m`;
+    }
+  };
+
+  const handleReportCar = async () => {
+    if (!user) {
+      alert('Morate biti prijavljeni da biste prijavili oglas');
+      return;
+    }
+
+    if (!reportReason.trim()) {
+      alert('Molimo unesite razlog prijave');
+      return;
+    }
+
+    setSubmittingReport(true);
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .insert({
+          car_id: car!.id,
+          reported_by: user.id,
+          reported_user_id: car!.user_id,
+          reason: reportReason,
+          description: reportDescription,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
+      alert('Prijava je uspešno poslata. Moderatori će pregledati oglas.');
+      setShowReportModal(false);
+      setReportReason('');
+      setReportDescription('');
+    } catch (error) {
+      console.error('Error reporting car:', error);
+      alert('Greška pri slanju prijave. Pokušajte ponovo.');
+    } finally {
+      setSubmittingReport(false);
     }
   };
 
@@ -560,6 +602,13 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                       </div>
                     </button>
                   )}
+                  <button
+                    onClick={() => setShowReportModal(true)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-orange-400 rounded-xl transition-all border border-white/10 hover:border-orange-500/30"
+                  >
+                    <AlertTriangle className="w-5 h-5" />
+                    <span className="text-sm font-medium">Prijavi oglas</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -618,6 +667,87 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
           </div>
         </div>
       </div>
+
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+          <div className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 rounded-3xl max-w-lg w-full border border-white/10 shadow-2xl">
+            <div className="p-6 border-b border-white/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-orange-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Prijavi oglas</h3>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowReportModal(false);
+                    setReportReason('');
+                    setReportDescription('');
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-xl"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Razlog prijave *
+                </label>
+                <select
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-orange-500/50"
+                >
+                  <option value="">Izaberite razlog</option>
+                  <option value="Lažan oglas">Lažan oglas</option>
+                  <option value="Neprikladne fotografije">Neprikladne fotografije</option>
+                  <option value="Prevara">Prevara</option>
+                  <option value="Duplikat">Duplikat oglasa</option>
+                  <option value="Netačni podaci">Netačni podaci</option>
+                  <option value="Ostalo">Ostalo</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Dodatni opis (opciono)
+                </label>
+                <textarea
+                  value={reportDescription}
+                  onChange={(e) => setReportDescription(e.target.value)}
+                  placeholder="Opišite problem detaljnije..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-orange-500/50 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    setShowReportModal(false);
+                    setReportReason('');
+                    setReportDescription('');
+                  }}
+                  className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl transition-all border border-white/10"
+                >
+                  Otkaži
+                </button>
+                <button
+                  onClick={handleReportCar}
+                  disabled={submittingReport || !reportReason}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submittingReport ? 'Slanje...' : 'Pošalji prijavu'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {fullscreenImage && carImages.length > 0 && carImages[currentImageIndex] && (
         <div
