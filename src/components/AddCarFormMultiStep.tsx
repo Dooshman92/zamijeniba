@@ -132,8 +132,12 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
   });
 
   const handleKilowattsChange = (value: string) => {
+    if (!value || value === '') {
+      setFormData({ ...formData, kilowatts: '' as any, horse_power: '' as any });
+      return;
+    }
     const kw = parseInt(value);
-    if (!value || isNaN(kw) || kw === 0) {
+    if (isNaN(kw) || kw === 0) {
       setFormData({ ...formData, kilowatts: '' as any, horse_power: '' as any });
     } else {
       const hp = Math.round(kw * 1.35962);
@@ -300,15 +304,73 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
         imageUrls = imagePreviews;
       }
 
+      const cleanValue = (val: any): number | null => {
+        if (val === '' || val === null || val === undefined || isNaN(Number(val))) {
+          return null;
+        }
+        return Number(val);
+      };
+
       const cleanFormData = {
-        ...formData,
-        year: formData.year || null,
-        mileage: formData.mileage || null,
-        price: formData.price || null,
-        kilowatts: formData.kilowatts || null,
-        horse_power: formData.horse_power || null,
-        doors: formData.doors || 4,
-        seats: formData.seats || 5,
+        vehicle_type: formData.vehicle_type,
+        brand: formData.brand,
+        model: formData.model,
+        year: cleanValue(formData.year),
+        mileage: cleanValue(formData.mileage),
+        price: cleanValue(formData.price),
+        fuel_type: formData.fuel_type,
+        color: formData.color,
+        transmission: formData.transmission,
+        drive_type: formData.drive_type || null,
+        kilowatts: cleanValue(formData.kilowatts),
+        horse_power: cleanValue(formData.horse_power),
+        engine_size: formData.engine_size || null,
+        engine_displacement: cleanValue(formData.engine_displacement),
+        hull_material: formData.hull_material || null,
+        track_length: cleanValue(formData.track_length),
+        doors: formData.doors || '4/5',
+        seats: cleanValue(formData.seats) || 5,
+        location: formData.location,
+        description: formData.description,
+        body_condition: cleanValue(formData.body_condition) || 5,
+        mechanical_condition: cleanValue(formData.mechanical_condition) || 5,
+        interior_condition: cleanValue(formData.interior_condition) || 5,
+        damaged: formData.damaged || false,
+        xenon_lights: formData.xenon_lights || false,
+        heated_seats: formData.heated_seats || false,
+        leather_seats: formData.leather_seats || false,
+        sunroof: formData.sunroof || false,
+        parking_camera: formData.parking_camera || false,
+        navigation: formData.navigation || false,
+        bluetooth: formData.bluetooth || false,
+        cruise_control: formData.cruise_control || false,
+        climate_control: formData.climate_control || false,
+        alloy_wheels: formData.alloy_wheels || false,
+        fog_lights: formData.fog_lights || false,
+        roof_rack: formData.roof_rack || false,
+        tow_hitch: formData.tow_hitch || false,
+        sport_package: formData.sport_package || false,
+        winter_tires: formData.winter_tires || false,
+        summer_tires: formData.summer_tires || false,
+        spare_tire: formData.spare_tire || false,
+        electric_windows: formData.electric_windows || false,
+        electric_mirrors: formData.electric_mirrors || false,
+        abs: formData.abs || false,
+        esp: formData.esp || false,
+        central_locking: formData.central_locking || false,
+        alarm: formData.alarm || false,
+        immobilizer: formData.immobilizer || false,
+        rain_sensor: formData.rain_sensor || false,
+        light_sensor: formData.light_sensor || false,
+        tinted_windows: formData.tinted_windows || false,
+        electric_seats: formData.electric_seats || false,
+        memory_seats: formData.memory_seats || false,
+        sport_seats: formData.sport_seats || false,
+        isofix: formData.isofix || false,
+        start_stop: formData.start_stop || false,
+        keyless_entry: formData.keyless_entry || false,
+        rear_parking_sensors: formData.rear_parking_sensors || false,
+        front_parking_sensors: formData.front_parking_sensors || false,
         image_url: imageUrls[0],
       };
 
@@ -366,15 +428,73 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       return;
     }
 
+    const cleanValue = (val: any): number | null => {
+      if (val === '' || val === null || val === undefined || isNaN(Number(val))) {
+        return null;
+      }
+      return Number(val);
+    };
+
     const cleanFormData = {
-      ...formData,
-      year: formData.year || null,
-      mileage: formData.mileage || null,
-      price: formData.price || null,
-      kilowatts: formData.kilowatts || null,
-      horse_power: formData.horse_power || null,
-      doors: formData.doors || 4,
-      seats: formData.seats || 5,
+      vehicle_type: formData.vehicle_type,
+      brand: formData.brand,
+      model: formData.model,
+      year: cleanValue(formData.year),
+      mileage: cleanValue(formData.mileage),
+      price: cleanValue(formData.price),
+      fuel_type: formData.fuel_type,
+      color: formData.color,
+      transmission: formData.transmission,
+      drive_type: formData.drive_type || null,
+      kilowatts: cleanValue(formData.kilowatts),
+      horse_power: cleanValue(formData.horse_power),
+      engine_size: formData.engine_size || null,
+      engine_displacement: cleanValue(formData.engine_displacement),
+      hull_material: formData.hull_material || null,
+      track_length: cleanValue(formData.track_length),
+      doors: formData.doors || '4/5',
+      seats: cleanValue(formData.seats) || 5,
+      location: formData.location,
+      description: formData.description,
+      body_condition: cleanValue(formData.body_condition) || 5,
+      mechanical_condition: cleanValue(formData.mechanical_condition) || 5,
+      interior_condition: cleanValue(formData.interior_condition) || 5,
+      damaged: formData.damaged || false,
+      xenon_lights: formData.xenon_lights || false,
+      heated_seats: formData.heated_seats || false,
+      leather_seats: formData.leather_seats || false,
+      sunroof: formData.sunroof || false,
+      parking_camera: formData.parking_camera || false,
+      navigation: formData.navigation || false,
+      bluetooth: formData.bluetooth || false,
+      cruise_control: formData.cruise_control || false,
+      climate_control: formData.climate_control || false,
+      alloy_wheels: formData.alloy_wheels || false,
+      fog_lights: formData.fog_lights || false,
+      roof_rack: formData.roof_rack || false,
+      tow_hitch: formData.tow_hitch || false,
+      sport_package: formData.sport_package || false,
+      winter_tires: formData.winter_tires || false,
+      summer_tires: formData.summer_tires || false,
+      spare_tire: formData.spare_tire || false,
+      electric_windows: formData.electric_windows || false,
+      electric_mirrors: formData.electric_mirrors || false,
+      abs: formData.abs || false,
+      esp: formData.esp || false,
+      central_locking: formData.central_locking || false,
+      alarm: formData.alarm || false,
+      immobilizer: formData.immobilizer || false,
+      rain_sensor: formData.rain_sensor || false,
+      light_sensor: formData.light_sensor || false,
+      tinted_windows: formData.tinted_windows || false,
+      electric_seats: formData.electric_seats || false,
+      memory_seats: formData.memory_seats || false,
+      sport_seats: formData.sport_seats || false,
+      isofix: formData.isofix || false,
+      start_stop: formData.start_stop || false,
+      keyless_entry: formData.keyless_entry || false,
+      rear_parking_sensors: formData.rear_parking_sensors || false,
+      front_parking_sensors: formData.front_parking_sensors || false,
     };
 
     const isPremium = !!(userProfile?.is_premium && userProfile?.premium_expires_at);
