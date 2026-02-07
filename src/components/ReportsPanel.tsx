@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, AlertTriangle, CheckCircle, XCircle, Clock, Eye, Trash2, User } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle, XCircle, Clock, User } from 'lucide-react';
 import { supabase, Car } from '../lib/supabase';
 
 interface Report {
@@ -30,7 +30,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
   const [reports, setReports] = useState<ReportWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<ReportWithDetails | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'reviewed' | 'resolved' | 'dismissed'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'dismissed'>('all');
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [processing, setProcessing] = useState(false);
 
@@ -94,11 +94,22 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
     }
   };
 
-  const handleUpdateStatus = async (reportId: string, newStatus: 'reviewed' | 'resolved' | 'dismissed') => {
+  const handleUpdateStatus = async (reportId: string, newStatus: 'resolved' | 'dismissed') => {
     setProcessing(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
+
+      const report = reports.find(r => r.id === reportId);
+
+      if (newStatus === 'resolved' && report?.car) {
+        const { error: deleteError } = await supabase
+          .from('cars')
+          .delete()
+          .eq('id', report.car_id);
+
+        if (deleteError) throw deleteError;
+      }
 
       const { error } = await supabase
         .from('reports')
@@ -115,32 +126,13 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
       setSelectedReport(null);
       setResolutionNotes('');
       loadReports();
+
+      if (newStatus === 'resolved') {
+        alert('Oglas je obrisan i prijava je rešena');
+      }
     } catch (error) {
       console.error('Error updating report:', error);
       alert('Greška pri ažuriranju prijave');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handleDeleteCar = async (carId: string, reportId: string) => {
-    if (!confirm('Da li ste sigurni da želite obrisati ovaj oglas?')) return;
-
-    setProcessing(true);
-    try {
-      const { error: deleteError } = await supabase
-        .from('cars')
-        .delete()
-        .eq('id', carId);
-
-      if (deleteError) throw deleteError;
-
-      await handleUpdateStatus(reportId, 'resolved');
-
-      alert('Oglas je uspešno obrisan');
-    } catch (error) {
-      console.error('Error deleting car:', error);
-      alert('Greška pri brisanju oglasa');
     } finally {
       setProcessing(false);
     }
@@ -150,8 +142,6 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
     switch (status) {
       case 'pending':
         return <Clock className="w-4 h-4 text-yellow-500" />;
-      case 'reviewed':
-        return <Eye className="w-4 h-4 text-blue-500" />;
       case 'resolved':
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       case 'dismissed':
@@ -165,8 +155,6 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
     switch (status) {
       case 'pending':
         return 'Na čekanju';
-      case 'reviewed':
-        return 'Pregledano';
       case 'resolved':
         return 'Rešeno';
       case 'dismissed':
@@ -199,7 +187,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
 
         <div className="p-6 border-b border-white/10">
           <div className="flex gap-2 flex-wrap">
-            {(['all', 'pending', 'reviewed', 'resolved', 'dismissed'] as const).map((status) => (
+            {(['all', 'pending', 'resolved', 'dismissed'] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
@@ -296,16 +284,6 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
                         >
                           Pregledi
                         </button>
-                        {report.car && (
-                          <button
-                            onClick={() => handleDeleteCar(report.car_id, report.id)}
-                            disabled={processing}
-                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all text-sm font-medium flex items-center gap-2 disabled:opacity-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Obriši
-                          </button>
-                        )}
                       </div>
                     )}
                   </div>
@@ -343,17 +321,15 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => handleUpdateStatus(selectedReport.id, 'reviewed')}
-                  disabled={processing}
-                  className="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  <Eye className="w-4 h-4" />
-                  Pregledano
-                </button>
-                <button
-                  onClick={() => handleUpdateStatus(selectedReport.id, 'resolved')}
+                  onClick={() => {
+                    if (selectedReport.car && confirm('Ovom akcijom ćete obrisati oglas. Da li ste sigurni?')) {
+                      handleUpdateStatus(selectedReport.id, 'resolved');
+                    } else if (!selectedReport.car) {
+                      handleUpdateStatus(selectedReport.id, 'resolved');
+                    }
+                  }}
                   disabled={processing}
                   className="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                 >
