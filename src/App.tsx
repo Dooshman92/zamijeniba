@@ -150,13 +150,30 @@ function App() {
       return;
     }
 
-    const { count } = await supabase
+    // Fetch all notifications for this user
+    const { data: notifications } = await supabase
       .from('system_notifications')
-      .select('*', { count: 'exact', head: true })
-      .or(`user_id.is.null,user_id.eq.${user.id}`)
-      .eq('is_read', false);
+      .select('id')
+      .or(`user_id.is.null,user_id.eq.${user.id}`);
 
-    setNotificationsUnreadCount(count ?? 0);
+    if (!notifications || notifications.length === 0) {
+      setNotificationsUnreadCount(0);
+      return;
+    }
+
+    const notificationIds = notifications.map(n => n.id);
+
+    // Check which notifications have been read by this user
+    const { data: readStatus } = await supabase
+      .from('notification_read_status')
+      .select('notification_id')
+      .eq('user_id', user.id)
+      .in('notification_id', notificationIds);
+
+    const readNotificationIds = new Set(readStatus?.map(r => r.notification_id) || []);
+    const unreadCount = notificationIds.filter(id => !readNotificationIds.has(id)).length;
+
+    setNotificationsUnreadCount(unreadCount);
   };
 
   const loadSystemSettings = async () => {
@@ -292,11 +309,28 @@ function App() {
         )
         .subscribe();
 
+      const notificationReadStatusChannel = supabase
+        .channel('notification-read-status-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notification_read_status',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            fetchNotificationsUnreadCount();
+          }
+        )
+        .subscribe();
+
       return () => {
         supabase.removeChannel(unreadChannel);
         supabase.removeChannel(messagesChannel);
         supabase.removeChannel(supportChannel);
         supabase.removeChannel(notificationsChannel);
+        supabase.removeChannel(notificationReadStatusChannel);
       };
     } else {
       setUserProfile(null);

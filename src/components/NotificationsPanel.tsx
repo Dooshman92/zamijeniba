@@ -35,9 +35,13 @@ export function NotificationsPanel({ onClose }: NotificationsPanelProps) {
   const fetchNotifications = async () => {
     if (!user) return;
 
+    // Fetch notifications with read status
     const { data, error } = await supabase
       .from('system_notifications')
-      .select('*')
+      .select(`
+        *,
+        notification_read_status!left(read_at)
+      `)
       .or(`user_id.is.null,user_id.eq.${user.id}`)
       .order('created_at', { ascending: false })
       .limit(50);
@@ -45,7 +49,18 @@ export function NotificationsPanel({ onClose }: NotificationsPanelProps) {
     if (error) {
       console.error('Error fetching notifications:', error);
     } else {
-      setNotifications(data || []);
+      // Map the data to include is_read based on notification_read_status
+      const notificationsWithReadStatus = (data || []).map(notification => {
+        const readStatus = Array.isArray(notification.notification_read_status)
+          ? notification.notification_read_status[0]
+          : notification.notification_read_status;
+
+        return {
+          ...notification,
+          is_read: !!readStatus?.read_at
+        };
+      });
+      setNotifications(notificationsWithReadStatus);
     }
     setLoading(false);
   };
@@ -74,33 +89,53 @@ export function NotificationsPanel({ onClose }: NotificationsPanelProps) {
   };
 
   const markAsRead = async (notificationId: string) => {
+    if (!user) return;
+
+    // Insert into notification_read_status to mark as read
     const { error } = await supabase
-      .from('system_notifications')
-      .update({ is_read: true })
-      .eq('id', notificationId);
+      .from('notification_read_status')
+      .insert({
+        notification_id: notificationId,
+        user_id: user.id
+      });
 
     if (!error) {
       setNotifications(prev =>
         prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
       );
+    } else {
+      // If error is duplicate key (already marked as read), just update UI
+      if (error.code === '23505') {
+        setNotifications(prev =>
+          prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+        );
+      }
     }
   };
 
   const markAllAsRead = async () => {
     if (!user) return;
 
-    const unreadIds = notifications
-      .filter(n => !n.is_read)
-      .map(n => n.id);
+    const unreadNotifications = notifications.filter(n => !n.is_read);
 
-    if (unreadIds.length === 0) return;
+    if (unreadNotifications.length === 0) return;
+
+    // Insert read status for all unread notifications
+    const readStatusRecords = unreadNotifications.map(n => ({
+      notification_id: n.id,
+      user_id: user.id
+    }));
 
     const { error } = await supabase
-      .from('system_notifications')
-      .update({ is_read: true })
-      .in('id', unreadIds);
+      .from('notification_read_status')
+      .insert(readStatusRecords);
 
     if (!error) {
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, is_read: true }))
+      );
+    } else {
+      // Even if there's an error (e.g., some already marked), update UI
       setNotifications(prev =>
         prev.map(n => ({ ...n, is_read: true }))
       );
