@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
-import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap, Headset } from 'lucide-react';
+import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Zap, Headset, Bike, Ship, Waves } from 'lucide-react';
 import { Car, supabase, UserProfile } from './lib/supabase';
 import { useAuth } from './lib/auth';
 import { initializeStorage } from './lib/storage';
@@ -53,6 +53,7 @@ function App() {
   const [supportUnreadCount, setSupportUnreadCount] = useState(0);
   const [selectedCarForSwap, setSelectedCarForSwap] = useState<Car | null>(null);
   const [activeTab, setActiveTab] = useState<'cars' | 'offers'>('cars');
+  const [selectedVehicleCategory, setSelectedVehicleCategory] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [creditsEnabled, setCreditsEnabled] = useState(true);
@@ -396,6 +397,7 @@ function App() {
     setSelectedCarForDetail(null);
     setActiveTab('cars');
     setSearchQuery('');
+    setSelectedVehicleCategory(null);
     setFilters({
       location: '',
       brand: '',
@@ -407,6 +409,20 @@ function App() {
       transmission: '',
       onlyDamaged: false,
     });
+  };
+
+  const handleVehicleCategoryClick = (category: string | null) => {
+    setSelectedVehicleCategory(category);
+    setFilters(prev => ({
+      ...prev,
+      vehicleType: category || undefined,
+    }));
+    setVisibleCarsCount(30);
+
+    const resultsElement = document.getElementById('results-section');
+    if (resultsElement) {
+      resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   useEffect(() => {
@@ -651,7 +667,11 @@ function App() {
           <div className="flex justify-center">
             <div className="inline-flex backdrop-blur-md bg-white/5 border border-white/10 p-1.5 rounded-2xl gap-2">
               <button
-                onClick={() => setActiveTab('cars')}
+                onClick={() => {
+                  setActiveTab('cars');
+                  setSelectedVehicleCategory(null);
+                  setFilters(prev => ({ ...prev, vehicleType: undefined }));
+                }}
                 className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   activeTab === 'cars'
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
@@ -672,6 +692,79 @@ function App() {
               </button>
             </div>
           </div>
+
+          {activeTab === 'cars' && (
+            <div className="flex justify-center mt-6">
+              <div className="inline-flex flex-wrap backdrop-blur-md bg-white/5 border border-white/10 p-2 rounded-2xl gap-2 max-w-4xl">
+                <button
+                  onClick={() => handleVehicleCategoryClick(null)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                    selectedVehicleCategory === null
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Sve kategorije
+                </button>
+                <button
+                  onClick={() => handleVehicleCategoryClick('automobil')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                    selectedVehicleCategory === 'automobil'
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <CarIcon className="w-5 h-5" />
+                  Automobili
+                </button>
+                <button
+                  onClick={() => handleVehicleCategoryClick('motocikl')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                    selectedVehicleCategory === 'motocikl'
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Bike className="w-5 h-5" />
+                  Motocikli
+                </button>
+                <button
+                  onClick={() => handleVehicleCategoryClick('quad')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                    selectedVehicleCategory === 'quad'
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Bike className="w-5 h-5" />
+                  Quad
+                </button>
+                <button
+                  onClick={() => handleVehicleCategoryClick('motorne_sanke')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                    selectedVehicleCategory === 'motorne_sanke'
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Ship className="w-5 h-5" />
+                  Motorne Sanke
+                </button>
+                <button
+                  onClick={() => handleVehicleCategoryClick('jetski')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                    selectedVehicleCategory === 'jetski'
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Waves className="w-5 h-5" />
+                  Jetski
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div id="results-section" className="max-w-7xl mx-auto px-4 pb-20">
