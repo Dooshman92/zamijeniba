@@ -582,19 +582,6 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
             {!isOwnCar && (
               <div className="sticky bottom-0 backdrop-blur-md bg-gray-900/90 border-t border-white/10 p-6 -mx-6 -mb-6">
                 <div className="space-y-3">
-                  {isPremiumUser && onSendMessage && (
-                    <button
-                      onClick={() => onSendMessage(car.user_id, car.id)}
-                      className="group/btn relative w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 overflow-hidden shadow-lg shadow-green-500/30"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-700 opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
-                      <div className="relative flex items-center justify-center gap-2">
-                        <MessageCircle className="w-6 h-6 group-hover/btn:scale-110 transition-transform duration-300" />
-                        <span className="text-lg">Pošalji poruku</span>
-                        <Crown className="w-5 h-5 text-yellow-300" />
-                      </div>
-                    </button>
-                  )}
                   {onSwapOffer && (
                     <button
                       onClick={() => onSwapOffer(car)}
