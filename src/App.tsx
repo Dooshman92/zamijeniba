@@ -527,13 +527,15 @@ function App() {
                     >
                       <Settings className="w-5 h-5" />
                     </button>
-                    <button
-                      onClick={() => setShowSupport(true)}
-                      className="backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
-                      title="Podrška korisnicima"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                    </button>
+                    {!userProfile?.is_admin && !userProfile?.is_moderator && (
+                      <button
+                        onClick={() => setShowSupport(true)}
+                        className="backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+                        title="Podrška korisnicima"
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                      </button>
+                    )}
                     <button
                       onClick={signOut}
                       className="backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
