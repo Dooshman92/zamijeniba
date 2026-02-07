@@ -95,10 +95,14 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
     if (!user) return;
 
     const newBlockedStatus = blockedByUserId ? null : user.id;
+    const newBlockedAt = blockedByUserId ? null : new Date().toISOString();
 
     const { error } = await supabase
       .from('conversations')
-      .update({ blocked_by_user_id: newBlockedStatus })
+      .update({
+        blocked_by_user_id: newBlockedStatus,
+        blocked_at: newBlockedAt
+      })
       .eq('id', conversationId);
 
     if (error) {
