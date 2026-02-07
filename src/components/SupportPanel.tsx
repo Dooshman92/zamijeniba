@@ -12,7 +12,7 @@ interface SupportTicket {
   user_id: string;
   subject: string;
   message: string;
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  status: 'pending' | 'open' | 'in_progress' | 'resolved' | 'closed';
   priority: 'low' | 'normal' | 'high' | 'urgent';
   created_at: string;
   updated_at: string;
@@ -66,6 +66,10 @@ export function SupportPanel({ userId }: SupportPanelProps) {
   useEffect(() => {
     if (selectedTicket) {
       loadMessages(selectedTicket.id);
+
+      if (selectedTicket.status === 'pending') {
+        updateTicketStatus(selectedTicket.id, 'open');
+      }
 
       const channel = supabase
         .channel(`support_messages_admin:${selectedTicket.id}`)
@@ -155,6 +159,7 @@ export function SupportPanel({ userId }: SupportPanelProps) {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'pending': return <Clock className="w-4 h-4 text-orange-400" />;
       case 'open': return <AlertCircle className="w-4 h-4 text-yellow-400" />;
       case 'in_progress': return <Clock className="w-4 h-4 text-blue-400" />;
       case 'resolved': return <CheckCircle className="w-4 h-4 text-green-400" />;
@@ -165,6 +170,7 @@ export function SupportPanel({ userId }: SupportPanelProps) {
 
   const getStatusText = (status: string) => {
     switch (status) {
+      case 'pending': return 'Na čekanju';
       case 'open': return 'Otvoreno';
       case 'in_progress': return 'U obradi';
       case 'resolved': return 'Riješeno';
@@ -185,6 +191,7 @@ export function SupportPanel({ userId }: SupportPanelProps) {
 
   const getTicketStats = () => {
     return {
+      pending: tickets.filter(t => t.status === 'pending').length,
       open: tickets.filter(t => t.status === 'open').length,
       in_progress: tickets.filter(t => t.status === 'in_progress').length,
       resolved: tickets.filter(t => t.status === 'resolved').length,
@@ -197,10 +204,14 @@ export function SupportPanel({ userId }: SupportPanelProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-6 gap-4">
         <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4">
           <p className="text-gray-400 text-sm mb-1">Ukupno</p>
           <p className="text-3xl font-black text-white">{stats.total}</p>
+        </div>
+        <div className="backdrop-blur-md bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
+          <p className="text-orange-400 text-sm mb-1">Na čekanju</p>
+          <p className="text-3xl font-black text-orange-400">{stats.pending}</p>
         </div>
         <div className="backdrop-blur-md bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
           <p className="text-yellow-400 text-sm mb-1">Otvoreno</p>
@@ -229,6 +240,7 @@ export function SupportPanel({ userId }: SupportPanelProps) {
             className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500/50"
           >
             <option value="all">Svi tiketi</option>
+            <option value="pending">Na čekanju</option>
             <option value="open">Otvoreni</option>
             <option value="in_progress">U obradi</option>
             <option value="resolved">Riješeni</option>
