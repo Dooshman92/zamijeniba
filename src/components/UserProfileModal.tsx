@@ -255,11 +255,11 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
   const getReactionIcon = (type: string) => {
     switch (type) {
       case 'helpful':
-        return <ThumbsUp className="w-4 h-4" />;
+        return <ThumbsUp className="w-3 h-3" />;
       case 'accurate':
-        return <CheckCircle className="w-4 h-4" />;
+        return <CheckCircle className="w-3 h-3" />;
       case 'supportive':
-        return <Heart className="w-4 h-4" />;
+        return <Heart className="w-3 h-3" />;
       default:
         return null;
     }
@@ -397,107 +397,107 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
               )}
             </div>
 
-            <div className="mt-8">
-              <div className="flex items-center gap-3 mb-4">
-                <Star className="w-5 h-5 text-amber-400" />
-                <h3 className="text-xl font-bold text-white">
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Star className="w-4 h-4 text-amber-400" />
+                <h3 className="text-lg font-bold text-white">
                   Dojmovi ({reviews.length})
                 </h3>
                 {averageRatings && (
-                  <div className="ml-auto flex items-center gap-2">
-                    {renderStars(averageRatings.overall)}
-                    <span className="text-white font-bold">{averageRatings.overall.toFixed(1)}</span>
+                  <div className="ml-auto flex items-center gap-1.5">
+                    {renderStars(averageRatings.overall, 'sm')}
+                    <span className="text-white font-bold text-sm">{averageRatings.overall.toFixed(1)}</span>
                   </div>
                 )}
               </div>
 
               {loadingReviews ? (
-                <div className="text-center py-8">
+                <div className="text-center py-6">
                   <div className="inline-block relative">
-                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-amber-500/30 border-t-amber-500"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-amber-500/30 border-t-amber-500"></div>
                   </div>
-                  <p className="mt-3 text-gray-300 text-sm">Učitavanje dojmova...</p>
+                  <p className="mt-2 text-gray-300 text-xs">Učitavanje dojmova...</p>
                 </div>
               ) : reviews.length === 0 ? (
-                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
-                  <Star className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-400">
+                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 text-center">
+                  <Star className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-400 text-sm">
                     {isOwnProfile
                       ? 'Još uvijek niste primili nijedan dojam'
                       : 'Korisnik još nije primio nijedan dojam'}
                   </p>
                 </div>
               ) : (
-                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4">
+                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-3">
                   {averageRatings && (
-                    <div className="pb-4 mb-4 border-b border-white/10">
-                      <div className="flex items-center justify-between gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4 text-blue-400" />
+                    <div className="pb-2 mb-2 border-b border-white/10">
+                      <div className="flex items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <MessageSquare className="w-3 h-3 text-blue-400" />
                           <span className="text-gray-300">Komunikacija</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           {renderStars(averageRatings.communication, 'sm')}
-                          <span className="text-gray-400 text-xs ml-1">{averageRatings.communication.toFixed(1)}</span>
+                          <span className="text-gray-400 text-xs">{averageRatings.communication.toFixed(1)}</span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between gap-4 text-sm mt-2">
-                        <div className="flex items-center gap-2">
-                          <Shield className="w-4 h-4 text-green-400" />
+                      <div className="flex items-center justify-between gap-3 text-xs mt-1">
+                        <div className="flex items-center gap-1.5">
+                          <Shield className="w-3 h-3 text-green-400" />
                           <span className="text-gray-300">Pouzdanost</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           {renderStars(averageRatings.reliability, 'sm')}
-                          <span className="text-gray-400 text-xs ml-1">{averageRatings.reliability.toFixed(1)}</span>
+                          <span className="text-gray-400 text-xs">{averageRatings.reliability.toFixed(1)}</span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between gap-4 text-sm mt-2">
-                        <div className="flex items-center gap-2">
-                          <Smile className="w-4 h-4 text-pink-400" />
+                      <div className="flex items-center justify-between gap-3 text-xs mt-1">
+                        <div className="flex items-center gap-1.5">
+                          <Smile className="w-3 h-3 text-pink-400" />
                           <span className="text-gray-300">Ljubaznost</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           {renderStars(averageRatings.friendliness, 'sm')}
-                          <span className="text-gray-400 text-xs ml-1">{averageRatings.friendliness.toFixed(1)}</span>
+                          <span className="text-gray-400 text-xs">{averageRatings.friendliness.toFixed(1)}</span>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {reviews.map((review) => (
                       <div
                         key={review.id}
-                        className="bg-white/5 rounded-xl p-3 hover:bg-white/10 transition-all"
+                        className="bg-white/5 rounded-lg p-2 hover:bg-white/10 transition-all"
                       >
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-2">
                           <div className="flex-shrink-0">
                             {review.reviewer_avatar ? (
                               <img
                                 src={review.reviewer_avatar}
                                 alt="Avatar"
-                                className="w-10 h-10 rounded-full object-cover border-2 border-cyan-400"
+                                className="w-8 h-8 rounded-full object-cover border border-cyan-400"
                               />
                             ) : (
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                                <User className="w-5 h-5 text-white" />
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                                <User className="w-4 h-4 text-white" />
                               </div>
                             )}
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2 mb-1">
-                              <p className="font-semibold text-white text-sm">
+                            <div className="flex items-center justify-between gap-2 mb-0.5">
+                              <p className="font-semibold text-white text-xs">
                                 {review.reviewer_nickname ? `@${review.reviewer_nickname}` : 'Korisnik'}
                               </p>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-0.5">
                                 {renderStars((review.rating_communication + review.rating_reliability + review.rating_friendliness) / 3, 'sm')}
                               </div>
                             </div>
-                            <p className="text-xs text-gray-500 mb-2">{formatDate(review.created_at)}</p>
-                            <p className="text-gray-300 text-sm mb-2 leading-snug">{review.comment}</p>
+                            <p className="text-[10px] text-gray-500 mb-1">{formatDate(review.created_at)}</p>
+                            <p className="text-gray-300 text-xs mb-1.5 leading-tight">{review.comment}</p>
 
-                            <div className="flex items-center gap-1.5 flex-wrap">
+                            <div className="flex items-center gap-1 flex-wrap">
                               {['helpful', 'accurate', 'supportive'].map((reactionType) => {
                                 const count = review.reactions[reactionType as keyof typeof review.reactions] as number;
                                 const isActive = review.reactions.user_reaction === reactionType;
@@ -507,16 +507,16 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                                     key={reactionType}
                                     onClick={() => handleReaction(review.id, reactionType)}
                                     disabled={!currentUser}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded-full transition-all text-xs ${
+                                    className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full transition-all text-[10px] ${
                                       isActive
                                         ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
                                         : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
                                     } border`}
                                   >
                                     {getReactionIcon(reactionType)}
-                                    <span className="text-xs">{getReactionLabel(reactionType)}</span>
+                                    <span className="text-[10px]">{getReactionLabel(reactionType)}</span>
                                     {count > 0 && (
-                                      <span className="text-xs font-semibold">{count}</span>
+                                      <span className="text-[10px] font-semibold">{count}</span>
                                     )}
                                   </button>
                                 );
