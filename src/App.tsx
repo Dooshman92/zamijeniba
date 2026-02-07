@@ -1264,35 +1264,59 @@ function App() {
 
         <footer className="border-t border-white/10 backdrop-blur-md bg-white/5 py-12 mt-20">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-4">
-              {user && (
-                <button
-                  onClick={() => {
-                    if (userProfile?.is_admin || userProfile?.is_moderator) {
-                      setAdminPanelSection('support');
-                      setShowAdminPanel(true);
-                    } else {
-                      setShowSupport(true);
-                    }
-                  }}
-                  className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                >
-                  <Headset className="w-5 h-5" />
-                  <span>Podrška korisnicima</span>
-                  {supportUnreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                      {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
-                    </span>
-                  )}
-                </button>
-              )}
-              <div className="flex items-center justify-center flex-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+              <div className="flex flex-col items-center lg:items-start justify-center">
                 <Logo size="md" />
+                <div className="mt-4 text-center lg:text-left">
+                  <p className="text-gray-400 font-medium">autozamjena.ba © 2026</p>
+                  <p className="text-sm text-gray-500 mt-1">Brzo. Sigurno. Jednostavno.</p>
+                </div>
               </div>
-              <div className="w-[200px]"></div>
+
+              <div className="flex items-center justify-center">
+                <div className="w-full max-w-lg backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Sparkles className="w-5 h-5 text-cyan-400" />
+                    <h3 className="text-lg font-bold text-white">Prostor za reklamu</h3>
+                    <Sparkles className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Promovišite svoj biznis ovdje
+                  </p>
+                  <div className="mt-3 text-xs text-gray-500">
+                    728x90 Banner
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center lg:justify-end">
+                {user && (
+                  <button
+                    onClick={() => {
+                      if (userProfile?.is_admin || userProfile?.is_moderator) {
+                        setAdminPanelSection('support');
+                        setShowAdminPanel(true);
+                      } else {
+                        setShowSupport(true);
+                      }
+                    }}
+                    className="relative backdrop-blur-md bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-500 hover:to-emerald-600 border border-green-500/50 text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg"
+                  >
+                    <Headset className="w-5 h-5" />
+                    <span className="font-semibold">Podrška korisnicima</span>
+                    {supportUnreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                        {supportUnreadCount > 9 ? '9+' : supportUnreadCount}
+                      </span>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
-            <p className="text-gray-400 text-center">autozamjena.ba © 2026 - Najbolja platforma za zamjenu vozila u BiH</p>
-            <p className="text-sm text-gray-500 mt-2 text-center">Brzo. Sigurno. Jednostavno.</p>
+
+            <div className="border-t border-white/10 pt-6">
+              <p className="text-gray-400 text-center text-sm">Najbolja platforma za zamjenu vozila u BiH</p>
+            </div>
           </div>
         </footer>
       </div>
