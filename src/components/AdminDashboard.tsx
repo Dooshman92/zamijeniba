@@ -1163,10 +1163,9 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
       { value: 'jetski', label: 'Jet Ski', icon: Car }
     ];
 
-    let vehicleFilteredCars = cars;
-    if (selectedVehicleType !== 'all') {
-      vehicleFilteredCars = cars.filter(car => car.vehicle_type === selectedVehicleType);
-    }
+    const vehicleFilteredCars = selectedVehicleType === 'all'
+      ? cars
+      : cars.filter(car => car.vehicle_type === selectedVehicleType);
 
     const filteredCars = filterData(vehicleFilteredCars);
     const paginatedCars = paginateData(filteredCars);
@@ -1225,6 +1224,58 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+            <p className="ml-3 text-gray-600">Učitavam oglase...</p>
+          </div>
+        ) : paginatedCars.length === 0 ? (
+          <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-8">
+            <Car className="w-16 h-16 text-yellow-600 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">Nema oglasa za prikaz</h3>
+            <div className="bg-white rounded-lg p-4 max-w-2xl mx-auto mt-4">
+              <p className="font-semibold text-gray-900 mb-3">Debug Informacije:</p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Ukupno učitano iz baze:</span>
+                  <strong className="text-blue-600">{cars.length} oglasa</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Nakon filter po tipu vozila:</span>
+                  <strong className="text-blue-600">{vehicleFilteredCars.length} oglasa</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Nakon search filtera:</span>
+                  <strong className="text-blue-600">{filteredCars.length} oglasa</strong>
+                </div>
+                <div className="flex justify-between border-t pt-2 mt-2">
+                  <span className="text-gray-600">Trenutni filter tipa:</span>
+                  <strong className="text-purple-600">{selectedVehicleType}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Search term:</span>
+                  <strong className="text-purple-600">{searchTerm || '(prazan)'}</strong>
+                </div>
+                {userProfile && (
+                  <div className="flex justify-between border-t pt-2 mt-2">
+                    <span className="text-gray-600">Vaš status:</span>
+                    <strong className="text-green-600">
+                      {userProfile.is_admin ? 'Administrator' : userProfile.is_moderator ? 'Moderator' : 'Korisnik'}
+                    </strong>
+                  </div>
+                )}
+                {user && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">User ID:</span>
+                    <strong className="text-gray-600 text-xs">{user.id.slice(0, 20)}...</strong>
+                  </div>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={loadCars}
+              className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2 mx-auto"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Ponovo učitaj oglase
+            </button>
           </div>
         ) : (
           <>
