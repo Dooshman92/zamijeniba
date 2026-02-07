@@ -36,6 +36,8 @@ interface AdminPanelProps {
 export function AdminPanel({ onClose }: AdminPanelProps) {
   const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<'users' | 'support' | 'promo'>('users');
+
+  console.log('AdminPanel - currentUser:', currentUser?.id, 'activeTab:', activeTab);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [promoCodes, setPromoCodes] = useState<PromoCodeWithRedemption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -469,7 +471,10 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
               Korisnici
             </button>
             <button
-              onClick={() => setActiveTab('support')}
+              onClick={() => {
+                console.log('Support tab clicked');
+                setActiveTab('support');
+              }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
                 activeTab === 'support'
                   ? 'bg-white/20 text-white'
@@ -494,9 +499,16 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
         </div>
 
         <div className="overflow-y-auto max-h-[calc(90vh-120px)] px-6 py-4">
-          {activeTab === 'support' && currentUser?.id && (
-            <SupportPanel userId={currentUser.id} />
-          )}
+          {activeTab === 'support' && currentUser?.id ? (
+            <>
+              {console.log('Rendering SupportPanel with userId:', currentUser.id)}
+              <SupportPanel userId={currentUser.id} />
+            </>
+          ) : activeTab === 'support' ? (
+            <div className="text-center py-8">
+              <p className="text-red-400">currentUser?.id is not defined</p>
+            </div>
+          ) : null}
 
           {activeTab === 'users' && (
             <>
