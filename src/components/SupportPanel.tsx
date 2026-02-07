@@ -333,7 +333,9 @@ export function SupportPanel({ userId }: SupportPanelProps) {
                         <div className="mt-2 flex items-center gap-2 text-sm">
                           <Lock className="w-4 h-4 text-red-400" />
                           <span className="text-red-400 font-semibold">
-                            Zaključano {formatDateTime(selectedTicket.locked_at)} - Automatski će se obrisati za{' '}
+                            Zaključano {formatDateTime(selectedTicket.locked_at)}
+                            {selectedTicket.locked_by === selectedTicket.user_id ? ' (od strane korisnika)' : ' (od strane admina)'} -
+                            Automatski će se obrisati za{' '}
                             {Math.max(0, 3 - Math.floor((Date.now() - new Date(selectedTicket.locked_at).getTime()) / (1000 * 60 * 60 * 24)))} dana
                           </span>
                         </div>

@@ -144,6 +144,42 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
     }
   };
 
+  const closeAndLockTicket = async () => {
+    if (!selectedTicket) return;
+
+    const confirmed = window.confirm(
+      'Da li ste sigurni da želite zatvoriti ovaj tiket?\n\n' +
+      'Tiket će biti zaključan i automatski obrisan nakon 3 dana.\n' +
+      'Nećete moći ponovo otvoriti ili slati poruke.'
+    );
+
+    if (!confirmed) return;
+
+    setLoading(true);
+    const { error } = await supabase
+      .from('support_tickets')
+      .update({
+        status: 'closed',
+        locked: true,
+        locked_at: new Date().toISOString(),
+        locked_by: userId
+      })
+      .eq('id', selectedTicket.id);
+
+    setLoading(false);
+
+    if (!error) {
+      loadTickets();
+      setSelectedTicket({
+        ...selectedTicket,
+        status: 'closed',
+        locked: true,
+        locked_at: new Date().toISOString(),
+        locked_by: userId
+      });
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return <Clock className="w-4 h-4 text-orange-400" />;
@@ -341,8 +377,10 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
                     <div className="mt-3 flex items-center gap-2 text-sm bg-red-500/10 border border-red-500/30 rounded-lg p-3">
                       <Lock className="w-4 h-4 text-red-400" />
                       <span className="text-red-400 font-semibold">
-                        Tiket je zaključan {formatDateTime(selectedTicket.locked_at)} i biti će automatski obrisan za{' '}
-                        {Math.max(0, 3 - Math.floor((Date.now() - new Date(selectedTicket.locked_at).getTime()) / (1000 * 60 * 60 * 24)))} dana
+                        Tiket je zaključan {formatDateTime(selectedTicket.locked_at)}
+                        {selectedTicket.locked_by === userId ? ' (zatvorili ste ga vi)' : ' (zaključao admin/moderator)'}.
+                        {' '}Biti će automatski obrisan za{' '}
+                        {Math.max(0, 3 - Math.floor((Date.now() - new Date(selectedTicket.locked_at).getTime()) / (1000 * 60 * 60 * 24)))} dana.
                       </span>
                     </div>
                   )}
@@ -378,7 +416,7 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
                 </div>
 
                 {selectedTicket.status !== 'closed' && !selectedTicket.locked && (
-                  <div className="p-6 border-t border-white/10">
+                  <div className="p-6 border-t border-white/10 space-y-3">
                     <div className="flex gap-3">
                       <input
                         type="text"
@@ -395,6 +433,16 @@ export function SupportModal({ isOpen, onClose, userId, userProfile }: SupportMo
                       >
                         <Send className="w-5 h-5" />
                         Pošalji
+                      </button>
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={closeAndLockTicket}
+                        disabled={loading}
+                        className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 font-semibold py-2 px-4 rounded-lg transition-all duration-300 flex items-center gap-2 text-sm"
+                      >
+                        <Lock className="w-4 h-4" />
+                        Zatvori tiket (problem riješen)
                       </button>
                     </div>
                   </div>
