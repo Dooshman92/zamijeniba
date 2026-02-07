@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, Clock, Zap, AlertTriangle, Phone } from 'lucide-react';
+import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, Clock, Zap, AlertTriangle, Phone, Trash2 } from 'lucide-react';
 import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
@@ -13,10 +13,12 @@ interface CarDetailModalProps {
   onOwnerClick?: (userId: string) => void;
   onSendMessage?: (userId: string) => void;
   onEdit?: (car: Car) => void;
+  onDelete?: (car: Car) => void;
   isPremiumUser?: boolean;
+  currentUserProfile?: UserProfile | null;
 }
 
-export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, onOwnerClick, onSendMessage, onEdit, isPremiumUser = false }: CarDetailModalProps) {
+export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, onOwnerClick, onSendMessage, onEdit, onDelete, isPremiumUser = false, currentUserProfile = null }: CarDetailModalProps) {
   const [car, setCar] = useState<Car | null>(initialCar || null);
   const [carImages, setCarImages] = useState<CarImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -805,6 +807,27 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                       Uredi oglas
                     </button>
                   )}
+                </div>
+              </div>
+            )}
+
+            {user && car && user.id !== car.user_id && currentUserProfile && (currentUserProfile.is_admin || currentUserProfile.is_moderator) && onDelete && (
+              <div className="lg:col-span-1">
+                <div className="backdrop-blur-md bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                  <p className="text-red-400 text-lg font-semibold text-center mb-4">
+                    {currentUserProfile.is_admin ? 'Admin' : 'Moderator'} Akcije
+                  </p>
+                  <button
+                    onClick={() => {
+                      if (confirm('Da li ste sigurni da želite da obrišete ovaj oglas? Ova akcija se ne može poništiti.')) {
+                        onDelete(car);
+                      }
+                    }}
+                    className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    Obriši oglas
+                  </button>
                 </div>
               </div>
             )}

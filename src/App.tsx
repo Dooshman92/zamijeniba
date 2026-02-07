@@ -403,6 +403,25 @@ function App() {
     setShowAddForm(true);
   };
 
+  const handleDeleteCar = async (car: Car) => {
+    try {
+      const { error } = await supabase
+        .from('cars')
+        .delete()
+        .eq('id', car.id);
+
+      if (error) throw error;
+
+      alert('Oglas je uspešno obrisan');
+      setShowCarDetail(false);
+      setSelectedCarForDetail(null);
+      loadCars();
+    } catch (error) {
+      console.error('Error deleting car:', error);
+      alert('Greška pri brisanju oglasa');
+    }
+  };
+
   const handleClearFilters = () => {
     setFilters({
       location: '',
@@ -1292,7 +1311,9 @@ function App() {
               }}
               onSendMessage={handleSendMessage}
               onEdit={handleEditCar}
+              onDelete={handleDeleteCar}
               isPremiumUser={userProfile?.is_premium || false}
+              currentUserProfile={userProfile}
             />
           )}
 

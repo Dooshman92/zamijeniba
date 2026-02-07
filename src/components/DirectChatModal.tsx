@@ -16,6 +16,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [otherUserProfile, setOtherUserProfile] = useState<UserProfile | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
   const [carInfo, setCarInfo] = useState<{ id: string; brand: string; model: string; year: number; image_url: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSwapAccepted, setIsSwapAccepted] = useState(false);
@@ -33,6 +34,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
     const initChat = async () => {
       await Promise.all([
         loadOtherUserProfile(),
+        loadCurrentUserProfile(),
         loadMessages(),
         loadCarInfo(),
         loadBlockedStatus(),
@@ -158,6 +160,29 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
+    }
+  };
+
+  const loadCurrentUserProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading current user profile:', error);
+        return;
+      }
+
+      if (profile) {
+        setCurrentUserProfile(profile);
+      }
+    } catch (error) {
+      console.error('Error loading current user profile:', error);
     }
   };
 
@@ -620,6 +645,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
           <CarDetailModal
             carId={selectedCarId}
             onClose={() => setSelectedCarId(null)}
+            currentUserProfile={currentUserProfile}
           />
         )}
         {showReviewModal && otherUserProfile && (
@@ -646,6 +672,7 @@ export function DirectChatModal({ conversationId, otherUserId, onClose, embedded
         <CarDetailModal
           carId={selectedCarId}
           onClose={() => setSelectedCarId(null)}
+          currentUserProfile={currentUserProfile}
         />
       )}
       {showReviewModal && otherUserProfile && (

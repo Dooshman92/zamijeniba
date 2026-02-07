@@ -41,9 +41,11 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onOwnerClick, onSe
   const [loading, setLoading] = useState(true);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [selectedUserProfile, setSelectedUserProfile] = useState<{ userId: string; userEmail: string } | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
+    loadCurrentUserProfile();
     loadOffers();
     loadConversations();
     loadDirectMessages();
@@ -83,6 +85,29 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onOwnerClick, onSe
       supabase.removeChannel(messagesChannel);
     };
   }, [user]);
+
+  const loadCurrentUserProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading current user profile:', error);
+        return;
+      }
+
+      if (profile) {
+        setCurrentUserProfile(profile);
+      }
+    } catch (error) {
+      console.error('Error loading current user profile:', error);
+    }
+  };
 
   const loadOffers = async () => {
     const { data: offersData, error } = await supabase
@@ -870,6 +895,7 @@ export function SwapOffersPanel({ onAcceptOffer, onSwapOffer, onOwnerClick, onSe
           onOwnerClick={onOwnerClick}
           onSendMessage={onSendMessage}
           isPremiumUser={isPremiumUser}
+          currentUserProfile={currentUserProfile}
         />
       )}
 
