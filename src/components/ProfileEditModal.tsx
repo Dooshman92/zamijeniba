@@ -306,9 +306,9 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
             <p className="text-xs text-gray-500 mt-1">Email ne može biti promijenjen</p>
           </div>
 
-          <div className="backdrop-blur-md bg-gradient-to-r from-red-600/20 to-orange-600/20 border border-red-500/30 rounded-xl p-3">
+          <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-3">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg">
+              <div className="p-1.5 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
                 <Lock className="w-4 h-4 text-white" />
               </div>
               <h3 className="text-base font-bold text-white">Promjena lozinke</h3>
@@ -323,7 +323,7 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
                     value={passwordData.currentPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                     placeholder="Trenutna lozinka"
-                    className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-lg px-3 py-2 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors"
+                    className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-lg px-3 py-2 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 transition-colors"
                   />
                   <button
                     type="button"
@@ -343,7 +343,7 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
                     value={passwordData.newPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                     placeholder="Min. 6 karaktera"
-                    className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-lg px-3 py-2 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors"
+                    className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-lg px-3 py-2 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 transition-colors"
                   />
                   <button
                     type="button"
@@ -363,7 +363,7 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
                     value={passwordData.confirmPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                     placeholder="Ponovi lozinku"
-                    className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-lg px-3 py-2 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors"
+                    className="w-full backdrop-blur-md bg-white/10 border border-white/20 rounded-lg px-3 py-2 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 transition-colors"
                   />
                   <button
                     type="button"
@@ -393,7 +393,7 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
                 type="button"
                 onClick={handlePasswordChange}
                 disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                className="w-full bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm"
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm"
               >
                 {loading ? (
                   <>
@@ -409,27 +409,6 @@ export function ProfileEditModal({ onClose, onSuccess, currentProfile }: Profile
               </button>
             </div>
           </div>
-
-          {!currentProfile?.is_premium && (
-            <div className="backdrop-blur-md bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-xl p-2">
-              <div className="flex items-start gap-2">
-                <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-1.5 rounded-lg">
-                  <Gift className="w-3.5 h-3.5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-sm font-bold text-white">Krediti</h3>
-                    <span className="text-lg font-black text-green-400">
-                      {currentProfile?.credits || 0}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    1 kredit = 1 slika · 10 = 1 oglas
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1.5">

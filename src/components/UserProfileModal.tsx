@@ -336,9 +336,6 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
 
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-white mb-2">{displayName}</h3>
-                  {userProfile?.full_name && (
-                    <p className="text-gray-400 mb-2">{userProfile.full_name}</p>
-                  )}
                   {userProfile?.location && (
                     <div className="flex items-center gap-2 text-cyan-400 mb-3">
                       <MapPin className="w-4 h-4" />
