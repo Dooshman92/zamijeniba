@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { X, Shield, Crown, User, Search, CheckCircle, XCircle, Power, Gift, Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Users, Ban, UserX, Clock, Headset } from 'lucide-react';
+import { X, Shield, Crown, User, Search, CheckCircle, XCircle, Power, Gift, Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Users, Ban, UserX, Clock, Headset, Image as ImageIcon } from 'lucide-react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDate, formatDateTimeShort } from '../lib/dateUtils';
 import { SupportPanel } from './SupportPanel';
+import AdvertisementsPanel from './AdvertisementsPanel';
 
 interface PromoCode {
   code: string;
@@ -35,7 +36,7 @@ interface AdminPanelProps {
 
 export function AdminPanel({ onClose }: AdminPanelProps) {
   const { user: currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'users' | 'support' | 'promo'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'support' | 'promo' | 'ads'>('users');
 
   console.log('AdminPanel - currentUser:', currentUser?.id, 'activeTab:', activeTab);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -495,10 +496,27 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
               <Gift className="w-5 h-5" />
               Promo Kodovi
             </button>
+            <button
+              onClick={() => setActiveTab('ads')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                activeTab === 'ads'
+                  ? 'bg-white/20 text-white'
+                  : 'text-gray-400 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <ImageIcon className="w-5 h-5" />
+              Reklame
+            </button>
           </div>
         </div>
 
         <div className="overflow-y-auto max-h-[calc(90vh-120px)] px-6 py-4">
+          {activeTab === 'ads' && (
+            <div className="-mx-6 -my-4">
+              <AdvertisementsPanel onClose={() => {}} />
+            </div>
+          )}
+
           {activeTab === 'support' && currentUser?.id ? (
             <>
               {console.log('Rendering SupportPanel with userId:', currentUser.id)}

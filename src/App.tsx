@@ -59,6 +59,15 @@ function App() {
   const [creditsEnabled, setCreditsEnabled] = useState(true);
   const [premiumEnabled, setPremiumEnabled] = useState(false);
   const [visibleCarsCount, setVisibleCarsCount] = useState(30);
+  const [advertisements, setAdvertisements] = useState<Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    image_url: string | null;
+    target_url: string | null;
+    position: number;
+    is_active: boolean;
+  }>>([]);
   const currentYear = new Date().getFullYear();
   const [filters, setFilters] = useState<FilterOptions>({
     location: '',
@@ -148,10 +157,42 @@ function App() {
     }
   };
 
+  const loadAdvertisements = async () => {
+    const { data, error } = await supabase
+      .from('advertisements')
+      .select('*')
+      .eq('is_active', true)
+      .order('position', { ascending: true });
+
+    if (!error && data) {
+      setAdvertisements(data);
+    }
+  };
+
+  const handleAdClick = async (adId: string, targetUrl: string | null) => {
+    if (!targetUrl) return;
+
+    const { data } = await supabase
+      .from('advertisements')
+      .select('clicks_count')
+      .eq('id', adId)
+      .single();
+
+    if (data) {
+      await supabase
+        .from('advertisements')
+        .update({ clicks_count: data.clicks_count + 1 })
+        .eq('id', adId);
+    }
+
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+  };
+
   useEffect(() => {
     initializeStorage();
     loadCars();
     loadSystemSettings();
+    loadAdvertisements();
   }, []);
 
   useEffect(() => {
@@ -1265,50 +1306,50 @@ function App() {
         <footer className="border-t border-white/10 backdrop-blur-md bg-white/5 py-12 mt-20">
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="flex items-center justify-center">
-                <div className="w-full backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Sparkles className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-lg font-bold text-white">Reklama</h3>
+              {[1, 2, 3].map(position => {
+                const ad = advertisements.find(a => a.position === position);
+                return (
+                  <div key={position} className="flex items-center justify-center">
+                    {ad ? (
+                      <div
+                        onClick={() => handleAdClick(ad.id, ad.target_url)}
+                        className={`w-full backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center ${
+                          ad.target_url ? 'cursor-pointer hover:border-cyan-500/50 transition-all duration-300 hover:scale-105' : ''
+                        }`}
+                      >
+                        {ad.image_url ? (
+                          <img
+                            src={ad.image_url}
+                            alt={ad.title}
+                            className="w-full h-48 object-cover rounded-lg mb-3"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <Sparkles className="w-5 h-5 text-cyan-400" />
+                            <h3 className="text-lg font-bold text-white">{ad.title}</h3>
+                          </div>
+                        )}
+                        {ad.description && (
+                          <p className="text-sm text-gray-400">{ad.description}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-full backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <Sparkles className="w-5 h-5 text-cyan-400" />
+                          <h3 className="text-lg font-bold text-white">Reklama</h3>
+                        </div>
+                        <p className="text-sm text-gray-400">
+                          Promovišite svoj biznis
+                        </p>
+                        <div className="mt-3 text-xs text-gray-500">
+                          300x250
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-400">
-                    Promovišite svoj biznis
-                  </p>
-                  <div className="mt-3 text-xs text-gray-500">
-                    300x250
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center">
-                <div className="w-full backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Sparkles className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-lg font-bold text-white">Reklama</h3>
-                  </div>
-                  <p className="text-sm text-gray-400">
-                    Promovišite svoj biznis
-                  </p>
-                  <div className="mt-3 text-xs text-gray-500">
-                    300x250
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center">
-                <div className="w-full backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 rounded-2xl p-6 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Sparkles className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-lg font-bold text-white">Reklama</h3>
-                  </div>
-                  <p className="text-sm text-gray-400">
-                    Promovišite svoj biznis
-                  </p>
-                  <div className="mt-3 text-xs text-gray-500">
-                    300x250
-                  </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
 
             <div className="border-t border-white/10 pt-8">
