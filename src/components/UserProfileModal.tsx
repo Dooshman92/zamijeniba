@@ -336,7 +336,15 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                 </div>
 
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-white mb-2">{displayName}</h3>
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <h3 className="text-2xl font-bold text-white">{displayName}</h3>
+                    {averageRatings && (
+                      <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/30 rounded-full px-3 py-1">
+                        {renderStars(averageRatings.overall, 'sm')}
+                        <span className="text-amber-400 font-bold text-sm">{averageRatings.overall.toFixed(1)}</span>
+                      </div>
+                    )}
+                  </div>
                   {userProfile?.location && (
                     <div className="flex items-center gap-2 text-cyan-400 mb-3">
                       <MapPin className="w-4 h-4" />
@@ -415,12 +423,6 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                 <h3 className="text-lg font-bold text-white">
                   Dojmovi ({reviews.length})
                 </h3>
-                {averageRatings && (
-                  <div className="ml-auto flex items-center gap-1.5">
-                    {renderStars(averageRatings.overall, 'sm')}
-                    <span className="text-white font-bold text-sm">{averageRatings.overall.toFixed(1)}</span>
-                  </div>
-                )}
               </div>
 
               {loadingReviews ? (
