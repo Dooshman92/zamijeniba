@@ -760,10 +760,13 @@ function App() {
 
                   {(() => {
                     const now = new Date();
-                    const regularCars = filteredCars.filter(car => {
-                      const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
-                      return !isFeatured && !car.owner_is_premium;
-                    });
+                    const regularCars = premiumEnabled
+                      ? filteredCars.filter(car => {
+                          const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
+                          return !isFeatured && !car.owner_is_premium;
+                        })
+                      : filteredCars;
+
                     return regularCars.length > 0 && (
                       <div>
                         <div className="mb-6">
@@ -874,10 +877,13 @@ function App() {
 
                   {(() => {
                     const now = new Date();
-                    const regularCars = filteredCars.filter(car => {
-                      const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
-                      return !isFeatured && !car.owner_is_premium;
-                    });
+                    const regularCars = premiumEnabled
+                      ? filteredCars.filter(car => {
+                          const isFeatured = car.is_featured && (!car.featured_until || new Date(car.featured_until) > now);
+                          return !isFeatured && !car.owner_is_premium;
+                        })
+                      : filteredCars;
+
                     return regularCars.length > 0 && (
                       <div>
                         <div className="mb-8">
