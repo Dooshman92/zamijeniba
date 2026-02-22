@@ -596,19 +596,42 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
         .from('reports')
         .select(`
           *,
-          reporter:user_profiles!reports_reported_by_fkey(nickname),
-          reported_user:user_profiles!reports_reported_user_id_fkey(nickname),
-          car:cars!reports_car_id_fkey(brand, model, year)
+          car:cars(brand, model, year)
         `)
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error loading reports:', error);
+        setReports([]);
+        return;
       }
 
-      setReports(data || []);
+      // Manually fetch user profiles for reporter and reported user
+      if (data && data.length > 0) {
+        const reporterIds = [...new Set(data.map(r => r.reported_by))];
+        const reportedUserIds = [...new Set(data.map(r => r.reported_user_id).filter(Boolean))];
+        const allUserIds = [...new Set([...reporterIds, ...reportedUserIds])];
+
+        const { data: userProfiles } = await supabase
+          .from('user_profiles')
+          .select('id, nickname')
+          .in('id', allUserIds);
+
+        const userMap = new Map(userProfiles?.map(u => [u.id, u]) || []);
+
+        const enrichedData = data.map(report => ({
+          ...report,
+          reporter: userMap.get(report.reported_by),
+          reported_user: userMap.get(report.reported_user_id)
+        }));
+
+        setReports(enrichedData);
+      } else {
+        setReports([]);
+      }
     } catch (error) {
       console.error('Error loading reports:', error);
+      setReports([]);
     } finally {
       setLoading(false);
     }
