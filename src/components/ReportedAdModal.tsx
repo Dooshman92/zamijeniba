@@ -54,7 +54,23 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
 
       if (updateError) throw updateError;
 
-      alert('Oglas je uspješno obrisan i prijava riješena');
+      await supabase.from('system_notifications').insert({
+        user_id: report.reported_user_id,
+        type: 'ad_deleted',
+        title: 'Oglas obrisan',
+        message: `Vaš oglas "${report.car?.brand} ${report.car?.model}" je obrisan zbog kršenja pravila. ${resolutionNotes ? `Razlog: ${resolutionNotes}` : ''}`,
+        priority: 'high'
+      });
+
+      await supabase.from('system_notifications').insert({
+        user_id: report.reported_by,
+        type: 'report_resolved',
+        title: 'Prijava riješena',
+        message: `Vaša prijava za oglas "${report.car?.brand} ${report.car?.model}" je riješena. Oglas je obrisan.`,
+        priority: 'medium'
+      });
+
+      alert('Oglas je uspješno obrisan i notifikacije poslate');
       onActionComplete();
       onClose();
     } catch (error) {
@@ -87,7 +103,15 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
 
       if (error) throw error;
 
-      alert('Prijava je odbijena');
+      await supabase.from('system_notifications').insert({
+        user_id: report.reported_by,
+        type: 'report_dismissed',
+        title: 'Prijava odbijena',
+        message: `Vaša prijava za oglas "${report.car?.brand} ${report.car?.model}" je odbijena. Oglas ne krši pravila platforme. ${resolutionNotes ? `Napomena: ${resolutionNotes}` : ''}`,
+        priority: 'low'
+      });
+
+      alert('Prijava je odbijena i notifikacija poslata');
       onActionComplete();
       onClose();
     } catch (error) {
@@ -99,8 +123,14 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
   };
 
   const handleRequestCorrection = async () => {
-    const correction = prompt('Šta korisnik treba da ispravi na ovom oglasu?');
-    if (!correction) return;
+    if (!resolutionNotes.trim()) {
+      alert('Molimo unesite šta korisnik treba da ispravi na oglasu');
+      return;
+    }
+
+    if (!confirm('Da li želite zatražiti ispravku ovog oglasa od vlasnika?')) {
+      return;
+    }
 
     setProcessing(true);
     try {
@@ -113,13 +143,29 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
           status: 'reviewed',
           reviewed_by: user.id,
           reviewed_at: new Date().toISOString(),
-          resolution_notes: `Potrebna ispravka: ${correction}`
+          resolution_notes: `Potrebna ispravka: ${resolutionNotes}`
         })
         .eq('id', report.id);
 
       if (error) throw error;
 
-      alert('Zahtjev za ispravku je poslat korisniku');
+      await supabase.from('system_notifications').insert({
+        user_id: report.reported_user_id,
+        type: 'correction_required',
+        title: 'Potrebna ispravka oglasa',
+        message: `Vaš oglas "${report.car?.brand} ${report.car?.model}" zahtijeva ispravku. Detalji: ${resolutionNotes}`,
+        priority: 'high'
+      });
+
+      await supabase.from('system_notifications').insert({
+        user_id: report.reported_by,
+        type: 'report_reviewed',
+        title: 'Prijava pregledana',
+        message: `Vaša prijava za oglas "${report.car?.brand} ${report.car?.model}" je pregledana. Od vlasnika je zatražena ispravka oglasa.`,
+        priority: 'low'
+      });
+
+      alert('Zahtjev za ispravku je poslat i notifikacije poslate');
       onActionComplete();
       onClose();
     } catch (error) {
@@ -282,34 +328,43 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
 
           <div className="border-t border-white/10 pt-6">
             <label className="block text-sm font-medium text-gray-300 mb-3">
-              Napomena o odluci (opciono)
+              Napomena (obavezno za ispravku, opciono za ostale akcije)
             </label>
             <textarea
               value={resolutionNotes}
               onChange={(e) => setResolutionNotes(e.target.value)}
-              placeholder="Dodajte razlog za svoju odluku ili dodatne informacije..."
+              placeholder="Za ispravku: opišite šta vlasnik treba popraviti na oglasu..."
               rows={3}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 resize-none"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <button
               onClick={handleDeleteAd}
               disabled={processing}
-              className="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-green-500/30"
+              className="px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-red-500/30"
             >
-              <CheckCircle className="w-5 h-5" />
-              Riješi
+              <Trash2 className="w-5 h-5" />
+              Obriši oglas
+            </button>
+
+            <button
+              onClick={handleRequestCorrection}
+              disabled={processing}
+              className="px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
+            >
+              <Shield className="w-5 h-5" />
+              Zatraži ispravku
             </button>
 
             <button
               onClick={handleDismiss}
               disabled={processing}
-              className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-gray-600/30"
+              className="px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-green-500/30"
             >
-              <XCircle className="w-5 h-5" />
-              Odbij
+              <CheckCircle className="w-5 h-5" />
+              Oglas je u redu
             </button>
           </div>
         </div>
