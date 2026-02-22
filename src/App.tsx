@@ -588,10 +588,17 @@ function App() {
         car.price.toString().includes(query) ||
         (car.location && car.location.toLowerCase().includes(query));
 
-      if (!matchesSearch) return false;
+      if (!matchesSearch) {
+        return false;
+      } else {
+        console.log('Car matches search:', car.brand, car.model, 'vehicle_type:', car.vehicle_type);
+      }
     }
 
-    if (filters.vehicleType && car.vehicle_type !== filters.vehicleType) return false;
+    if (filters.vehicleType && car.vehicle_type !== filters.vehicleType) {
+      console.log('Car filtered out by vehicleType:', car.brand, car.model, 'has:', car.vehicle_type, 'needs:', filters.vehicleType);
+      return false;
+    }
     if (filters.location && car.location !== filters.location) return false;
     if (filters.brand && car.brand !== filters.brand) return false;
     if (car.year < filters.minYear || car.year > filters.maxYear) return false;
