@@ -3,6 +3,7 @@ import { X, Bell, AlertCircle, CheckCircle, Info, AlertTriangle, Megaphone, Tras
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
+import { NotificationDetailModal } from './NotificationDetailModal';
 
 interface SystemNotification {
   id: string;
@@ -24,6 +25,7 @@ export function NotificationsPanel({ onClose }: NotificationsPanelProps) {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<SystemNotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedNotification, setSelectedNotification] = useState<SystemNotification | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -232,9 +234,10 @@ export function NotificationsPanel({ onClose }: NotificationsPanelProps) {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
+                  onClick={() => setSelectedNotification(notification)}
                   className={`${getNotificationBgColor(notification.type, notification.is_read)} rounded-xl p-4 border ${
                     notification.is_read ? 'border-gray-700' : 'border-cyan-500/30'
-                  } transition-all hover:scale-[1.02]`}
+                  } transition-all hover:scale-[1.02] cursor-pointer`}
                 >
                   <div className="flex gap-3">
                     <div className="flex-shrink-0 mt-1">
@@ -248,14 +251,17 @@ export function NotificationsPanel({ onClose }: NotificationsPanelProps) {
                           {notification.title}
                         </h3>
                         <button
-                          onClick={() => deleteNotification(notification.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(notification.id);
+                          }}
                           className="text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
                           title="Obriši obavještenje"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      <p className={`text-sm mt-1 ${
+                      <p className={`text-sm mt-1 line-clamp-2 ${
                         notification.is_read ? 'text-gray-400' : 'text-gray-300'
                       }`}>
                         {notification.message}
@@ -265,12 +271,9 @@ export function NotificationsPanel({ onClose }: NotificationsPanelProps) {
                           {formatDateTime(notification.created_at)}
                         </span>
                         {!notification.is_read && (
-                          <button
-                            onClick={() => markAsRead(notification.id)}
-                            className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
-                          >
-                            Označi kao pročitano
-                          </button>
+                          <span className="text-xs text-cyan-400 font-medium">
+                            Klikni za detalje
+                          </span>
                         )}
                       </div>
                       {notification.user_id === null && (
@@ -288,6 +291,14 @@ export function NotificationsPanel({ onClose }: NotificationsPanelProps) {
           )}
         </div>
       </div>
+
+      {selectedNotification && (
+        <NotificationDetailModal
+          notification={selectedNotification}
+          onClose={() => setSelectedNotification(null)}
+          onMarkAsRead={() => markAsRead(selectedNotification.id)}
+        />
+      )}
     </div>
   );
 }
