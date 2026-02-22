@@ -571,6 +571,8 @@ function App() {
     setVisibleCarsCount(30);
   }, [searchQuery, filters]);
 
+  console.log('Total cars:', cars.length, 'Search query:', searchQuery, 'Filters:', filters);
+
   const filteredCars = cars.filter(car => {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
