@@ -162,7 +162,7 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
                   <UserBadge
                     averageRating={ownerRating.averageRating}
                     reviewCount={ownerRating.reviewCount}
-                    size="sm"
+                    size="md"
                   />
                 </div>
                 {!isOwnCar && ownerProfile?.phone && (ownerProfile?.show_phone_number || phoneRevealed) && (

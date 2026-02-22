@@ -7,6 +7,8 @@ interface UserBadgeProps {
 }
 
 export function UserBadge({ averageRating, reviewCount, size = 'md' }: UserBadgeProps) {
+  console.log('UserBadge rendering with:', { averageRating, reviewCount, size });
+
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
@@ -15,7 +17,7 @@ export function UserBadge({ averageRating, reviewCount, size = 'md' }: UserBadge
 
   const iconSize = sizeClasses[size];
 
-  if (reviewCount === 0 || averageRating === null) {
+  if (averageRating === null || reviewCount === 0) {
     return (
       <span
         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-600/30 border border-gray-500/30"
