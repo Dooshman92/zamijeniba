@@ -57,7 +57,10 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
     try {
       let query = supabase
         .from('reports')
-        .select('*, car:cars(*)')
+        .select(`
+          *,
+          car:cars(*)
+        `)
         .order('created_at', { ascending: false });
 
       if (filterStatus !== 'all') {
@@ -66,7 +69,10 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading reports:', error);
+        throw error;
+      }
 
       const reportsWithDetails = await Promise.all(
         (data || []).map(async (report) => {
