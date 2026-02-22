@@ -426,6 +426,13 @@ function App() {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
 
+      console.log('Setting cars, total:', sortedCars.length);
+      console.log('Cars include Husqvarna?', sortedCars.some(c => c.brand === 'Husqvarna'));
+      const husqvarna = sortedCars.find(c => c.brand === 'Husqvarna');
+      if (husqvarna) {
+        console.log('Husqvarna details:', husqvarna);
+      }
+
       setCars(sortedCars as Car[]);
     }
     setLoading(false);
