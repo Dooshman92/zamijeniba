@@ -30,7 +30,7 @@ export function UserBadge({ averageRating, reviewCount, size = 'md' }: UserBadge
     return (
       <span
         className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-yellow-600/30 to-yellow-500/30 border border-yellow-500/50 cursor-help transition-all hover:scale-110"
-        title={`Recenzija korisnika: Zlatna znaka - ${averageRating.toFixed(1)} ⭐ (${reviewCount} ${reviewCount === 1 ? 'recenzija' : reviewCount < 5 ? 'recenzije' : 'recenzija'})`}
+        title={`Recenzija korisnika: Zlatna značka - ${averageRating.toFixed(1)} ⭐ (${reviewCount} ${reviewCount === 1 ? 'recenzija' : reviewCount < 5 ? 'recenzije' : 'recenzija'})`}
       >
         <Award className={`${iconSize} text-yellow-400`} />
       </span>
@@ -41,7 +41,7 @@ export function UserBadge({ averageRating, reviewCount, size = 'md' }: UserBadge
     return (
       <span
         className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-gray-400/30 to-gray-300/30 border border-gray-400/50 cursor-help transition-all hover:scale-110"
-        title={`Recenzija korisnika: Srebrna znaka - ${averageRating.toFixed(1)} ⭐ (${reviewCount} ${reviewCount === 1 ? 'recenzija' : reviewCount < 5 ? 'recenzije' : 'recenzija'})`}
+        title={`Recenzija korisnika: Srebrna značka - ${averageRating.toFixed(1)} ⭐ (${reviewCount} ${reviewCount === 1 ? 'recenzija' : reviewCount < 5 ? 'recenzije' : 'recenzija'})`}
       >
         <Medal className={`${iconSize} text-gray-300`} />
       </span>
@@ -52,7 +52,7 @@ export function UserBadge({ averageRating, reviewCount, size = 'md' }: UserBadge
     return (
       <span
         className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-amber-700/30 to-amber-600/30 border border-amber-600/50 cursor-help transition-all hover:scale-110"
-        title={`Recenzija korisnika: Bronzana znaka - ${averageRating.toFixed(1)} ⭐ (${reviewCount} ${reviewCount === 1 ? 'recenzija' : reviewCount < 5 ? 'recenzije' : 'recenzija'})`}
+        title={`Recenzija korisnika: Bronzana značka - ${averageRating.toFixed(1)} ⭐ (${reviewCount} ${reviewCount === 1 ? 'recenzija' : reviewCount < 5 ? 'recenzije' : 'recenzija'})`}
       >
         <Medal className={`${iconSize} text-amber-500`} />
       </span>
