@@ -3,6 +3,8 @@ import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star
 import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
+import { UserBadge } from './UserBadge';
+import { getUserRatingInfo, UserRatingInfo } from '../lib/userRatings';
 
 interface CarDetailModalProps {
   car?: Car;
@@ -25,6 +27,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [ownerProfile, setOwnerProfile] = useState<UserProfile | null>(null);
+  const [ownerRating, setOwnerRating] = useState<UserRatingInfo>({ averageRating: null, reviewCount: 0 });
   const [phoneRevealed, setPhoneRevealed] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
@@ -66,6 +69,9 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
     if (data) {
       setOwnerProfile(data);
     }
+
+    const ratingInfo = await getUserRatingInfo(car.user_id);
+    setOwnerRating(ratingInfo);
   };
 
   const checkPhoneRevealed = async () => {
@@ -353,6 +359,11 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
                     >
                       {ownerDisplayName}
                     </button>
+                    <UserBadge
+                      averageRating={ownerRating.averageRating}
+                      reviewCount={ownerRating.reviewCount}
+                      size="md"
+                    />
                   </div>
                   {!isOwnCar && ownerProfile?.phone && (ownerProfile?.show_phone_number || phoneRevealed) && (
                     <div className="mt-3 backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded-lg px-3 py-2">
