@@ -147,7 +147,7 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <div className="flex items-center gap-2 mb-3 flex-wrap" style={{ background: 'rgba(255,0,0,0.1)' }}>
                   <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
                   <button
                     onClick={(e) => {
@@ -160,11 +160,13 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
                   >
                     {ownerDisplayName}
                   </button>
-                  <UserBadge
-                    averageRating={ownerRating.averageRating}
-                    reviewCount={ownerRating.reviewCount}
-                    size="md"
-                  />
+                  <div style={{ background: 'rgba(0,255,0,0.3)', padding: '4px' }}>
+                    <UserBadge
+                      averageRating={ownerRating.averageRating}
+                      reviewCount={ownerRating.reviewCount}
+                      size="md"
+                    />
+                  </div>
                 </div>
                 {!isOwnCar && ownerProfile?.phone && (ownerProfile?.show_phone_number || phoneRevealed) && (
                   <div className="flex items-center gap-2 backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded-lg px-2 py-1 mb-2">

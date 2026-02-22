@@ -18,6 +18,7 @@ export function UserBadge({ averageRating, reviewCount, size = 'md' }: UserBadge
   const iconSize = sizeClasses[size];
 
   if (averageRating === null || reviewCount === 0) {
+    console.log('UserBadge: Returning "Novi" badge');
     return (
       <span
         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-600/30 border border-gray-500/30"
@@ -30,6 +31,7 @@ export function UserBadge({ averageRating, reviewCount, size = 'md' }: UserBadge
   }
 
   if (averageRating >= 4.5) {
+    console.log('UserBadge: Returning "Zlatni" badge');
     return (
       <span
         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-yellow-600/30 to-yellow-500/30 border border-yellow-500/50"
