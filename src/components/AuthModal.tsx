@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { X, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { validateEmail, sanitizeInput, rateLimiter, detectSuspiciousEmail, validatePasswordStrength } from '../lib/security';
@@ -17,26 +17,12 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const formOpenedAt = useRef<number>(Date.now());
-  const [honeypot, setHoneypot] = useState('');
-  const [honeypot2, setHoneypot2] = useState('');
   const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-
-    if (honeypot || honeypot2) {
-      setError('Greška pri obradi. Pokušajte ponovo.');
-      return;
-    }
-
-    const timeSinceFormOpened = Date.now() - formOpenedAt.current;
-    if (mode === 'register' && timeSinceFormOpened < 3000) {
-      setError('Molimo popunite formu pažljivo.');
-      return;
-    }
 
     const sanitizedEmail = sanitizeInput(email);
 
@@ -139,25 +125,6 @@ export function AuthModal({ onClose, initialMode = 'login' }: AuthModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }} aria-hidden="true">
-            <input
-              type="text"
-              name="website"
-              value={honeypot}
-              onChange={(e) => setHoneypot(e.target.value)}
-              tabIndex={-1}
-              autoComplete="off"
-            />
-            <input
-              type="email"
-              name="confirm_email"
-              value={honeypot2}
-              onChange={(e) => setHoneypot2(e.target.value)}
-              tabIndex={-1}
-              autoComplete="off"
-            />
-          </div>
-
           {error && (
             <div className="p-3 rounded-lg text-sm bg-red-100 text-red-800">
               {error}
