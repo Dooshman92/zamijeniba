@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, AlertTriangle, Phone, Trash2 } from 'lucide-react';
+import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, AlertTriangle, Phone, Trash2, Clock } from 'lucide-react';
 import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
