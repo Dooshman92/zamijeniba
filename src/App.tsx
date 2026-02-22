@@ -234,6 +234,26 @@ function App() {
     loadCars();
     loadSystemSettings();
     loadAdvertisements();
+
+    const carsChannel = supabase
+      .channel('cars-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'cars',
+        },
+        () => {
+          console.log('Cars table changed, reloading...');
+          loadCars();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(carsChannel);
+    };
   }, []);
 
   useEffect(() => {
