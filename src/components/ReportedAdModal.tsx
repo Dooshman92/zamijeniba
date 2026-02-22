@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { X, Eye, Trash2, AlertTriangle, CheckCircle, XCircle, User, Calendar, Tag, Shield } from 'lucide-react';
 import { supabase, Car } from '../lib/supabase';
 import { getCarImageUrl } from '../lib/storage';
+import { UserBadge } from './UserBadge';
+import { getUserRatingInfo, UserRatingInfo } from '../lib/userRatings';
 
 interface ReportedAdModalProps {
   report: {
@@ -26,6 +28,8 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
   const [processing, setProcessing] = useState(false);
   const [showCarDetails, setShowCarDetails] = useState(true);
   const [carImageUrl, setCarImageUrl] = useState<string | null>(null);
+  const [reporterRating, setReporterRating] = useState<UserRatingInfo>({ averageRating: null, reviewCount: 0 });
+  const [ownerRating, setOwnerRating] = useState<UserRatingInfo>({ averageRating: null, reviewCount: 0 });
 
   useEffect(() => {
     const loadCarImage = async () => {
@@ -36,6 +40,18 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
     };
     loadCarImage();
   }, [report.car]);
+
+  useEffect(() => {
+    const loadRatings = async () => {
+      const [reporterInfo, ownerInfo] = await Promise.all([
+        getUserRatingInfo(report.reporter_id),
+        getUserRatingInfo(report.reported_user_id)
+      ]);
+      setReporterRating(reporterInfo);
+      setOwnerRating(ownerInfo);
+    };
+    loadRatings();
+  }, [report.reporter_id, report.reported_user_id]);
 
   const handleDeleteAd = async () => {
     if (!confirm('Da li ste sigurni da želite obrisati ovaj oglas? Ova akcija je nepovratna.')) {
@@ -244,7 +260,14 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
                 <User className="w-4 h-4 text-cyan-500" />
                 <span className="text-sm font-medium text-gray-400">Prijavio</span>
               </div>
-              <p className="text-white font-medium">{report.reporter_nickname}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-white font-medium">{report.reporter_nickname}</p>
+                <UserBadge
+                  averageRating={reporterRating.averageRating}
+                  reviewCount={reporterRating.reviewCount}
+                  size="sm"
+                />
+              </div>
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-xl p-4">
@@ -252,7 +275,14 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
                 <User className="w-4 h-4 text-orange-500" />
                 <span className="text-sm font-medium text-gray-400">Vlasnik oglasa</span>
               </div>
-              <p className="text-white font-medium">{report.reported_user_nickname}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-white font-medium">{report.reported_user_nickname}</p>
+                <UserBadge
+                  averageRating={ownerRating.averageRating}
+                  reviewCount={ownerRating.reviewCount}
+                  size="sm"
+                />
+              </div>
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-xl p-4">
