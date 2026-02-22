@@ -56,7 +56,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
     filters.minYear > 1990 ||
     filters.maxYear < currentYear ||
     filters.minPrice > 0 ||
-    filters.maxPrice < 1000000 ||
+    filters.maxPrice < 100000000 ||
     filters.fuelType ||
     filters.transmission ||
     filters.onlyDamaged ||
@@ -228,9 +228,9 @@ export function AdvancedFilters({ filters, onFiltersChange, onClearFilters }: Ad
                   </label>
                   <input
                     type="number"
-                    value={filters.maxPrice === 1000000 ? '' : filters.maxPrice}
-                    onChange={(e) => handleFilterChange('maxPrice', parseInt(e.target.value) || 1000000)}
-                    placeholder="1000000"
+                    value={filters.maxPrice === 100000000 ? '' : filters.maxPrice}
+                    onChange={(e) => handleFilterChange('maxPrice', parseInt(e.target.value) || 100000000)}
+                    placeholder="100000000"
                     min="0"
                     step="100"
                     className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"

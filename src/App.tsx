@@ -84,7 +84,7 @@ function App() {
     minYear: 1990,
     maxYear: currentYear,
     minPrice: 0,
-    maxPrice: 1000000,
+    maxPrice: 100000000,
     fuelType: '',
     transmission: '',
     onlyDamaged: false,
@@ -381,7 +381,6 @@ function App() {
   };
 
   const loadCars = async () => {
-    console.log('loadCars called at:', new Date().toISOString());
     setLoading(true);
     const { data, error } = await supabase
       .from('cars')
@@ -389,9 +388,8 @@ function App() {
       .order('priority_score', { ascending: false })
       .order('created_at', { ascending: false });
 
-    console.log('loadCars result:', { error, dataLength: data?.length, timestamp: new Date().toISOString() });
     if (error) {
-      console.error('loadCars error details:', error);
+      console.error('Error loading cars:', error);
     }
 
     if (!error && data) {
@@ -425,13 +423,6 @@ function App() {
       const sortedCars = carsWithOwnerInfo.sort((a, b) => {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
-
-      console.log('Setting cars, total:', sortedCars.length);
-      console.log('Cars include Husqvarna?', sortedCars.some(c => c.brand === 'Husqvarna'));
-      const husqvarna = sortedCars.find(c => c.brand === 'Husqvarna');
-      if (husqvarna) {
-        console.log('Husqvarna details:', husqvarna);
-      }
 
       setCars(sortedCars as Car[]);
     }
@@ -506,7 +497,7 @@ function App() {
       minYear: 1990,
       maxYear: currentYear,
       minPrice: 0,
-      maxPrice: 1000000,
+      maxPrice: 100000000,
       fuelType: '',
       transmission: '',
       onlyDamaged: false,
@@ -578,8 +569,6 @@ function App() {
     setVisibleCarsCount(30);
   }, [searchQuery, filters]);
 
-  console.log('Total cars:', cars.length, 'Search query:', searchQuery, 'Filters:', filters);
-
   const filteredCars = cars.filter(car => {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -597,49 +586,36 @@ function App() {
 
       if (!matchesSearch) {
         return false;
-      } else {
-        console.log('Car matches search:', car.brand, car.model, 'vehicle_type:', car.vehicle_type);
       }
     }
 
     if (filters.vehicleType && car.vehicle_type !== filters.vehicleType) {
-      console.log('Car filtered out by vehicleType:', car.brand, car.model, 'has:', car.vehicle_type, 'needs:', filters.vehicleType);
       return false;
     }
     if (filters.location && car.location !== filters.location) {
-      console.log('Car filtered out by location:', car.brand, car.model);
       return false;
     }
     if (filters.brand && car.brand !== filters.brand) {
-      console.log('Car filtered out by brand:', car.brand, car.model, 'needs:', filters.brand);
       return false;
     }
     if (car.year < filters.minYear || car.year > filters.maxYear) {
-      console.log('Car filtered out by year:', car.brand, car.model, 'year:', car.year);
       return false;
     }
     if (car.price < filters.minPrice || car.price > filters.maxPrice) {
-      console.log('Car filtered out by price:', car.brand, car.model, 'price:', car.price);
       return false;
     }
     if (filters.fuelType && car.fuel_type !== filters.fuelType) {
-      console.log('Car filtered out by fuelType:', car.brand, car.model);
       return false;
     }
     if (filters.transmission && car.transmission !== filters.transmission) {
-      console.log('Car filtered out by transmission:', car.brand, car.model);
       return false;
     }
     if (filters.onlyDamaged && !car.damaged) {
-      console.log('Car filtered out by onlyDamaged:', car.brand, car.model);
       return false;
     }
 
-    console.log('Car PASSED all filters:', car.brand, car.model);
     return true;
   });
-
-  console.log('Filtered cars count:', filteredCars.length, 'Cars:', filteredCars.map(c => `${c.brand} ${c.model}`));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 relative overflow-hidden">
