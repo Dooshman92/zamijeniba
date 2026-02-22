@@ -57,13 +57,13 @@ function AppContent() {
   const fetchUnreadCount = async () => {
     if (!user) return;
     const { data } = await supabase
-      .from('conversations')
-      .select('id, unread_count, conversation_participants!inner(user_id)')
-      .eq('conversation_participants.user_id', user.id);
+      .from('messages')
+      .select('id')
+      .eq('recipient_id', user.id)
+      .eq('read', false);
 
     if (data) {
-      const total = data.reduce((sum, conv) => sum + (conv.unread_count || 0), 0);
-      setUnreadCount(total);
+      setUnreadCount(data.length);
     }
   };
 

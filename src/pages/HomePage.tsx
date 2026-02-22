@@ -25,8 +25,8 @@ export function HomePage() {
           nickname,
           avatar_url,
           is_premium,
-          phone_number,
-          show_phone_publicly
+          phone,
+          show_phone_number
         )
       `)
       .eq('status', 'active')

@@ -3,9 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Car, supabase } from '../lib/supabase';
 import { CarCard } from '../components/CarCard';
 import { AdvancedFilters } from '../components/AdvancedFilters';
-import { SearchWithAutocomplete } from '../components/SearchWithAutocomplete';
 import { vehicleTypes } from '../data/carOptions';
-import { Filter, SlidersHorizontal } from 'lucide-react';
+import { Filter, SlidersHorizontal, Search } from 'lucide-react';
 
 export function VehiclesPage() {
   const [searchParams] = useSearchParams();
@@ -13,6 +12,7 @@ export function VehiclesPage() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedType, setSelectedType] = useState(searchParams.get('type') || 'sve');
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,8 +34,8 @@ export function VehiclesPage() {
           nickname,
           avatar_url,
           is_premium,
-          phone_number,
-          show_phone_publicly
+          phone,
+          show_phone_number
         )
       `)
       .eq('status', 'active')
@@ -54,13 +54,20 @@ export function VehiclesPage() {
     setLoading(false);
   };
 
-  const handleSearch = (searchTerm: string) => {
-    console.log('Searching for:', searchTerm);
-  };
-
   const handleFilterChange = (filters: any) => {
     console.log('Filters changed:', filters);
   };
+
+  const filteredCars = cars.filter(car => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      car.brand.toLowerCase().includes(query) ||
+      car.model.toLowerCase().includes(query) ||
+      (car.location && car.location.toLowerCase().includes(query)) ||
+      car.year.toString().includes(query)
+    );
+  });
 
   const currentType = vehicleTypes.find(t => t.value === selectedType);
   const Icon = currentType?.icon;
@@ -120,8 +127,15 @@ export function VehiclesPage() {
 
           {/* Search and Filters */}
           <div className="flex gap-4">
-            <div className="flex-1">
-              <SearchWithAutocomplete onSearch={handleSearch} />
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Pretraži po marki, modelu, lokaciji..."
+                className="w-full pl-12 pr-4 py-3 bg-slate-800/80 border border-slate-700/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 transition-all"
+              />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -143,7 +157,7 @@ export function VehiclesPage() {
         {/* Results */}
         <div className="mb-4">
           <p className="text-gray-400">
-            Pronađeno <span className="text-cyan-400 font-semibold">{cars.length}</span> oglasa
+            Pronađeno <span className="text-cyan-400 font-semibold">{filteredCars.length}</span> oglasa
           </p>
         </div>
 
@@ -152,14 +166,14 @@ export function VehiclesPage() {
             <div className="inline-block w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
             <p className="text-gray-400 mt-4">Učitavanje...</p>
           </div>
-        ) : cars.length === 0 ? (
+        ) : filteredCars.length === 0 ? (
           <div className="text-center py-20">
             <Filter className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400 text-lg">Nema vozila koja odgovaraju kriterijima</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {cars.map((car) => (
+            {filteredCars.map((car) => (
               <CarCard
                 key={car.id}
                 car={car}
