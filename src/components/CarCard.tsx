@@ -87,6 +87,7 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
   const loadOwnerRating = async () => {
     if (!car.user_id) return;
     const ratingInfo = await getUserRatingInfo(car.user_id);
+    console.log('CarCard: loadOwnerRating for user', car.user_id, ':', ratingInfo);
     setOwnerRating(ratingInfo);
   };
 
