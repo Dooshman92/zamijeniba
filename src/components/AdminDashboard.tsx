@@ -72,6 +72,7 @@ interface DashboardStats {
   premiumUsers: number;
   totalSwapOffers: number;
   activePromoCodes: number;
+  pendingReports: number;
 }
 
 interface Report {
@@ -169,11 +170,12 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
   const loadDashboardStats = async () => {
     setLoading(true);
     try {
-      const [usersRes, carsRes, swapsRes, promoRes] = await Promise.all([
+      const [usersRes, carsRes, swapsRes, promoRes, reportsRes] = await Promise.all([
         supabase.from('user_profiles').select('is_banned, is_premium, created_at'),
         supabase.from('cars').select('status'),
         supabase.from('swap_offers').select('status'),
-        supabase.from('promo_codes').select('is_active')
+        supabase.from('promo_codes').select('is_active'),
+        supabase.from('reports').select('status')
       ]);
 
       const totalUsers = usersRes.data?.length || 0;
@@ -187,6 +189,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
 
       const totalSwapOffers = swapsRes.data?.length || 0;
       const activePromoCodes = promoRes.data?.filter(p => p.is_active).length || 0;
+      const pendingReports = reportsRes.data?.filter(r => r.status === 'pending').length || 0;
 
       setStats({
         totalUsers,
@@ -197,7 +200,8 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
         soldCars,
         premiumUsers,
         totalSwapOffers,
-        activePromoCodes
+        activePromoCodes,
+        pendingReports
       });
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -465,16 +469,16 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
         })
         .eq('id', userId);
 
-      alert(`Premium status dodeljen na ${days} dana`);
+      alert(`Premium status dodijeljen na ${days} dana`);
       loadUsers();
     } catch (error) {
       console.error('Error toggling premium:', error);
-      alert('Greška pri promeni premium statusa');
+      alert('Greška pri promjeni premium statusa');
     }
   };
 
   const toggleModerator = async (userId: string, currentStatus: boolean) => {
-    if (!confirm(`Da li ste sigurni da želite da ${currentStatus ? 'uklonite' : 'dodate'} moderatorsku ulogu?`)) return;
+    if (!confirm(`Da li ste sigurni da želite da ${currentStatus ? 'uklonite' : 'dodijelite'} moderatorsku ulogu?`)) return;
 
     try {
       await supabase
@@ -484,12 +488,12 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
         })
         .eq('id', userId);
 
-      alert(currentStatus ? 'Moderatorska uloga uklonjena' : 'Moderatorska uloga dodeljena');
+      alert(currentStatus ? 'Moderatorska uloga uklonjena' : 'Moderatorska uloga dodijeljena');
       loadUsers();
       if (activeSection === 'banned') loadBannedUsers();
     } catch (error) {
       console.error('Error toggling moderator:', error);
-      alert('Greška pri promeni moderatorske uloge');
+      alert('Greška pri promjeni moderatorske uloge');
     }
   };
 
@@ -503,16 +507,16 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
 
       if (error) {
         console.error('Error promoting to admin:', error);
-        alert('Greška pri promoviju u admina: ' + error.message);
+        alert('Greška pri promovisanju u admina: ' + error.message);
         return;
       }
 
-      alert('Korisnik je uspešno promovisan u administratora');
+      alert('Korisnik je uspješno promovisan u administratora');
       loadAdmins();
       if (activeSection === 'users') loadUsers();
     } catch (error) {
       console.error('Error promoting to admin:', error);
-      alert('Greška pri promoviju u admina');
+      alert('Greška pri promovisanju u admina');
     }
   };
 
@@ -530,7 +534,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
         return;
       }
 
-      alert('Administratorska uloga uspešno uklonjena');
+      alert('Administratorska uloga uspješno uklonjena');
       loadAdmins();
       if (activeSection === 'users') loadUsers();
     } catch (error) {
@@ -874,6 +878,18 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                 </div>
               </div>
             </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <AlertTriangle className="w-5 h-5 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{stats.pendingReports}</p>
+                  <p className="text-sm text-gray-600">Neriješene Prijave</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -1043,7 +1059,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                                           ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
                                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                       }`}
-                                      title={user.is_moderator ? 'Ukloni Moderatora' : 'Dodaj Moderatora'}
+                                      title={user.is_moderator ? 'Ukloni Moderatora' : 'Dodijeli Moderatora'}
                                     >
                                       <ShieldCheck className="w-4 h-4" />
                                     </button>
@@ -1054,7 +1070,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
                                           ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
                                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                       }`}
-                                      title={user.is_premium ? 'Ukloni Premium' : 'Dodaj Premium'}
+                                      title={user.is_premium ? 'Ukloni Premium' : 'Dodijeli Premium'}
                                     >
                                       <Crown className="w-4 h-4" />
                                     </button>
