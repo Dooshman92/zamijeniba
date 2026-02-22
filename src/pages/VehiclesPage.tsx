@@ -55,7 +55,7 @@ export function VehiclesPage() {
   };
 
   const handleFilterChange = (filters: any) => {
-    console.log('Filters changed:', filters);
+    // Filters updated
   };
 
   const filteredCars = cars.filter(car => {

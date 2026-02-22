@@ -245,7 +245,6 @@ function App() {
           table: 'cars',
         },
         () => {
-          console.log('Cars table changed, reloading...');
           loadCars();
         }
       )
@@ -292,7 +291,7 @@ function App() {
             if (payload.new && payload.new.receiver_id === user.id && payload.new.sender_id !== user.id) {
               if (audioRef) {
                 audioRef.volume = 0.5;
-                audioRef.play().catch(err => console.log('Audio play failed:', err));
+                audioRef.play().catch(() => {});
               }
             }
           }
@@ -459,7 +458,7 @@ function App() {
           viewed_at: new Date().toISOString(),
         });
       } catch (error) {
-        console.log('Failed to track view (non-critical):', error);
+        // View tracking failed (non-critical)
       }
     }
   };

@@ -74,22 +74,35 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
         throw error;
       }
 
-      const reportsWithDetails = await Promise.all(
-        (data || []).map(async (report) => {
-          const [reporterProfile, reportedUserProfile] = await Promise.all([
-            supabase.from('user_profiles').select('nickname').eq('id', report.reported_by).maybeSingle(),
-            report.reported_user_id
-              ? supabase.from('user_profiles').select('nickname').eq('id', report.reported_user_id).maybeSingle()
-              : Promise.resolve({ data: null })
-          ]);
+      // Collect all unique user IDs to fetch
+      const allUserIds = new Set<string>();
+      (data || []).forEach(report => {
+        allUserIds.add(report.reported_by);
+        if (report.reported_user_id) {
+          allUserIds.add(report.reported_user_id);
+        }
+      });
 
-          return {
-            ...report,
-            reporter_nickname: reporterProfile.data?.nickname || 'Nepoznato',
-            reported_user_nickname: reportedUserProfile.data?.nickname || 'Nepoznato'
-          };
-        })
-      );
+      // Batch fetch all user profiles
+      const { data: profilesData } = await supabase
+        .from('user_profiles')
+        .select('id, nickname')
+        .in('id', Array.from(allUserIds));
+
+      // Create profiles map for O(1) lookup
+      const profilesMap = new Map();
+      (profilesData || []).forEach(profile => {
+        profilesMap.set(profile.id, profile.nickname);
+      });
+
+      // Map reports with their profile data
+      const reportsWithDetails = (data || []).map(report => ({
+        ...report,
+        reporter_nickname: profilesMap.get(report.reported_by) || 'Nepoznato',
+        reported_user_nickname: report.reported_user_id
+          ? profilesMap.get(report.reported_user_id) || 'Nepoznato'
+          : 'Nepoznato'
+      }));
 
       setReports(reportsWithDetails);
     } catch (error) {

@@ -119,7 +119,7 @@ export async function sendMessage(
         }),
       });
     } catch (emailError) {
-      console.log('Email notification failed (non-critical):', emailError);
+      // Email notification failed (non-critical)
     }
   }
 

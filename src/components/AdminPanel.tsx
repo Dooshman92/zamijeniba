@@ -38,7 +38,6 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<'users' | 'support' | 'promo' | 'ads'>('users');
 
-  console.log('AdminPanel - currentUser:', currentUser?.id, 'activeTab:', activeTab);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [promoCodes, setPromoCodes] = useState<PromoCodeWithRedemption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,34 +116,40 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      const codesWithRedemptions = await Promise.all(
-        data.map(async (code) => {
-          if (!code.is_active) {
-            const { data: redemptionData } = await supabase
-              .from('promo_code_redemptions')
-              .select(`
-                *,
-                user_profiles:user_id (
-                  full_name,
-                  nickname
-                )
-              `)
-              .eq('code', code.code)
-              .maybeSingle();
+      // Get all inactive codes
+      const inactiveCodes = data.filter(code => !code.is_active).map(c => c.code);
 
-            if (redemptionData) {
-              const redemption = {
-                ...redemptionData,
-                user_profile: Array.isArray(redemptionData.user_profiles)
-                  ? redemptionData.user_profiles[0]
-                  : redemptionData.user_profiles
-              };
-              return { ...code, redemption };
-            }
-          }
-          return code;
-        })
-      );
+      // Batch fetch all redemptions for inactive codes
+      const { data: redemptionsData } = await supabase
+        .from('promo_code_redemptions')
+        .select(`
+          *,
+          user_profiles:user_id (
+            full_name,
+            nickname
+          )
+        `)
+        .in('code', inactiveCodes);
+
+      // Create redemptions map for O(1) lookup
+      const redemptionsMap = new Map();
+      if (redemptionsData) {
+        redemptionsData.forEach(r => {
+          redemptionsMap.set(r.code, {
+            ...r,
+            user_profile: Array.isArray(r.user_profiles) ? r.user_profiles[0] : r.user_profiles
+          });
+        });
+      }
+
+      // Map codes with their redemptions
+      const codesWithRedemptions = data.map(code => {
+        if (!code.is_active && redemptionsMap.has(code.code)) {
+          return { ...code, redemption: redemptionsMap.get(code.code) };
+        }
+        return code;
+      });
+
       setPromoCodes(codesWithRedemptions);
     }
   };
@@ -473,7 +478,6 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
             </button>
             <button
               onClick={() => {
-                console.log('Support tab clicked');
                 setActiveTab('support');
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
@@ -519,7 +523,6 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
 
           {activeTab === 'support' && currentUser?.id ? (
             <>
-              {console.log('Rendering SupportPanel with userId:', currentUser.id)}
               <SupportPanel userId={currentUser.id} />
             </>
           ) : activeTab === 'support' ? (

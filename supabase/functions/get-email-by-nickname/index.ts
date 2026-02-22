@@ -40,9 +40,9 @@ Deno.serve(async (req: Request) => {
 
     if (profileError || !profile) {
       return new Response(
-        JSON.stringify({ error: "User not found" }),
+        JSON.stringify({ error: "Invalid credentials" }),
         {
-          status: 404,
+          status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
@@ -54,9 +54,9 @@ Deno.serve(async (req: Request) => {
 
     if (userError || !userData.user?.email) {
       return new Response(
-        JSON.stringify({ error: "Email not found" }),
+        JSON.stringify({ error: "Invalid credentials" }),
         {
-          status: 404,
+          status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );

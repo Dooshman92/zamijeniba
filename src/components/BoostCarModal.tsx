@@ -87,8 +87,6 @@ export function BoostCarModal({ carId, carTitle, onClose, onSuccess, premiumEnab
       return;
     }
 
-    console.log('Car boosted successfully:', { carId, featuredUntil: featuredUntil.toISOString() });
-
     alert(`Oglas je uspješno istaknut na ${selectedOption.label}!`);
     onSuccess();
     onClose();
