@@ -596,9 +596,9 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
         .from('reports')
         .select(`
           *,
-          reporter:user_profiles!reported_by(nickname),
-          reported_user:user_profiles!reported_user_id(nickname),
-          car:cars(brand, model, year)
+          reporter:user_profiles!reports_reported_by_fkey(nickname),
+          reported_user:user_profiles!reports_reported_user_id_fkey(nickname),
+          car:cars!reports_car_id_fkey(brand, model, year)
         `)
         .order('created_at', { ascending: false });
 
