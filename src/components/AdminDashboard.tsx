@@ -126,6 +126,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
   const [updatingCreditsSystem, setUpdatingCreditsSystem] = useState(false);
   const [selectedVehicleType, setSelectedVehicleType] = useState<string>('all');
   const [selectedCarStatus, setSelectedCarStatus] = useState<string>('all');
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
 
   useEffect(() => {
     const loadCurrentUserProfile = async () => {
@@ -147,6 +148,40 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
       }
     };
     loadCurrentUserProfile();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const loadPendingReportsCount = async () => {
+      const { count } = await supabase
+        .from('reports')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+
+      setPendingReportsCount(count || 0);
+    };
+
+    loadPendingReportsCount();
+
+    const channel = supabase
+      .channel('reports-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reports'
+        },
+        () => {
+          loadPendingReportsCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   useEffect(() => {
@@ -2151,6 +2186,11 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
             >
               <AlertTriangle className="w-5 h-5" />
               <span className="font-medium">Prijave</span>
+              {pendingReportsCount > 0 && (
+                <span className="ml-auto bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
+                  {pendingReportsCount}
+                </span>
+              )}
             </button>
 
             <button
