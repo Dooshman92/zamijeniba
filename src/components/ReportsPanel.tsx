@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { X, AlertTriangle, CheckCircle, XCircle, Clock, User } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle, XCircle, Clock, User, Search } from 'lucide-react';
 import { supabase, Car } from '../lib/supabase';
+import { ReportedAdModal } from './ReportedAdModal';
 
 interface Report {
   id: string;
@@ -31,8 +32,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<ReportWithDetails | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'dismissed'>('pending');
-  const [resolutionNotes, setResolutionNotes] = useState('');
-  const [processing, setProcessing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadReports();
@@ -94,49 +94,6 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
     }
   };
 
-  const handleUpdateStatus = async (reportId: string, newStatus: 'resolved' | 'dismissed') => {
-    setProcessing(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const report = reports.find(r => r.id === reportId);
-
-      if (newStatus === 'resolved' && report?.car) {
-        const { error: deleteError } = await supabase
-          .from('cars')
-          .delete()
-          .eq('id', report.car_id);
-
-        if (deleteError) throw deleteError;
-      }
-
-      const { error } = await supabase
-        .from('reports')
-        .update({
-          status: newStatus,
-          reviewed_by: user.id,
-          reviewed_at: new Date().toISOString(),
-          resolution_notes: resolutionNotes || null
-        })
-        .eq('id', reportId);
-
-      if (error) throw error;
-
-      setSelectedReport(null);
-      setResolutionNotes('');
-      loadReports();
-
-      if (newStatus === 'resolved') {
-        alert('Oglas je obrisan i prijava je riješena');
-      }
-    } catch (error) {
-      console.error('Error updating report:', error);
-      alert('Greška pri ažuriranju prijave');
-    } finally {
-      setProcessing(false);
-    }
-  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -164,9 +121,19 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
     }
   };
 
-  const filteredReports = filterStatus === 'all'
-    ? reports
-    : reports.filter(r => r.status === filterStatus);
+  const filteredReports = reports
+    .filter(r => filterStatus === 'all' ? true : r.status === filterStatus)
+    .filter(r => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        r.reason.toLowerCase().includes(query) ||
+        (r.description && r.description.toLowerCase().includes(query)) ||
+        r.reporter_nickname.toLowerCase().includes(query) ||
+        r.reported_user_nickname.toLowerCase().includes(query) ||
+        (r.car && `${r.car.brand} ${r.car.model}`.toLowerCase().includes(query))
+      );
+    });
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -187,7 +154,18 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
           </button>
         </div>
 
-        <div className="p-6 border-b border-white/10">
+        <div className="p-6 border-b border-white/10 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Pretraži po razlogu, korisniku, oglasu..."
+              className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50"
+            />
+          </div>
+
           <div className="flex gap-2 flex-wrap">
             {(['all', 'pending', 'resolved', 'dismissed'] as const).map((status) => (
               <button
@@ -195,7 +173,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
                 onClick={() => setFilterStatus(status)}
                 className={`px-4 py-2 rounded-xl transition-all ${
                   filterStatus === status
-                    ? 'bg-orange-500 text-white'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30'
                     : 'bg-white/5 text-gray-400 hover:bg-white/10'
                 }`}
               >
@@ -279,14 +257,12 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
                     </div>
 
                     {report.status === 'pending' && (
-                      <div className="flex flex-col gap-2">
-                        <button
-                          onClick={() => setSelectedReport(report)}
-                          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all text-sm font-medium"
-                        >
-                          Pregledi
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => setSelectedReport(report)}
+                        className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl transition-all text-sm font-bold shadow-lg shadow-cyan-500/30"
+                      >
+                        Pregledi
+                      </button>
                     )}
                   </div>
                 </div>
@@ -297,59 +273,14 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
       </div>
 
       {selectedReport && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl max-w-lg w-full shadow-2xl border border-white/10">
-            <div className="p-6 border-b border-white/10 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Pregledi prijavu</h3>
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="p-2 hover:bg-white/10 rounded-xl transition-all text-gray-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Napomena (opciono)
-                </label>
-                <textarea
-                  value={resolutionNotes}
-                  onChange={(e) => setResolutionNotes(e.target.value)}
-                  placeholder="Dodajte napomenu o odluci..."
-                  rows={3}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-orange-500/50 resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => {
-                    if (selectedReport.car && confirm('Ovom akcijom ćete obrisati oglas. Da li ste sigurni?')) {
-                      handleUpdateStatus(selectedReport.id, 'resolved');
-                    } else if (!selectedReport.car) {
-                      handleUpdateStatus(selectedReport.id, 'resolved');
-                    }
-                  }}
-                  disabled={processing}
-                  className="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Riješeno
-                </button>
-                <button
-                  onClick={() => handleUpdateStatus(selectedReport.id, 'dismissed')}
-                  disabled={processing}
-                  className="px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-xl transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  <XCircle className="w-4 h-4" />
-                  Odbaci
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ReportedAdModal
+          report={selectedReport}
+          onClose={() => setSelectedReport(null)}
+          onActionComplete={() => {
+            setSelectedReport(null);
+            loadReports();
+          }}
+        />
       )}
     </div>
   );
