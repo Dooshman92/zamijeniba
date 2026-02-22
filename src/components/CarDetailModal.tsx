@@ -3,6 +3,7 @@ import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star
 import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
+import { PremiumBadge } from './PremiumBadge';
 
 interface CarDetailModalProps {
   car?: Car;
