@@ -497,9 +497,6 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
       front_parking_sensors: formData.front_parking_sensors || false,
     };
 
-    const isPremium = !!(userProfile?.is_premium && userProfile?.premium_expires_at);
-    const featuredUntil = isPremium && userProfile?.premium_expires_at ? userProfile.premium_expires_at : null;
-
     const { data: carData, error: carError } = await supabase
       .from('cars')
       .insert([{
@@ -508,9 +505,9 @@ export function AddCarFormMultiStep({ onClose, onSuccess, editMode = false, carT
         user_id: user.id,
         user_email: user.email,
         user_name: user.email?.split('@')[0] || 'Korisnik',
-        priority_score: isPremium ? 100 : 0,
-        is_featured: isPremium,
-        featured_until: featuredUntil
+        priority_score: 0,
+        is_featured: false,
+        featured_until: null
       }])
       .select('*')
       .single();

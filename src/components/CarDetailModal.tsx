@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, Crown, AlertTriangle, Phone, Trash2, Clock } from 'lucide-react';
+import { X, Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, User, Star, Wrench, Sparkles, DoorOpen, Users, ChevronLeft, ChevronRight, MessageCircle, Maximize2, CheckCircle2, AlertTriangle, Phone, Trash2 } from 'lucide-react';
 import { Car, supabase, CarImage, UserProfile } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { formatDateTime } from '../lib/dateUtils';
-import { PremiumBadge } from './PremiumBadge';
 
 interface CarDetailModalProps {
   car?: Car;
@@ -176,46 +175,6 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
     if (carImages.length === 0) return;
     setCurrentImageIndex((prev) => (prev - 1 + carImages.length) % carImages.length);
   };
-
-
-  const getRemainingPremiumTime = () => {
-    if (!userProfile?.is_premium || !userProfile?.premium_expires_at) {
-      return null;
-    }
-
-    const now = new Date();
-    const expiresAt = new Date(userProfile.premium_expires_at);
-    const diffMs = expiresAt.getTime() - now.getTime();
-
-    if (diffMs <= 0) {
-      return { expired: true, text: 'Premium je istekao' };
-    }
-
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (diffDays > 0) {
-      return {
-        expired: false,
-        text: `${diffDays} ${diffDays === 1 ? 'dan' : diffDays < 5 ? 'dana' : 'dana'}`,
-        detailed: `${diffDays}d ${diffHours}h`
-      };
-    } else if (diffHours > 0) {
-      return {
-        expired: false,
-        text: `${diffHours} ${diffHours === 1 ? 'sat' : diffHours < 5 ? 'sata' : 'sati'}`,
-        detailed: `${diffHours}h ${diffMinutes}m`
-      };
-    } else {
-      return {
-        expired: false,
-        text: `${diffMinutes} ${diffMinutes === 1 ? 'minuta' : diffMinutes < 5 ? 'minute' : 'minuta'}`,
-        detailed: `${diffMinutes}m`
-      };
-    }
-  };
-
   const handleReportCar = async () => {
     if (!user) {
       alert('Morate biti prijavljeni da biste prijavili oglas');
@@ -310,7 +269,6 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h2 className="text-2xl font-bold text-white">Detalji vozila</h2>
-              {car.owner_is_premium && <PremiumBadge size="sm" />}
             </div>
             <button
               onClick={onClose}
@@ -723,43 +681,6 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
             )}
             {isOwnCar && (
               <div className="space-y-4">
-                {userProfile?.is_premium && getRemainingPremiumTime() && !getRemainingPremiumTime()?.expired && (
-                  <div className="backdrop-blur-md rounded-xl p-6 border-2 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-yellow-500 to-amber-600">
-                          <Crown className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-lg text-yellow-500">
-                            Premium Oglas
-                          </h4>
-                          <p className="text-sm text-gray-400">
-                            Vaš oglas je istaknut
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="backdrop-blur-md bg-white/5 rounded-lg p-4 border border-yellow-500/20">
-                      <div className="flex items-center gap-3 mb-3">
-                        <Clock className="w-5 h-5 text-yellow-400" />
-                        <p className="text-gray-300 font-semibold">Preostalo vrijeme:</p>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black text-white">
-                          {getRemainingPremiumTime()?.text}
-                        </span>
-                      </div>
-                      {userProfile?.premium_expires_at && (
-                        <p className="text-xs text-gray-500 mt-3">
-                          Ističe: {formatDateTime(userProfile.premium_expires_at)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
                 <div className="backdrop-blur-md bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-6">
                   <p className="text-cyan-400 text-lg font-semibold text-center mb-4">Ovo je vaš oglas</p>
                   {onEdit && (
