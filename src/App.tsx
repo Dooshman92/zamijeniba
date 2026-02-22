@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
-import { Plus, Car as CarIcon, LogIn, LogOut, User, Sparkles, Settings, FileText, Shield, ShieldCheck, MessageCircle, Gift, ArrowRightLeft, Coins, Headset, Bike, Ship, Waves, Bell } from 'lucide-react';
+import { Plus, LogIn, LogOut, User, Sparkles, FileText, Shield, ShieldCheck, ArrowRightLeft, Headset, Bell } from 'lucide-react';
 import { Car, supabase, UserProfile } from './lib/supabase';
 import { useAuth } from './lib/auth';
 import { initializeStorage } from './lib/storage';
@@ -834,7 +834,9 @@ function App() {
                       : 'text-gray-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <CarIcon className="w-5 h-5" />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                  </svg>
                   Automobili
                 </button>
                 <button
@@ -845,7 +847,9 @@ function App() {
                       : 'text-gray-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <Bike className="w-5 h-5" />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.72 11.47C12.4 10.55 11.72 9.77 10.8 9.3L10.78 9.29C10.72 9.26 10.68 9.22 10.63 9.19L10.59 9.17C9.97 8.84 9.23 8.64 8.44 8.64C6.38 8.64 4.64 10.08 4.14 12H1v2h3.42c.77 2.07 2.76 3.54 5.08 3.54 2.63 0 4.83-1.85 5.4-4.33l1.47.5.63-1.84-1.29-.44c-.05-.4-.15-.78-.28-1.15l1.72-.58-.63-1.84-2.8.95zM8.5 15.68c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5zm11.5-3.5c0 2.63-1.85 4.83-4.33 5.4l.5 1.47-1.84.63-.44-1.29c-.4.05-.78.15-1.15.28l-.58 1.72-1.84-.63.95-2.8c-1.03-.24-1.93-.83-2.59-1.62 1.03.88 2.37 1.41 3.82 1.41 3.03 0 5.5-2.47 5.5-5.5 0-1.45-.53-2.79-1.41-3.82.79.66 1.38 1.56 1.62 2.59l2.8-.95.63 1.84-1.72.58c-.13.37-.23.75-.28 1.15l1.29.44-.63 1.84-1.47-.5z"/>
+                  </svg>
                   Motocikli
                 </button>
                 <button
@@ -856,7 +860,9 @@ function App() {
                       : 'text-gray-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <Bike className="w-5 h-5" />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 14c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm0 4c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-14-4c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm0 4c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm13-10.42V5.5c0-.83-.67-1.5-1.5-1.5h-11C4.67 4 4 4.67 4 5.5v2.08C2.84 8.16 2 9.44 2 11v5h2v3h2v-3h12v3h2v-3h2v-5c0-1.56-.84-2.84-2-3.42zm-12 1.92h8v2h-8v-2z"/>
+                  </svg>
                   Quad
                 </button>
                 <button
@@ -867,7 +873,9 @@ function App() {
                       : 'text-gray-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <Ship className="w-5 h-5" />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 18H7l-1.41-1.41 2.12-2.12c1.17-.39 2.3-.94 3.3-1.7l2-1.59c.47-.36 1.09-.56 1.73-.56H17c.55 0 1 .45 1 1v1h3c.55 0 1 .45 1 1v3c0 .55-.45 1-1 1zm-10-7c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM5.12 14.86c-.8.65-1.68 1.2-2.61 1.62L2 18h4l.9-2.72c-.25-.15-.5-.29-.78-.42zM1 20h20v2H1v-2z"/>
+                  </svg>
                   Motorne Sanke
                 </button>
                 <button
@@ -878,7 +886,9 @@ function App() {
                       : 'text-gray-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <Waves className="w-5 h-5" />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 14c-.18 0-.36.03-.53.05L17.5 9H11l.76-3.04c.18-.72-.3-1.46-1.04-1.64-.75-.18-1.46.3-1.64 1.04L8.5 9H3c-1.1 0-2 .9-2 2 0 1.1.9 2 2 2h1.61c1.07 2.19 3.26 3.7 5.82 3.7 2.11 0 4.01-1.04 5.18-2.64L18 16.95c.17.02.34.05.53.05 1.93 0 3.5-1.57 3.5-3.5S21.93 10 20 10c-1.93 0-3.5 1.57-3.5 3.5 0 .17.03.33.05.5zM4.5 13c-.83 0-1.5-.67-1.5-1.5S3.67 10 4.5 10s1.5.67 1.5 1.5S5.33 13 4.5 13zm15.5 2c-.83 0-1.5-.67-1.5-1.5S19.17 12 20 12s1.5.67 1.5 1.5S20.83 15 20 15z"/>
+                  </svg>
                   Jetski
                 </button>
               </div>
@@ -901,7 +911,9 @@ function App() {
                 <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-16 text-center">
                   <div className="relative inline-block mb-6">
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-3xl blur-2xl opacity-30 animate-pulse"></div>
-                    <CarIcon className="relative w-24 h-24 text-gray-400" />
+                    <svg className="relative w-24 h-24 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                    </svg>
                   </div>
                   <h3 className="text-3xl font-bold text-white mb-3">
                     {searchQuery ? 'Nema rezultata' : 'Nema dostupnih vozila'}
