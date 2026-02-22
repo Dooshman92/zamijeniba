@@ -1,9 +1,11 @@
+import { Car, Bike, TramFront, Snowflake, Waves } from 'lucide-react';
+
 export const vehicleTypes = [
-  { value: 'automobil', label: 'Automobil' },
-  { value: 'motocikl', label: 'Motocikl' },
-  { value: 'quad', label: 'Quad/ATV' },
-  { value: 'motorne_sanke', label: 'Motorne sanke' },
-  { value: 'jetski', label: 'Jet Ski' }
+  { value: 'automobil', label: 'Automobili', icon: Car },
+  { value: 'motocikl', label: 'Motocikli', icon: Bike },
+  { value: 'quad', label: 'Quad/ATV', icon: TramFront },
+  { value: 'motorne_sanke', label: 'Motorne Sanke', icon: Snowflake },
+  { value: 'jetski', label: 'Jetski', icon: Waves }
 ];
 
 export const motorcycleBrands = [
