@@ -10,6 +10,7 @@ import { formatDate } from '../lib/dateUtils';
 import { SupportPanel } from './SupportPanel';
 import AdvertisementsPanel from './AdvertisementsPanel';
 import { NotificationsAdminPanel } from './NotificationsAdminPanel';
+import { ReportsPanel } from './ReportsPanel';
 
 type AdminSection = 'dashboard' | 'users' | 'banned' | 'cars' | 'promo' | 'reports' | 'support' | 'advertisements' | 'notifications' | 'admins';
 
@@ -2243,7 +2244,7 @@ export default function AdminDashboard({ initialSection }: AdminDashboardProps =
           {activeSection === 'banned' && renderBannedUsers()}
           {activeSection === 'admins' && renderAdmins()}
           {activeSection === 'cars' && renderCars()}
-          {activeSection === 'reports' && renderReports()}
+          {activeSection === 'reports' && <div className="fixed inset-0 z-50"><ReportsPanel onClose={() => setActiveSection('dashboard')} /></div>}
           {activeSection === 'promo' && renderPromoCodes()}
           {activeSection === 'support' && <SupportPanel onClose={() => {}} />}
           {activeSection === 'advertisements' && <AdvertisementsPanel onClose={() => {}} />}
