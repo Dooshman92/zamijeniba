@@ -1,6 +1,8 @@
 import { memo, useState, useEffect } from 'react';
 import { Calendar, Gauge, Fuel, Palette, Settings, ArrowRightLeft, Zap, MapPin, Car as CarIcon, Phone } from 'lucide-react';
 import { Car, VehicleType, supabase, UserProfile } from '../lib/supabase';
+import { UserBadge } from './UserBadge';
+import { getUserRatingInfo, UserRatingInfo } from '../lib/userRatings';
 
 interface CarCardProps {
   car: Car;
@@ -56,10 +58,12 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
 
   const [ownerProfile, setOwnerProfile] = useState<UserProfile | null>(null);
   const [phoneRevealed, setPhoneRevealed] = useState(false);
+  const [ownerRating, setOwnerRating] = useState<UserRatingInfo>({ averageRating: null, reviewCount: 0 });
 
   useEffect(() => {
     if (car.user_id) {
       loadOwnerProfile();
+      loadOwnerRating();
       if (currentUserId && currentUserId !== car.user_id) {
         checkPhoneRevealed();
       }
@@ -78,6 +82,12 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
     if (data) {
       setOwnerProfile(data);
     }
+  };
+
+  const loadOwnerRating = async () => {
+    if (!car.user_id) return;
+    const ratingInfo = await getUserRatingInfo(car.user_id);
+    setOwnerRating(ratingInfo);
   };
 
   const checkPhoneRevealed = async () => {
@@ -136,11 +146,18 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
-                  <span className="text-gray-400 text-sm">
-                    {ownerDisplayName}
-                  </span>
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+                    <span className="text-gray-400 text-sm">
+                      {ownerDisplayName}
+                    </span>
+                  </div>
+                  <UserBadge
+                    averageRating={ownerRating.averageRating}
+                    reviewCount={ownerRating.reviewCount}
+                    size="sm"
+                  />
                 </div>
                 {!isOwnCar && ownerProfile?.phone && (ownerProfile?.show_phone_number || phoneRevealed) && (
                   <div className="flex items-center gap-2 backdrop-blur-md bg-green-500/10 border border-green-500/30 rounded-lg px-2 py-1 mb-2">
