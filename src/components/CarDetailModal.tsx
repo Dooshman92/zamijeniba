@@ -138,7 +138,7 @@ export function CarDetailModal({ car: initialCar, carId, onClose, onSwapOffer, o
 
   const isOwnCar = user && car && car.user_id === user.id;
   const ownerDisplayName = car?.owner_nickname
-    ? `@${car.owner_nickname}`
+    ? car.owner_nickname
     : car?.user_email?.split('@')[0];
 
   const fetchCarImages = async (carIdToFetch: string, carData?: Car) => {

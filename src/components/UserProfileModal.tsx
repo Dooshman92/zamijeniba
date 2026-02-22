@@ -186,7 +186,7 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
   };
 
   const displayName = userProfile?.nickname
-    ? `@${userProfile.nickname}`
+    ? userProfile.nickname
     : userProfile?.email?.split('@')[0] || 'Korisnik';
 
   const isOwnProfile = currentUser?.id === userId;
@@ -465,7 +465,7 @@ export function UserProfileModal({ userId, onClose, onStartConversation }: UserP
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2 mb-0.5">
                               <p className="font-semibold text-white text-xs">
-                                {review.reviewer_nickname ? `@${review.reviewer_nickname}` : 'Korisnik'}
+                                {review.reviewer_nickname ? review.reviewer_nickname : 'Korisnik'}
                               </p>
                               <div className="flex items-center gap-0.5">
                                 {renderStars((review.rating_communication + review.rating_reliability + review.rating_friendliness) / 3, 'sm')}

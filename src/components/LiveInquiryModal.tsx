@@ -91,7 +91,7 @@ export function LiveInquiryModal({ car, onClose, onSuccess }: LiveInquiryModalPr
                 </h3>
                 <p className="text-cyan-400">{car.year}</p>
                 <p className="text-sm text-gray-400">
-                  Vlasnik: {car.owner_nickname ? `@${car.owner_nickname}` : car.user_email?.split('@')[0]}
+                  Vlasnik: {car.owner_nickname ? car.owner_nickname : car.user_email?.split('@')[0]}
                 </p>
               </div>
             </div>

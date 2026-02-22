@@ -9,7 +9,7 @@ export async function getUserRatingInfo(userId: string): Promise<UserRatingInfo>
   try {
     const { data, error } = await supabase
       .from('user_reviews')
-      .select('rating')
+      .select('rating_communication, rating_reliability, rating_friendliness')
       .eq('reviewed_user_id', userId);
 
     if (error) {
@@ -21,11 +21,14 @@ export async function getUserRatingInfo(userId: string): Promise<UserRatingInfo>
       return { averageRating: null, reviewCount: 0 };
     }
 
-    const sum = data.reduce((acc, review) => acc + review.rating, 0);
-    const averageRating = sum / data.length;
+    // Calculate average of all three ratings for each review, then average all reviews
+    const totalAverage = data.reduce((acc, review) => {
+      const reviewAverage = (review.rating_communication + review.rating_reliability + review.rating_friendliness) / 3;
+      return acc + reviewAverage;
+    }, 0) / data.length;
 
     return {
-      averageRating,
+      averageRating: totalAverage,
       reviewCount: data.length
     };
   } catch (error) {
