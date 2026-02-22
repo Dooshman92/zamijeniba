@@ -83,3 +83,15 @@ export async function deleteCarImage(imageUrl: string) {
     .from(BUCKET_NAME)
     .remove([filePath]);
 }
+
+export async function getCarImageUrl(imagePath: string): Promise<string> {
+  if (imagePath.startsWith('http')) {
+    return imagePath;
+  }
+
+  const { data } = supabase.storage
+    .from(BUCKET_NAME)
+    .getPublicUrl(imagePath);
+
+  return data.publicUrl;
+}

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Eye, Trash2, AlertTriangle, CheckCircle, XCircle, User, Calendar, Tag, Shield } from 'lucide-react';
 import { supabase, Car } from '../lib/supabase';
+import { getCarImageUrl } from '../lib/storage';
 
 interface ReportedAdModalProps {
   report: {
@@ -24,6 +25,17 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [showCarDetails, setShowCarDetails] = useState(true);
+  const [carImageUrl, setCarImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadCarImage = async () => {
+      if (report.car?.images && report.car.images.length > 0) {
+        const url = await getCarImageUrl(report.car.images[0]);
+        setCarImageUrl(url);
+      }
+    };
+    loadCarImage();
+  }, [report.car]);
 
   const handleDeleteAd = async () => {
     if (!confirm('Da li ste sigurni da želite obrisati ovaj oglas? Ova akcija je nepovratna.')) {
@@ -276,9 +288,9 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
             {showCarDetails && (
               <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
                 <div className="flex items-start gap-6">
-                  {report.car.images && report.car.images.length > 0 && (
+                  {carImageUrl && (
                     <img
-                      src={report.car.images[0]}
+                      src={carImageUrl}
                       alt={`${report.car.brand} ${report.car.model}`}
                       className="w-48 h-32 object-cover rounded-lg"
                     />
