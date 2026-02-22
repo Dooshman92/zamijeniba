@@ -599,16 +599,40 @@ function App() {
       console.log('Car filtered out by vehicleType:', car.brand, car.model, 'has:', car.vehicle_type, 'needs:', filters.vehicleType);
       return false;
     }
-    if (filters.location && car.location !== filters.location) return false;
-    if (filters.brand && car.brand !== filters.brand) return false;
-    if (car.year < filters.minYear || car.year > filters.maxYear) return false;
-    if (car.price < filters.minPrice || car.price > filters.maxPrice) return false;
-    if (filters.fuelType && car.fuel_type !== filters.fuelType) return false;
-    if (filters.transmission && car.transmission !== filters.transmission) return false;
-    if (filters.onlyDamaged && !car.damaged) return false;
+    if (filters.location && car.location !== filters.location) {
+      console.log('Car filtered out by location:', car.brand, car.model);
+      return false;
+    }
+    if (filters.brand && car.brand !== filters.brand) {
+      console.log('Car filtered out by brand:', car.brand, car.model, 'needs:', filters.brand);
+      return false;
+    }
+    if (car.year < filters.minYear || car.year > filters.maxYear) {
+      console.log('Car filtered out by year:', car.brand, car.model, 'year:', car.year);
+      return false;
+    }
+    if (car.price < filters.minPrice || car.price > filters.maxPrice) {
+      console.log('Car filtered out by price:', car.brand, car.model, 'price:', car.price);
+      return false;
+    }
+    if (filters.fuelType && car.fuel_type !== filters.fuelType) {
+      console.log('Car filtered out by fuelType:', car.brand, car.model);
+      return false;
+    }
+    if (filters.transmission && car.transmission !== filters.transmission) {
+      console.log('Car filtered out by transmission:', car.brand, car.model);
+      return false;
+    }
+    if (filters.onlyDamaged && !car.damaged) {
+      console.log('Car filtered out by onlyDamaged:', car.brand, car.model);
+      return false;
+    }
 
+    console.log('Car PASSED all filters:', car.brand, car.model);
     return true;
   });
+
+  console.log('Filtered cars count:', filteredCars.length, 'Cars:', filteredCars.map(c => `${c.brand} ${c.model}`));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 relative overflow-hidden">
