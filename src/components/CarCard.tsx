@@ -87,7 +87,6 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
   const loadOwnerRating = async () => {
     if (!car.user_id) return;
     const ratingInfo = await getUserRatingInfo(car.user_id);
-    console.log('Owner rating for', car.owner_nickname, ':', ratingInfo);
     setOwnerRating(ratingInfo);
   };
 
@@ -148,20 +147,18 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
                   )}
                 </div>
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onOwnerClick && car.user_id) {
-                          onOwnerClick(car.user_id);
-                        }
-                      }}
-                      className="text-cyan-400 text-sm hover:text-cyan-300 transition-colors font-medium cursor-pointer"
-                    >
-                      {ownerDisplayName}
-                    </button>
-                  </div>
+                  <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onOwnerClick && car.user_id) {
+                        onOwnerClick(car.user_id);
+                      }
+                    }}
+                    className="text-cyan-400 text-sm hover:text-cyan-300 transition-colors font-medium cursor-pointer"
+                  >
+                    {ownerDisplayName}
+                  </button>
                   <UserBadge
                     averageRating={ownerRating.averageRating}
                     reviewCount={ownerRating.reviewCount}
