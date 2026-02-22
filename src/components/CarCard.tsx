@@ -53,7 +53,7 @@ const formatSwapPreference = (car: Car): string | null => {
 const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUser = false, currentUserId, onOwnerClick, onCardClick, layout = 'grid' }: CarCardProps) => {
   const isOwnCar = currentUserId && car.user_id === currentUserId;
   const ownerDisplayName = car.owner_nickname
-    ? `@${car.owner_nickname}`
+    ? car.owner_nickname
     : car.user_email?.split('@')[0];
 
   const [ownerProfile, setOwnerProfile] = useState<UserProfile | null>(null);
@@ -149,9 +149,17 @@ const CarCardComponent = ({ car, onSwapOffer, showSwapButton = true, isPremiumUs
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
-                    <span className="text-gray-400 text-sm">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onOwnerClick && car.user_id) {
+                          onOwnerClick(car.user_id);
+                        }
+                      }}
+                      className="text-cyan-400 text-sm hover:text-cyan-300 transition-colors font-medium cursor-pointer"
+                    >
                       {ownerDisplayName}
-                    </span>
+                    </button>
                   </div>
                   <UserBadge
                     averageRating={ownerRating.averageRating}
