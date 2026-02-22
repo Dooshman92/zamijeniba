@@ -54,7 +54,7 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
 
       if (updateError) throw updateError;
 
-      alert('Oglas je uspješno obrisan');
+      alert('Oglas je uspješno obrisan i prijava riješena');
       onActionComplete();
       onClose();
     } catch (error) {
@@ -293,32 +293,23 @@ export function ReportedAdModal({ report, onClose, onActionComplete }: ReportedA
             />
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex items-center justify-end gap-3">
             <button
               onClick={handleDeleteAd}
               disabled={processing}
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-red-500/30"
+              className="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-green-500/30"
             >
-              <Trash2 className="w-5 h-5" />
-              Obriši oglas
-            </button>
-
-            <button
-              onClick={handleRequestCorrection}
-              disabled={processing}
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
-            >
-              <Shield className="w-5 h-5" />
-              Zatraži ispravku
+              <CheckCircle className="w-5 h-5" />
+              Riješi
             </button>
 
             <button
               onClick={handleDismiss}
               disabled={processing}
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-gray-600/30"
+              className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-gray-600/30"
             >
               <XCircle className="w-5 h-5" />
-              Odbaci prijavu
+              Odbij
             </button>
           </div>
         </div>

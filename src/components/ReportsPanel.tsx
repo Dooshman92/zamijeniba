@@ -113,7 +113,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
       case 'pending':
         return 'Na čekanju';
       case 'resolved':
-        return 'Riješeno';
+        return 'Riješen';
       case 'dismissed':
         return 'Odbačeno';
       default:
@@ -261,7 +261,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
                         onClick={() => setSelectedReport(report)}
                         className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl transition-all text-sm font-bold shadow-lg shadow-cyan-500/30"
                       >
-                        Pregledi
+                        Otvori oglas
                       </button>
                     )}
                   </div>
