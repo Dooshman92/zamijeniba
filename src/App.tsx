@@ -6,6 +6,7 @@ import { initializeStorage } from './lib/storage';
 import { Navigation } from './components/Navigation';
 import { HomePage } from './pages/HomePage';
 import { VehiclesPage } from './pages/VehiclesPage';
+import { CarDetailPage } from './pages/CarDetailPage';
 
 const AuthModal = lazy(() => import('./components/AuthModal').then(m => ({ default: m.AuthModal })));
 const AddCarFormMultiStep = lazy(() => import('./components/AddCarFormMultiStep').then(m => ({ default: m.AddCarFormMultiStep })));
@@ -86,6 +87,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
+        <Route path="/vehicle/:id" element={<CarDetailPage />} />
       </Routes>
 
       {/* Modals */}

@@ -18,7 +18,17 @@ export function HomePage() {
     setLoading(true);
     const { data, error } = await supabase
       .from('cars')
-      .select('*')
+      .select(`
+        *,
+        user_profiles!cars_user_id_fkey (
+          id,
+          nickname,
+          avatar_url,
+          is_premium,
+          phone_number,
+          show_phone_publicly
+        )
+      `)
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(12);
