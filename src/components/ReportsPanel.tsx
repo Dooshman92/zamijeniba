@@ -211,8 +211,16 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
                   key={report.id}
                   className="bg-white/5 rounded-xl border border-white/10 p-4 hover:bg-white/10 transition-all"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-2">
+                  <div className="flex items-start gap-4">
+                    {report.car && report.car.images && report.car.images.length > 0 && (
+                      <img
+                        src={report.car.images[0]}
+                        alt={`${report.car.brand} ${report.car.model}`}
+                        className="w-32 h-24 object-cover rounded-lg flex-shrink-0"
+                      />
+                    )}
+
+                    <div className="flex-1 space-y-2 min-w-0">
                       <div className="flex items-center gap-3">
                         {getStatusIcon(report.status)}
                         <span className="text-sm font-medium text-gray-400">
@@ -227,7 +235,7 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-gray-400">Oglas:</span>
                           <span className="text-white font-medium">
-                            {report.car ? `${report.car.brand} ${report.car.model}` : 'Obrisan oglas'}
+                            {report.car ? `${report.car.brand} ${report.car.model} (${report.car.year})` : 'Obrisan oglas'}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -262,14 +270,12 @@ export function ReportsPanel({ onClose }: ReportsPanelProps) {
                       )}
                     </div>
 
-                    {report.status === 'pending' && (
-                      <button
-                        onClick={() => setSelectedReport(report)}
-                        className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl transition-all text-sm font-bold shadow-lg shadow-cyan-500/30"
-                      >
-                        Otvori oglas
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setSelectedReport(report)}
+                      className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl transition-all text-sm font-bold shadow-lg shadow-cyan-500/30 flex-shrink-0 self-start"
+                    >
+                      {report.status === 'pending' ? 'Otvori' : 'Pogledaj'}
+                    </button>
                   </div>
                 </div>
               ))}
